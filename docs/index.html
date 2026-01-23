@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Satoshis für Berlin – die Millionenchallenge</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; line-height: 1.4; }
+    h1 { margin-bottom: 6px; }
+    .sub { color:#444; margin-top:0; }
+    .pill { display:inline-block; padding:3px 10px; border:1px solid #ddd; border-radius:999px; margin-right:8px; }
+    input { width: 100%; padding: 10px; margin: 14px 0; font-size: 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #eee; padding: 8px; vertical-align: top; }
+    th { position: sticky; top: 0; background: #fff; }
+    .small { font-size: 13px; color:#555; }
+    .rowmeta { white-space: nowrap; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Satoshis für Berlin – die Millionenchallenge</h1>
+  <p class="sub"><span class="pill"><strong>1.000.000 sats</strong> Gesamtbounty</span> öffentlich, transparent, auf Basis von BTCMap/OSM</p>
+  <p class="small">
+    Mitmachen: <a href="../issues/new/choose">Check einreichen</a> · Regeln: <a href="../blob/main/RULES.md">RULES.md</a> · Daten: <a href="../tree/main/data">/data</a>
+  </p>
+
+  <input id="q" placeholder="Suche (Name, Kategorie, Adresse, PLZ)…" />
+  <div class="small" id="meta">Lade Daten…</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Kategorie</th>
+        <th>Adresse</th>
+        <th>Status</th>
+        <th>Letzter Check</th>
+        <th>Cooldown bis</th>
+        <th>Bounty (Basis)</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody id="body"></tbody>
+  </table>
+
+  <p class="small">
+    © OpenStreetMap contributors (ODbL) · Challenge-Metadaten: dieses Repo
+  </p>
+
+<script>
+function parseCSV(text) {
+  // Minimaler CSV-Parser für unser Schema (ohne Kommas in Feldern idealerweise ok).
+  // Wenn du später 100% robust willst, wechseln wir auf JSON.
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(",");
+  return lines.slice(1).map(l => {
+    const cols = l.split(",");
+    const row = {};
+    headers.forEach((h,i)=>row[h]=cols[i] ?? "");
+    return row;
+  });
+}
+
+function fmtDate(s) {
+  return s ? s : "—";
+}
+
+async function load() {
+  const csv = await fetch("../data/locations.csv", {cache:"no-store"}).then(r=>r.text());
+  const rows = parseCSV(csv);
+
+  const metaEl = document.getElementById("meta");
+  metaEl.textContent = `Einträge: ${rows.length} · Quelle: BTCMap/OSM · Stand: live aus GitHub Repo`;
+
+  const body = document.getElementById("body");
+  function render(filter="") {
+    const f = filter.toLowerCase();
+    const view = rows.filter(r => {
+      const hay = [
+        r.name, r.category, r.street, r.housenumber, r.postcode, r.city
+      ].join(" ").toLowerCase();
+      return hay.includes(f);
+    });
+
+    body.innerHTML = view.map(r => {
+      const addr = [r.street, r.housenumber, r.postcode, r.city].filter(Boolean).join(" ");
+      const status = r.bitcoin_payment_status || "unknown";
+      const bounty = r.bounty_base_sats ? `${r.bounty_base_sats} sats` : "—";
+      const link = r.btcmap_url || (r.osm_type && r.osm_id ? `https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}` : "");
+      return `
+        <tr>
+          <td>${r.name || "—"}</td>
+          <td>${r.category || "—"}</td>
+          <td>${addr || "—"}</td>
+          <td class="rowmeta">${status}</td>
+          <td class="rowmeta">${fmtDate(r.last_verified_at)}</td>
+          <td class="rowmeta">${fmtDate(r.cooldown_until)}</td>
+          <td class="rowmeta">${bounty}</td>
+          <td class="rowmeta">${link ? `<a href="${link}" target="_blank" rel="noopener">OSM/BTCMap</a>` : "—"}</td>
+        </tr>`;
+    }).join("");
+  }
+
+  render("");
+  document.getElementById("q").addEventListener("input", e => render(e.target.value));
+}
+load();
+</script>
+</body>
+</html>
