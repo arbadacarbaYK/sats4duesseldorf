@@ -1,0 +1,30 @@
+name: Normalize Berlin raw data
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Normalize
+        run: |
+          python scripts/normalize_locations.py
+
+      - name: Commit updated locations.csv
+        run: |
+          git config user.name "sfb-bot"
+          git config user.email "sfb-bot@users.noreply.github.com"
+          git add data/locations.csv
+          git diff --cached --quiet || git commit -m "Normalize berlin_raw.csv -> locations.csv"
+          git push
