@@ -1,13 +1,16 @@
 name: Neuen Ort melden (Kauf in Bitcoin)
 description: Neuer Berliner Ort, an dem vor Ort in Bitcoin bezahlt wurde. Auszahlung erst nach 2 weiteren Bestätigungen.
 title: "Neuer Ort: <Name> – <YYYY-MM-DD>"
-labels: ["pending", "new-location"]
+labels:
+  - pending
+  - new-location
+
 body:
   - type: markdown
     attributes:
       value: |
         **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**  
-        **Neuer Ort = 21.000 sats**, Auszahlung erst wenn **2 weitere Bitcoiner** den Ort ebenfalls durch **Kauf vor Ort in Bitcoin** bestätigt haben.
+        Neuer Ort = **21.000 sats**, Auszahlung erst wenn **2 weitere Bitcoiner** den Ort ebenfalls durch **Kauf vor Ort in Bitcoin** bestätigt haben.
 
   - type: input
     id: name
@@ -87,22 +90,19 @@ body:
     attributes:
       label: Hinweise (kurz)
       description: Z.B. Öffnungszeiten/Website/Wie lief das Bezahlen?
-      placeholder: Zahlung an der Kasse problemlos. Hinweis am Tresen. Öffnungszeiten laut Aushang...
+      placeholder: Zahlung an der Kasse problemlos. Öffnungszeiten laut Aushang...
     validations:
       required: true
-
-    - type: markdown
-    attributes:
-      value: |
-        **Auszahlung (anonym):**  
-        Bitte poste **keine** Lightning-Adresse und kein eCash-Ziel öffentlich ins Issue.  
-        Nach erfolgreichem Review (Label **approved**) bekommst du eine kurze Aufforderung, dein Auszahlungsziel privat zu senden.
 
   - type: markdown
     attributes:
       value: |
+        **Auszahlung (anonym):**  
+        Bitte poste **keine** Lightning-Adresse und kein eCash-Ziel öffentlich ins Issue.  
+        Nach erfolgreichem Review (Label **approved**) bekommst du eine Aufforderung, dein Auszahlungsziel privat zu senden.
+
         **Bestätigung durch 2 weitere Bitcoiner:**  
-        Bitte nach Einreichen dieses Issues zwei weitere Personen motivieren, einen normalen **Check** für denselben Ort zu machen (mit Kauf in Bitcoin und vollständigen Nachweisen).  
+        Bitte motiviere zwei weitere Personen, einen normalen **Check** für denselben Ort zu machen (jeweils Kauf vor Ort in Bitcoin + vollständige Nachweise).  
         Sobald **3 gültige Checks** vorliegen (du + 2 weitere), wird das Neueintrag-Bounty freigegeben.
 
         **Datenschutz:** Bitte schwärze persönliche Daten auf Belegen/Screenshots. Keine Personen filmen.
