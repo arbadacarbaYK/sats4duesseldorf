@@ -27,7 +27,7 @@ jobs:
         run: |
           cp -f data/locations.csv docs/data/locations.csv
           # optional: checks.csv für öffentliche Transparenz
-          if [ -f data/checks.csv ]; then cp -f data/checks.csv docs/data/checks.csv; fi
+          if [ -f data/checks_public.csv ]; then cp -f data/checks_public.csv docs/data/checks_public.csv; fi
           # optional: participants.csv (würde ich eher NICHT öffentlich machen)
           # if [ -f data/participants.csv ]; then cp -f data/participants.csv docs/data/participants.csv; fi
 
