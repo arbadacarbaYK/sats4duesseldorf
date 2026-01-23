@@ -1,0 +1,2 @@
+location_id,osm_type,osm_id,btcmap_url,name,category,street,housenumber,postcode,city,lat,lon,website,opening_hours,bitcoin_payment_status,status_note_public,last_verified_at,cooldown_until,verified_by_count,verification_confidence,bounty_base_sats,bounty_critical_sats,bounty_new_entry_sats,eligible_now,last_check_id,last_updated_at
+DE-BE-00001,node,0,,BEISPIEL (bitte ersetzen),,Musterstraße,1,10115,Berlin,52.5200,13.4050,,,"unknown","",,,0,low,10000,21000,21000,no,,2026-01-23
