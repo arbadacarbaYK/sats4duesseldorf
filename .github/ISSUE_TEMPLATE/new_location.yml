@@ -1,0 +1,119 @@
+name: Neuen Ort melden (Kauf in Bitcoin)
+description: Neuer Berliner Ort, an dem vor Ort in Bitcoin bezahlt wurde. Auszahlung erst nach 2 weiteren Bestätigungen.
+title: "Neuer Ort: <Name> – <YYYY-MM-DD>"
+labels: ["pending", "new-location"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**  
+        **Neuer Ort = 21.000 sats**, Auszahlung erst wenn **2 weitere Bitcoiner** den Ort ebenfalls durch **Kauf vor Ort in Bitcoin** bestätigt haben.
+
+  - type: input
+    id: name
+    attributes:
+      label: Name des Ortes
+      placeholder: Café Beispiel
+    validations:
+      required: true
+
+  - type: input
+    id: address
+    attributes:
+      label: Adresse
+      placeholder: Musterstraße 1, 10115 Berlin
+    validations:
+      required: true
+
+  - type: input
+    id: latlon
+    attributes:
+      label: Koordinaten (optional, hilft sehr)
+      placeholder: 52.5200, 13.4050
+    validations:
+      required: false
+
+  - type: input
+    id: osm_url
+    attributes:
+      label: OSM-Link (optional, falls vorhanden)
+      description: Wenn du den Ort in OpenStreetMap findest oder bereits angelegt hast.
+      placeholder: https://www.openstreetmap.org/node/...
+    validations:
+      required: false
+
+  - type: input
+    id: date_time
+    attributes:
+      label: Datum/Uhrzeit des Kaufs
+      placeholder: 2026-01-23 18:30
+    validations:
+      required: true
+
+  - type: input
+    id: public_post_url
+    attributes:
+      label: Öffentlicher Beweis-Post (muss "Berlin" und "Bitcoin" enthalten)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: receipt_proof_url
+    attributes:
+      label: Beleg (Bon) – Link (Daten schwärzen)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: payment_proof_url
+    attributes:
+      label: Bitcoin-Zahlungsnachweis – Link (Bestätigung "bezahlt", Betrag/Datum sichtbar; Daten schwärzen)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: venue_photo_url
+    attributes:
+      label: Ort erkennbar – Foto/Video-Link (Schild/Eingang/Kasse)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Hinweise (kurz)
+      description: Z.B. Öffnungszeiten/Website/Wie lief das Bezahlen?
+      placeholder: Zahlung an der Kasse problemlos. Hinweis am Tresen. Öffnungszeiten laut Aushang...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: payout_method
+    attributes:
+      label: Auszahlungsmethode (für den Fall, dass der Neueintrag freigeschaltet wird)
+      options:
+        - lightning_address
+        - ecash
+    validations:
+      required: true
+
+  - type: input
+    id: payout_destination
+    attributes:
+      label: Lightning-Adresse oder eCash-Info
+      placeholder: name@domain.tld oder eCash...
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        **Bestätigung durch 2 weitere Bitcoiner:**  
+        Bitte nach Einreichen dieses Issues zwei weitere Personen motivieren, einen normalen **Check** für denselben Ort zu machen (mit Kauf in Bitcoin und vollständigen Nachweisen).  
+        Sobald **3 gültige Checks** vorliegen (du + 2 weitere), wird das Neueintrag-Bounty freigegeben.
+
+        **Datenschutz:** Bitte schwärze persönliche Daten auf Belegen/Screenshots. Keine Personen filmen.
