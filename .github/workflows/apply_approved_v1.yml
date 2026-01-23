@@ -19,26 +19,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
-      - name: Fetch approved issues
+      - name: Fetch approved issues (raw JSON)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh api -H "Accept: application/vnd.github+json" "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" > /tmp/issues.json
-
-          python - <<'PY'
-import json
-issues = json.load(open("/tmp/issues.json","r",encoding="utf-8"))
-out = []
-for it in issues:
-    out.append({
-        "number": it["number"],
-        "body": it.get("body") or "",
-        "labels": [l["name"] for l in it.get("labels", [])],
-    })
-json.dump(out, open("data/_approved_issues.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
-print("approved issues:", len(out))
-PY
+          mkdir -p data
+          gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" \
+            > data/_approved_issues.json
+          echo "Saved approved issues to data/_approved_issues.json"
+          head -c 200 data/_approved_issues.json || true
+          echo ""
 
       - name: Set up Python
         uses: actions/setup-python@v5
