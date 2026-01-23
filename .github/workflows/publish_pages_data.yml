@@ -1,0 +1,40 @@
+name: Publish Pages data
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "data/**"
+      - "docs/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  copy-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure docs/data exists
+        run: |
+          mkdir -p docs/data
+
+      - name: Copy data to Pages folder
+        run: |
+          cp -f data/locations.csv docs/data/locations.csv
+          # optional: checks.csv für öffentliche Transparenz
+          if [ -f data/checks.csv ]; then cp -f data/checks.csv docs/data/checks.csv; fi
+          # optional: participants.csv (würde ich eher NICHT öffentlich machen)
+          # if [ -f data/participants.csv ]; then cp -f data/participants.csv docs/data/participants.csv; fi
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "pages-data-bot"
+          git config user.email "pages-data-bot@users.noreply.github.com"
+          git add docs/data/locations.csv docs/data/checks.csv || true
+          git diff --cached --quiet || git commit -m "Publish data to GitHub Pages"
+          git push
