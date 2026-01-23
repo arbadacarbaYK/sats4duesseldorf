@@ -67,7 +67,7 @@ function fmtDate(s) {
 }
 
 async function load() {
-  const csv = await fetch("../data/locations.csv", {cache:"no-store"}).then(r=>r.text());
+  const csv = await fetch("data/locations.csv", {cache:"no-store"}).then(r=>r.text());
   const rows = parseCSV(csv);
 
   const metaEl = document.getElementById("meta");
