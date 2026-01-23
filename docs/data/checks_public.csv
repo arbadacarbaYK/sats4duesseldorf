@@ -1,0 +1,1 @@
+check_id,location_id,submitted_at,check_type,public_post_url,receipt_proof_url,payment_proof_url,venue_photo_url,proof_hash,observations_public,suggested_updates,review_status,reviewed_at,reviewer_id,rejection_reason_public,base_bounty_sats,activity_factor,final_bounty_sats,paid_status,paid_at
