@@ -13,15 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install GitHub CLI (gh)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
       - name: Fetch approved issues
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           gh api -H "Accept: application/vnd.github+json" \
             "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" > /tmp/issues.json
 
           python - << 'PY'
-import json, os, subprocess
+import json
 issues = json.load(open("/tmp/issues.json","r",encoding="utf-8"))
 out=[]
 for it in issues:
