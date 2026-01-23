@@ -1,5 +1,5 @@
 location_id,osm_type,osm_id,btcmap_url,name,category,street,housenumber,postcode,city,lat,lon,website,opening_hours,bitcoin_payment_status,status_note_public,last_verified_at,verified_by_count,verification_confidence,bounty_base_sats,bounty_critical_sats,bounty_new_entry_sats,eligible_now,last_check_id,last_updated_at,source_last_update,source_last_update_tag,cooldown_until,cooldown_days_left,eligible_for_check
-DE-BE-00001,node,318526010,https://www.openstreetmap.org/node/318526010,Viale dei Tigli,restaurant,Wilhelmstraße,75,10117,Berlin,52.5148686,13.3811135,http://www.ristorante-viale.de/,Mo-Su 12:00-24:00,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
+DE-BE-00001,node,318526010,https://www.openstreetmap.org/node/318526010,Viale dei Tigli,restaurant,Wilhelmstraße,75,10117,Berlin,52.5148686,13.3811135,http://www.ristorante-viale.de/,Mo-Su 12:00-24:00,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,
 DE-BE-00002,node,318704396,https://www.openstreetmap.org/node/318704396,Drittes Ohr,pub,Matternstraße,14,10249,Berlin,52.5219305,13.4529113,https://www.drittes-ohr.eu/,"Mo-We, Su 17:00-01:00; Th-Sa 18:00-02:00; Dec 25, Jan 1, Easter off",unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
 DE-BE-00003,node,941439093,https://www.openstreetmap.org/node/941439093,Horváth,restaurant,Paul-Lincke-Ufer,44a,10999,Berlin,52.4963757,13.4208114,http://restaurant-horvath.de/,We-Su 18:30-21:30,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
 DE-BE-00004,node,1263799847,https://www.openstreetmap.org/node/1263799847,Disconnect Art Gallery and Record Shop,music,Finowstraße,25,10247,Berlin,52.5109844,13.4671354,https://disconnectberlin.wordpress.com/,Th-Sa 14:00-19:00; PH off,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
@@ -51,6 +51,7 @@ DE-BE-00049,node,12850682170,https://www.openstreetmap.org/node/12850682170,Mass
 DE-BE-00050,node,12853222862,https://www.openstreetmap.org/node/12853222862,A.C.T. Computer TEAM,computer,Wendenschloßstraße,366,12557,Berlin,52.4246474,13.5856438,https://www.act-computer.de,Mo-Fr 09:00-17:00,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
 DE-BE-00051,node,13192449754,https://www.openstreetmap.org/node/13192449754,Zahnzentrum Ahrensfelde,dentist,Märkische Allee,408,12689,Berlin,52.5713569,13.5676303,https://zahnzentrum-ahrensfelde.de/,Mo 09:00-15:00; Tu 09:00-19:00; We 09:00-18:00; Th 09:00-16:00,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
 DE-BE-00052,node,13397450343,https://www.openstreetmap.org/node/13397450343,Osteopathie und Physiotherapie Bächle,,Am Wäldchen,38A,13591,Berlin,52.5222546,13.1290912,https://osteopathie-baechle.com/,,unknown,,,,0,low,10000,21000,21000,yes,,2026-01-23,,,
+
 
 
 
