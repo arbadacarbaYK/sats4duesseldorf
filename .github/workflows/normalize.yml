@@ -2,6 +2,8 @@ name: Normalize Berlin raw data
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"   # daily 03:17 UTC
 
 permissions:
   contents: write
@@ -21,10 +23,14 @@ jobs:
         run: |
           python scripts/normalize_locations.py
 
-      - name: Commit updated locations.csv
+      - name: Compute cooldown from BTCMap raw
+        run: |
+          python scripts/compute_cooldown_from_btcmap.py
+
+      - name: Commit updated data files
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/locations.csv
-          git diff --cached --quiet || git commit -m "Normalize berlin_raw.csv -> locations.csv"
+          git add data/locations.csv data/berlin_raw.csv
+          git diff --cached --quiet || git commit -m "Daily normalize + cooldown (Berlin)"
           git push
