@@ -11,7 +11,8 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install GitHub CLI (gh)
         run: |
@@ -23,13 +24,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh api -H "Accept: application/vnd.github+json" \
-            "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" > /tmp/issues.json
+          gh api -H "Accept: application/vnd.github+json" "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" > /tmp/issues.json
 
-          python - << 'PY'
+          python - <<'PY'
 import json
 issues = json.load(open("/tmp/issues.json","r",encoding="utf-8"))
-out=[]
+out = []
 for it in issues:
     out.append({
         "number": it["number"],
@@ -46,65 +46,6 @@ PY
           python-version: "3.11"
 
       - name: Apply to CSV
-        run: |
-          python scripts/apply_approved_v1.py
-          rm -f data/_approved_issues.json
-
-      - name: Commit and push
-        run: |
-          git config user.name "sfb-bot"
-          git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/locations.csv data/checks_public.csv
-          git diff --cached --quiet || git commit -m "Apply approved issues (v1)"
-          git push
-name: Apply approved issues to CSV (v1)
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  issues: read
-
-jobs:
-  apply:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install GitHub CLI (gh)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
-
-      - name: Fetch approved issues
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          gh api -H "Accept: application/vnd.github+json" \
-            "/repos/${GITHUB_REPOSITORY}/issues?state=all&labels=approved&per_page=100" > /tmp/issues.json
-
-          python - << 'PY'
-import json
-issues = json.load(open("/tmp/issues.json","r",encoding="utf-8"))
-out=[]
-for it in issues:
-    out.append({
-        "number": it["number"],
-        "body": it.get("body") or "",
-        "labels": [l["name"] for l in it.get("labels", [])],
-    })
-json.dump(out, open("data/_approved_issues.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
-print("approved issues:", len(out))
-PY
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Apply
         run: |
           python scripts/apply_approved_v1.py
           rm -f data/_approved_issues.json
