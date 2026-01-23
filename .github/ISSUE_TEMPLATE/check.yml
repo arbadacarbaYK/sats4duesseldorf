@@ -1,0 +1,112 @@
+name: Check einreichen (Kauf in Bitcoin)
+description: Vor-Ort-Kauf in Berlin mit Bitcoin belegen, BTCMap/OSM-Eintrag prüfen und ggf. aktualisieren.
+title: "Check: <Location-ID oder Name> – <YYYY-MM-DD>"
+labels: ["pending", "check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**  
+        Bounty nur bei Kauf vor Ort **in Bitcoin** und vollständigen Nachweisen.
+
+  - type: input
+    id: location_id
+    attributes:
+      label: Location-ID (aus locations.csv)
+      description: Z.B. DE-BE-00042
+      placeholder: DE-BE-00042
+    validations:
+      required: true
+
+  - type: input
+    id: date_time
+    attributes:
+      label: Datum/Uhrzeit des Kaufs
+      description: Lokalzeit Berlin reicht
+      placeholder: 2026-01-23 18:30
+    validations:
+      required: true
+
+  - type: dropdown
+    id: check_type
+    attributes:
+      label: Check-Typ
+      options:
+        - base
+        - critical_change
+    validations:
+      required: true
+
+  - type: input
+    id: public_post_url
+    attributes:
+      label: Öffentlicher Beweis-Post (muss "Berlin" und "Bitcoin" enthalten)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: receipt_proof_url
+    attributes:
+      label: Beleg (Bon) – Link (Daten schwärzen)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: payment_proof_url
+    attributes:
+      label: Bitcoin-Zahlungsnachweis – Link (Bestätigung "bezahlt", Betrag/Datum sichtbar; Daten schwärzen)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: input
+    id: venue_photo_url
+    attributes:
+      label: Ort erkennbar – Foto/Video-Link (Schild/Eingang/Kasse)
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: textarea
+    id: observations
+    attributes:
+      label: Beobachtungen (kurz)
+      description: Was genau wurde geprüft? Gab es Besonderheiten beim Bezahlen?
+      placeholder: Zahlung an der Kasse problemlos. Hinweis "Bitcoin accepted" am Tresen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested_updates
+    attributes:
+      label: Änderungsbedarf am Eintrag? (optional)
+      description: Öffnungszeiten/Website/Adresse/Status-Änderung etc.
+      placeholder: Öffnungszeiten laut Aushang Mo-Fr 10-19, statt 10-18.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: payout_method
+    attributes:
+      label: Auszahlungsmethode
+      options:
+        - lightning_address
+        - ecash
+    validations:
+      required: true
+
+  - type: input
+    id: payout_destination
+    attributes:
+      label: Lightning-Adresse oder eCash-Info
+      description: Keine Klarnamen nötig. Nur Ziel für Auszahlung.
+      placeholder: name@domain.tld oder eCash...
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        **Datenschutz:** Bitte schwärze persönliche Daten auf Belegen/Screenshots. Keine Personen filmen.
