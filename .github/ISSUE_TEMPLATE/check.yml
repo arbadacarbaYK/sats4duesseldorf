@@ -87,24 +87,12 @@ body:
     validations:
       required: false
 
-  - type: dropdown
-    id: payout_method
+  - type: markdown
     attributes:
-      label: Auszahlungsmethode
-      options:
-        - lightning_address
-        - ecash
-    validations:
-      required: true
-
-  - type: input
-    id: payout_destination
-    attributes:
-      label: Lightning-Adresse oder eCash-Info
-      description: Keine Klarnamen nötig. Nur Ziel für Auszahlung.
-      placeholder: name@domain.tld oder eCash...
-    validations:
-      required: true
+      value: |
+        **Auszahlung (anonym):**  
+        Bitte poste **keine** Lightning-Adresse und kein eCash-Ziel öffentlich ins Issue.  
+        Nach erfolgreichem Review (Label **approved**) bekommst du eine kurze Aufforderung, dein Auszahlungsziel privat zu senden.
 
   - type: markdown
     attributes:
