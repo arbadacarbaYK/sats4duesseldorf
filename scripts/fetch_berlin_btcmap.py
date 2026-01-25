@@ -10,20 +10,19 @@ import urllib.request
 import urllib.parse
 from pathlib import Path
 
-# Berlin bounding box (approximate city limits)
-BERLIN_BBOX = "52.33,13.07,52.68,13.78"  # south,west,north,east
-
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OUTPUT_PATH = Path("data/berlin_raw.csv")
 
-# Overpass query for Bitcoin-accepting places in Berlin
-OVERPASS_QUERY = f"""
+# Overpass query for Bitcoin-accepting places within Berlin's administrative boundary
+# Uses area query with Berlin's OSM relation ID (62422) + 3600000000
+OVERPASS_QUERY = """
 [out:json][timeout:120];
+area["name"="Berlin"]["boundary"="administrative"]["admin_level"="4"]->.berlin;
 (
-  node["currency:XBT"="yes"]({BERLIN_BBOX});
-  way["currency:XBT"="yes"]({BERLIN_BBOX});
-  node["payment:bitcoin"="yes"]({BERLIN_BBOX});
-  way["payment:bitcoin"="yes"]({BERLIN_BBOX});
+  node["currency:XBT"="yes"](area.berlin);
+  way["currency:XBT"="yes"](area.berlin);
+  node["payment:bitcoin"="yes"](area.berlin);
+  way["payment:bitcoin"="yes"](area.berlin);
 );
 out center tags;
 """
