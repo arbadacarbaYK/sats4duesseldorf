@@ -15,20 +15,26 @@
     .sub { color:var(--m); margin: 0 0 14px 0; }
     .pill { display:inline-block; padding:3px 10px; border:1px solid var(--b); border-radius:999px; margin-right:8px; }
     .grid { display:grid; gap:10px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid { grid-template-columns: 2fr 1fr 1fr; } }
+    @media(min-width: 900px){ .grid { grid-template-columns: 2fr 1fr; } }
 
     input, select { width:100%; padding:10px; font-size: 15px; border:1px solid var(--b); border-radius:10px; }
     .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .btn { display:inline-block; padding:9px 12px; border:1px solid var(--b); border-radius:10px; text-decoration:none; color:inherit; background:#fafafa; }
     .btn:hover { background:#f4f4f4; }
     .small { font-size: 13px; color:var(--m); }
-    .ok { color:#0a0; } .bad{ color:#a00; } .unk{ color:#777; }
 
     table { border-collapse: collapse; width: 100%; margin-top: 12px; }
     th, td { border: 1px solid var(--b); padding: 8px; vertical-align: top; }
     th { position: sticky; top: 0; background: #fff; z-index: 1; text-align:left; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
     .nowrap { white-space: nowrap; }
+
+    /* Sortable column headers */
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: #f5f5f5; }
+    th.sortable::after { content: " \2195"; color: #ccc; font-size: 12px; }
+    th.sortable.asc::after { content: " \2191"; color: var(--t); }
+    th.sortable.desc::after { content: " \2193"; color: var(--t); }
 
     .toast { position: fixed; bottom: 14px; left: 14px; padding: 10px 12px; border:1px solid var(--b); border-radius:12px; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); display:none; }
   </style>
@@ -57,22 +63,16 @@
       <option value="yes">Bounty: jetzt möglich</option>
       <option value="no">Bounty: im Cooldown</option>
     </select>
-    <select id="sort">
-      <option value="bounty_desc">Sort: Bounty absteigend</option>
-      <option value="bounty_asc">Sort: Bounty aufsteigend</option>
-      <option value="last_verified_desc">Sort: Letzter Check neu→alt</option>
-      <option value="name_asc">Sort: Name A→Z</option>
-    </select>
   </div>
 
   <table>
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Adresse</th>
-        <th class="nowrap">Bounty</th>
-        <th class="nowrap">Letzter Check</th>
-        <th class="nowrap">Cooldown bis</th>
+        <th class="sortable" data-sort="name">Name</th>
+        <th class="sortable" data-sort="address">Adresse</th>
+        <th class="sortable nowrap" data-sort="bounty">Bounty</th>
+        <th class="sortable nowrap" data-sort="last_check">Letzter Check</th>
+        <th class="sortable nowrap" data-sort="cooldown">Cooldown bis</th>
         <th class="nowrap">Location-ID</th>
         <th>Link</th>
       </tr>
@@ -106,15 +106,25 @@
   };
 
   let rows = [];
+  let sortColumn = "bounty";
+  let sortDirection = "desc";
 
   function addr(r){
     return [r.street, r.housenumber, r.postcode, r.city].map(norm).filter(Boolean).join(" ");
   }
 
+  function updateSortIndicators() {
+    document.querySelectorAll("th.sortable").forEach(th => {
+      th.classList.remove("asc", "desc");
+      if (th.dataset.sort === sortColumn) {
+        th.classList.add(sortDirection);
+      }
+    });
+  }
+
   function render() {
     const q = norm(document.getElementById("q").value).toLowerCase();
     const el = norm(document.getElementById("eligible").value).toLowerCase();
-    const sort = norm(document.getElementById("sort").value);
 
     let view = rows.filter(r => {
       const hay = [
@@ -125,14 +135,22 @@
       return true;
     });
 
-    const cmp = {
-      bounty_desc: (a,b)=> toInt(b.bounty_base_sats) - toInt(a.bounty_base_sats),
-      bounty_asc:  (a,b)=> toInt(a.bounty_base_sats) - toInt(b.bounty_base_sats),
-      last_verified_desc: (a,b)=> norm(b.source_last_update).localeCompare(norm(a.source_last_update)),
-      name_asc: (a,b)=> norm(a.name).localeCompare(norm(b.name)),
-    }[sort] || ((a,b)=>0);
+    // Sort comparators
+    const comparators = {
+      name: (a, b) => norm(a.name).localeCompare(norm(b.name)),
+      address: (a, b) => addr(a).localeCompare(addr(b)),
+      bounty: (a, b) => toInt(a.bounty_base_sats) - toInt(b.bounty_base_sats),
+      last_check: (a, b) => norm(a.source_last_update).localeCompare(norm(b.source_last_update)),
+      cooldown: (a, b) => norm(a.cooldown_until).localeCompare(norm(b.cooldown_until)),
+    };
 
-    view.sort(cmp);
+    const cmp = comparators[sortColumn] || comparators.bounty;
+    view.sort((a, b) => {
+      const result = cmp(a, b);
+      return sortDirection === "desc" ? -result : result;
+    });
+
+    updateSortIndicators();
 
     document.getElementById("meta").textContent =
       `Treffer: ${view.length} / ${rows.length}`;
@@ -140,7 +158,7 @@
     const body = document.getElementById("body");
     body.innerHTML = view.map(r => {
       const link = norm(r.btcmap_url) || (norm(r.osm_type) && norm(r.osm_id) ? `https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}` : "");
-      const bounty = `${toInt(r.bounty_base_sats)} sats`;
+      const bounty = `${toInt(r.bounty_base_sats).toLocaleString("de-DE")} sats`;
       const lid = norm(r.location_id);
       return `
         <tr>
@@ -191,9 +209,26 @@
     });
   }
 
-  ["q","eligible","sort"].forEach(id=>{
+  // Filter event listeners
+  ["q","eligible"].forEach(id=>{
     document.getElementById(id).addEventListener("input", render);
     document.getElementById(id).addEventListener("change", render);
+  });
+
+  // Column header click handlers for sorting
+  document.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+      const col = th.dataset.sort;
+      if (sortColumn === col) {
+        // Toggle direction
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        // New column, default to descending for bounty/dates, ascending for text
+        sortColumn = col;
+        sortDirection = (col === "bounty" || col === "last_check" || col === "cooldown") ? "desc" : "asc";
+      }
+      render();
+    });
   });
 
   load();
