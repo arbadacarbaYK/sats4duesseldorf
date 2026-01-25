@@ -12,9 +12,10 @@ TODAY = datetime.date.today().isoformat()
 OUT_FIELDS = [
     "location_id","osm_type","osm_id","btcmap_url","name","category",
     "street","housenumber","postcode","city","lat","lon","website","opening_hours",
-    "bitcoin_payment_status","status_note_public","last_verified_at","cooldown_until",
-    "verified_by_count","verification_confidence","bounty_base_sats","bounty_critical_sats",
-    "bounty_new_entry_sats","eligible_now","last_check_id","last_updated_at"
+    "bitcoin_payment_status","status_note_public","last_verified_at","verified_by_count",
+    "verification_confidence","bounty_base_sats","bounty_critical_sats","bounty_new_entry_sats",
+    "eligible_now","last_check_id","last_updated_at",
+    "source_last_update","source_last_update_tag","cooldown_until","cooldown_days_left","eligible_for_check"
 ]
 
 def get(row, *keys, default=""):
@@ -103,6 +104,11 @@ def main():
             "eligible_now": "yes",  # initial: ja (weil noch keine Checks eingetragen)
             "last_check_id": "",
             "last_updated_at": TODAY,
+            "source_last_update": "",
+            "source_last_update_tag": "",
+            "cooldown_until": "",
+            "cooldown_days_left": "0",
+            "eligible_for_check": "yes",
         })
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

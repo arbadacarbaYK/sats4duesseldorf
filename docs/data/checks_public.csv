@@ -1,3 +1,1 @@
 check_id,location_id,submitted_at,check_type,public_post_url,receipt_proof_url,payment_proof_url,venue_photo_url,proof_hash,observations_public,suggested_updates,review_status,reviewed_at,reviewer_id,rejection_reason_public,base_bounty_sats,activity_factor,final_bounty_sats,paid_status,paid_at
-ISSUE-1,test,test,base,test,test,test,test,,test,,approved,2026-01-23,maintainer,,10000,1.0,10000,pending,
-ISSUE-2,DE-BE-00042,2026-01-23 21:38,base,https://www.test.de,https://www.test.de,https://www.test.de,https://www.test.de,,Test,,approved,2026-01-23,maintainer,,10000,1.0,10000,pending,

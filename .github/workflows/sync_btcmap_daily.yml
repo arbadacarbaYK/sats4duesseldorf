@@ -1,8 +1,12 @@
-name: Daily BTCMap sync (Berlin)
+name: BTCMap sync (Berlin)
 
 on:
   schedule:
-    - cron: "17 3 * * *"   # täglich 03:17 UTC (~04:17 Berlin im Winter)
+    # Twice daily: midnight and noon Berlin time
+    # Berlin = UTC+1 (winter) / UTC+2 (summer)
+    # Using UTC times that approximate both seasons
+    - cron: "0 23 * * *"   # ~00:00 Berlin (winter) / ~01:00 Berlin (summer)
+    - cron: "0 11 * * *"   # ~12:00 Berlin (winter) / ~13:00 Berlin (summer)
   workflow_dispatch: {}
 
 permissions:
@@ -19,29 +23,26 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests python-dateutil
+      - name: Fetch Berlin locations from BTCMap
+        run: python scripts/fetch_berlin_btcmap.py
 
-      - name: Fetch latest Berlin raw from BTCMap/OSM
-        run: |
-          python scripts/fetch_berlin_raw.py
+      - name: Normalize locations
+        run: python scripts/normalize_locations.py
 
-      - name: Normalize + compute cooldowns
-        run: |
-          python scripts/normalize_locations.py
+      - name: Compute cooldowns from BTCMap data
+        run: python scripts/compute_cooldown_from_btcmap.py
 
       - name: Create Pull Request if changed
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "Daily sync: update berlin_raw + recompute cooldowns"
-          title: "Daily BTCMap sync (Berlin)"
+          commit-message: "sync: update Berlin locations from BTCMap"
+          title: "BTCMap sync (Berlin)"
           body: |
-            Automatischer täglicher Abgleich mit BTCMap/OSM-Daten.
-            - Updates data/berlin_raw.csv
-            - Recomputes cooldown fields in data/locations.csv
-          branch: bot/daily-btcmap-sync
+            Automatischer Abgleich mit BTCMap/OSM-Daten (2x täglich).
+            - Aktualisiert data/berlin_raw.csv von BTCMap API
+            - Normalisiert data/locations.csv
+            - Berechnet Cooldown-Felder neu
+          branch: bot/btcmap-sync
           delete-branch: true
