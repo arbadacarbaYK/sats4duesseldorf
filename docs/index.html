@@ -4,112 +4,510 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Satoshis für Berlin – die Millionenchallenge</title>
+  <meta name="description" content="Verdiene Bitcoin durch Verifizierung von BTC-Akzeptanzstellen in Berlin. 1.000.000 sats Gesamtbounty." />
 
   <!-- Robust CSV parsing -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    :root { --b:#eee; --t:#111; --m:#555; --bg:#fff; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; line-height: 1.35; color:var(--t); background:var(--bg); }
-    h1 { margin: 0 0 6px 0; font-size: 22px; }
-    .sub { color:var(--m); margin: 0 0 14px 0; }
-    .pill { display:inline-block; padding:3px 10px; border:1px solid var(--b); border-radius:999px; margin-right:8px; }
-    .grid { display:grid; gap:10px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid { grid-template-columns: 2fr 1fr; } }
+    :root {
+      --primary: #f7931a;
+      --primary-dark: #e8850f;
+      --green: #22c55e;
+      --green-bg: #dcfce7;
+      --green-dark: #16a34a;
+      --orange: #f97316;
+      --orange-bg: #ffedd5;
+      --orange-dark: #ea580c;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
 
-    input, select { width:100%; padding:10px; font-size: 15px; border:1px solid var(--b); border-radius:10px; }
-    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .btn { display:inline-block; padding:9px 12px; border:1px solid var(--b); border-radius:10px; text-decoration:none; color:inherit; background:#fafafa; }
-    .btn:hover { background:#f4f4f4; }
-    .small { font-size: 13px; color:var(--m); }
+    * { box-sizing: border-box; }
 
-    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
-    th, td { border: 1px solid var(--b); padding: 8px; vertical-align: top; }
-    th { position: sticky; top: 0; background: #fff; z-index: 1; text-align:left; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
-    .nowrap { white-space: nowrap; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+    }
 
-    /* Sortable column headers */
-    th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { background: #f5f5f5; }
-    th.sortable::after { content: " \2195"; color: #ccc; font-size: 12px; }
-    th.sortable.asc::after { content: " \2191"; color: var(--t); }
-    th.sortable.desc::after { content: " \2193"; color: var(--t); }
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--gray-900) 0%, #1f2937 100%);
+      color: white;
+      padding: 32px 20px;
+    }
 
-    /* Bounty/Cooldown status colors */
-    .status-eligible { background: #e8f5e9; }
-    .status-eligible .bounty-amount { color: #2e7d32; font-weight: 600; }
-    .status-cooldown { background: #fff3e0; }
-    .status-cooldown .bounty-amount { color: #e65100; }
-    .cooldown-active { color: #e65100; font-weight: 500; }
-    .cooldown-passed { color: #2e7d32; }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-    .toast { position: fixed; bottom: 14px; left: 14px; padding: 10px 12px; border:1px solid var(--b); border-radius:12px; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); display:none; }
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 .btc-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--gray-300);
+      font-size: 16px;
+    }
+
+    /* Stats bar */
+    .stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.1);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      min-width: 140px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--gray-300);
+      margin-top: 4px;
+    }
+
+    /* Main content */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Action buttons */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--gray-700);
+      background: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-300);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .btn-claim {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    .btn-claim:hover {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+    }
+
+    .btn-claim-disabled {
+      background: var(--gray-200);
+      border-color: var(--gray-200);
+      color: var(--gray-500);
+      cursor: not-allowed;
+    }
+
+    .btn-claim-disabled:hover {
+      background: var(--gray-200);
+      border-color: var(--gray-200);
+    }
+
+    /* Filters */
+    .filters {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 640px) {
+      .filters { grid-template-columns: 2fr 1fr; }
+    }
+
+    .filter-input, .filter-select {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      background: white;
+      color: var(--gray-900);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-input:focus, .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.1);
+    }
+
+    /* Results info */
+    .results-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+
+    /* Table container */
+    .table-container {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    th {
+      background: var(--gray-50);
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-500);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    th.sortable:hover { background: var(--gray-100); }
+
+    th.sortable::after {
+      content: " ↕";
+      color: var(--gray-300);
+      font-size: 12px;
+    }
+
+    th.sortable.asc::after { content: " ↑"; color: var(--gray-700); }
+    th.sortable.desc::after { content: " ↓"; color: var(--gray-700); }
+
+    tbody tr:hover { background: var(--gray-50); }
+
+    .location-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .location-category {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+
+    .address {
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+
+    /* Bounty cell */
+    .bounty-cell {
+      text-align: center;
+    }
+
+    .bounty-amount {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .bounty-status {
+      font-size: 12px;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .status-eligible .bounty-amount { color: var(--green-dark); }
+    .status-eligible .bounty-status {
+      background: var(--green-bg);
+      color: var(--green-dark);
+    }
+
+    .status-cooldown .bounty-amount { color: var(--orange-dark); }
+    .status-cooldown .bounty-status {
+      background: var(--orange-bg);
+      color: var(--orange-dark);
+    }
+
+    .date-cell {
+      font-size: 14px;
+      color: var(--gray-700);
+      white-space: nowrap;
+    }
+
+    .cooldown-active { color: var(--orange-dark); font-weight: 500; }
+    .cooldown-passed { color: var(--green-dark); }
+
+    .location-id {
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+      font-size: 12px;
+      color: var(--gray-500);
+      background: var(--gray-100);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .link-cell a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .link-cell a:hover { text-decoration: underline; }
+
+    .action-cell {
+      text-align: center;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background: var(--gray-900);
+      color: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      display: none;
+      font-size: 14px;
+      z-index: 100;
+    }
+
+    /* Footer */
+    .footer {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      text-align: center;
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+
+    .footer a { color: var(--gray-700); }
+
+    /* Mobile adjustments */
+    @media (max-width: 640px) {
+      .header { padding: 24px 16px; }
+      .header h1 { font-size: 22px; }
+      .stats { gap: 12px; }
+      .stat { padding: 12px 16px; min-width: 100px; }
+      .stat-value { font-size: 20px; }
+      .main { padding: 16px; }
+      .btn { padding: 8px 12px; font-size: 13px; }
+    }
   </style>
 </head>
 
 <body>
-  <h1>Satoshis für Berlin – die Millionenchallenge</h1>
-  <p class="sub">
-    <span class="pill"><strong>1.000.000 sats</strong> Gesamtbounty</span>
-    <span class="pill">Basis: BTCMap/OSM</span>
-    <span class="pill">Nur Kauf vor Ort in Bitcoin</span>
-  </p>
+  <header class="header">
+    <div class="header-content">
+      <h1>
+        <span class="btc-icon">₿</span>
+        Satoshis für Berlin
+      </h1>
+      <p>Die Millionenchallenge – Verifiziere Bitcoin-Akzeptanzstellen und verdiene Sats</p>
 
-  <div class="row">
-    <a class="btn" id="btnSubmit" href="#" target="_blank" rel="noopener">Check einreichen</a>
-    <a class="btn" id="btnRules" href="#" target="_blank" rel="noopener">Regeln</a>
-    <a class="btn" id="btnCSV" href="data/locations.csv" target="_blank" rel="noopener">locations.csv</a>
-    <a class="btn" id="btnChecks" href="data/checks_public.csv" target="_blank" rel="noopener">checks_public.csv</a>
-    <span class="small" id="meta">Lade Daten…</span>
-  </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">1.000.000</div>
+          <div class="stat-label">Sats Gesamtbounty</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statAvailable">—</div>
+          <div class="stat-label">Sats verfügbar</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statLocations">—</div>
+          <div class="stat-label">Locations</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="statEligible">—</div>
+          <div class="stat-label">Jetzt prüfbar</div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-  <div class="grid" style="margin-top:12px;">
-    <input id="q" placeholder="Suche (Name, Kategorie, Adresse, PLZ)…" />
-    <select id="eligible">
-      <option value="">Bounty: alle</option>
-      <option value="yes">Bounty: jetzt möglich</option>
-      <option value="no">Bounty: im Cooldown</option>
-    </select>
-  </div>
+  <main class="main">
+    <div class="actions">
+      <a class="btn btn-primary" id="btnSubmit" href="#" target="_blank" rel="noopener">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Check einreichen
+      </a>
+      <a class="btn" id="btnNewLocation" href="#" target="_blank" rel="noopener">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Neuen Ort melden
+      </a>
+      <a class="btn" id="btnRules" href="#" target="_blank" rel="noopener">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Regeln
+      </a>
+      <a class="btn" href="https://github.com/satoshiinberlin/sats4berlin" target="_blank" rel="noopener">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th class="sortable" data-sort="name">Name</th>
-        <th class="sortable" data-sort="address">Adresse</th>
-        <th class="sortable nowrap" data-sort="bounty">Bounty</th>
-        <th class="sortable nowrap" data-sort="last_check">Letzter Check</th>
-        <th class="sortable nowrap" data-sort="cooldown">Cooldown bis</th>
-        <th class="nowrap">Location-ID</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody id="body"></tbody>
-  </table>
+    <div class="filters">
+      <input class="filter-input" id="q" type="text" placeholder="Suche nach Name, Kategorie, Adresse oder PLZ…" />
+      <select class="filter-select" id="eligible">
+        <option value="">Alle Locations</option>
+        <option value="yes">Nur verfügbare Bounties</option>
+        <option value="no">Im Cooldown</option>
+      </select>
+    </div>
+
+    <div class="results-info">
+      <span id="meta">Lade Daten…</span>
+      <span>Sortieren: Klicke auf Spaltenüberschriften</span>
+    </div>
+
+    <div class="table-container">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="name">Location</th>
+              <th class="sortable" data-sort="address">Adresse</th>
+              <th class="sortable" data-sort="bounty">Bounty</th>
+              <th class="sortable" data-sort="last_check">Letzter Check</th>
+              <th class="sortable" data-sort="cooldown">Cooldown bis</th>
+              <th>ID</th>
+              <th>Links</th>
+              <th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Daten: <a href="https://btcmap.org" target="_blank">BTCMap</a> / <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a> ·
+      <a href="data/locations.csv">locations.csv</a> ·
+      <a href="data/checks_public.csv">checks_public.csv</a>
+    </p>
+    <p>© OpenStreetMap contributors (ODbL) · Aktualisierung: täglich um 00:00 und 12:00 Uhr</p>
+  </footer>
 
   <div class="toast" id="toast"></div>
 
 <script>
-  // === CONFIG: passe das an ===
   const REPO_URL = "https://github.com/satoshiinberlin/sats4berlin";
-  // ============================
+  const CHECK_TEMPLATE_URL = `${REPO_URL}/issues/new?template=check.yml`;
+  const NEW_LOCATION_URL = `${REPO_URL}/issues/new?template=new_location.yml`;
 
-  // Set buttons to repo resources
   document.getElementById("btnSubmit").href = `${REPO_URL}/issues/new/choose`;
-  document.getElementById("btnRules").href  = `${REPO_URL}/blob/main/RULES.md`;
+  document.getElementById("btnNewLocation").href = NEW_LOCATION_URL;
+  document.getElementById("btnRules").href = `${REPO_URL}/blob/main/RULES.md`;
 
   const toast = (msg) => {
     const el = document.getElementById("toast");
     el.textContent = msg;
     el.style.display = "block";
     clearTimeout(window.__t);
-    window.__t = setTimeout(()=>{ el.style.display="none"; }, 1800);
+    window.__t = setTimeout(() => { el.style.display = "none"; }, 2000);
   };
 
   const norm = (s) => (s ?? "").toString().trim();
   const toInt = (s) => {
-    const n = parseInt((s ?? "").toString().replace(/[^\d]/g,""), 10);
+    const n = parseInt((s ?? "").toString().replace(/[^\d]/g, ""), 10);
     return Number.isFinite(n) ? n : 0;
   };
 
@@ -117,8 +515,19 @@
   let sortColumn = "bounty";
   let sortDirection = "desc";
 
-  function addr(r){
-    return [r.street, r.housenumber, r.postcode, r.city].map(norm).filter(Boolean).join(" ");
+  function addr(r) {
+    const parts = [r.street, r.housenumber].map(norm).filter(Boolean).join(" ");
+    const city = [r.postcode, r.city].map(norm).filter(Boolean).join(" ");
+    return [parts, city].filter(Boolean).join(", ");
+  }
+
+  function updateStats() {
+    const eligible = rows.filter(r => norm(r.eligible_now).toLowerCase() === "yes");
+    const availableSats = eligible.reduce((sum, r) => sum + toInt(r.bounty_base_sats), 0);
+
+    document.getElementById("statLocations").textContent = rows.length.toLocaleString("de-DE");
+    document.getElementById("statEligible").textContent = eligible.length.toLocaleString("de-DE");
+    document.getElementById("statAvailable").textContent = availableSats.toLocaleString("de-DE");
   }
 
   function updateSortIndicators() {
@@ -128,6 +537,13 @@
         th.classList.add(sortDirection);
       }
     });
+  }
+
+  function createClaimUrl(locationId, name) {
+    const today = new Date().toISOString().slice(0, 10);
+    const title = encodeURIComponent(`Check: ${locationId} – ${today}`);
+    const lid = encodeURIComponent(locationId);
+    return `${CHECK_TEMPLATE_URL}&title=${title}&location_id=${lid}`;
   }
 
   function render() {
@@ -143,7 +559,6 @@
       return true;
     });
 
-    // Sort comparators
     const comparators = {
       name: (a, b) => norm(a.name).localeCompare(norm(b.name)),
       address: (a, b) => addr(a).localeCompare(addr(b)),
@@ -160,59 +575,54 @@
 
     updateSortIndicators();
 
-    document.getElementById("meta").textContent =
-      `Treffer: ${view.length} / ${rows.length}`;
+    document.getElementById("meta").textContent = `${view.length} von ${rows.length} Locations`;
 
     const body = document.getElementById("body");
     const today = new Date().toISOString().slice(0, 10);
 
     body.innerHTML = view.map(r => {
       const link = norm(r.btcmap_url) || (norm(r.osm_type) && norm(r.osm_id) ? `https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}` : "");
-      const bounty = `${toInt(r.bounty_base_sats).toLocaleString("de-DE")} sats`;
+      const bounty = toInt(r.bounty_base_sats).toLocaleString("de-DE");
       const lid = norm(r.location_id);
+      const name = norm(r.name) || "Unbekannt";
 
-      // Determine status for color coding
       const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
       const cooldownDate = norm(r.cooldown_until);
       const hasCooldown = cooldownDate && cooldownDate >= today;
       const statusClass = isEligible ? "status-eligible" : "status-cooldown";
       const cooldownClass = hasCooldown ? "cooldown-active" : (cooldownDate ? "cooldown-passed" : "");
 
+      const claimUrl = createClaimUrl(lid, name);
+      const claimBtnClass = isEligible ? "btn btn-claim" : "btn btn-claim-disabled";
+      const claimBtnText = isEligible ? "Claim Bounty" : "Im Cooldown";
+      const claimBtnAttr = isEligible ? `href="${claimUrl}" target="_blank" rel="noopener"` : 'href="#" onclick="return false;"';
+
       return `
         <tr>
           <td>
-            <strong>${norm(r.name) || "—"}</strong><br>
-            <span class="small">${norm(r.category) || "—"}</span>
+            <div class="location-name">${name}</div>
+            <div class="location-category">${norm(r.category) || "—"}</div>
           </td>
-          <td>${addr(r) || "—"}</td>
-          <td class="nowrap ${statusClass}">
-            <span class="bounty-amount">${bounty}</span><br>
-            <span class="small">${isEligible ? "verfügbar" : "im Cooldown"}</span>
+          <td class="address">${addr(r) || "—"}</td>
+          <td class="bounty-cell ${statusClass}">
+            <div class="bounty-amount">${bounty}</div>
+            <div class="bounty-status">${isEligible ? "verfügbar" : "Cooldown"}</div>
           </td>
-          <td class="nowrap">${norm(r.source_last_update) || "—"}</td>
-          <td class="nowrap ${cooldownClass}">${cooldownDate || "—"}</td>
-          <td class="mono nowrap">
-            <button class="btn" style="padding:6px 8px;" data-copy="${lid}">Copy</button>
-            <div style="margin-top:6px;">${lid}</div>
+          <td class="date-cell">${norm(r.source_last_update) || "—"}</td>
+          <td class="date-cell ${cooldownClass}">${cooldownDate || "—"}</td>
+          <td><span class="location-id">${lid}</span></td>
+          <td class="link-cell">${link ? `<a href="${link}" target="_blank" rel="noopener">OSM</a>` : "—"}</td>
+          <td class="action-cell">
+            <a class="${claimBtnClass}" ${claimBtnAttr}>${claimBtnText}</a>
           </td>
-          <td class="nowrap">${link ? `<a href="${link}" target="_blank" rel="noopener">OSM/BTCMap</a>` : "—"}</td>
         </tr>
       `;
     }).join("");
-
-    // Copy handlers
-    body.querySelectorAll("button[data-copy]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const v = btn.getAttribute("data-copy");
-        try { await navigator.clipboard.writeText(v); toast(`Kopiert: ${v}`); }
-        catch { toast("Copy nicht möglich (Browser)"); }
-      });
-    });
   }
 
   function load() {
     const meta = document.getElementById("meta");
-    meta.textContent = "Lade locations.csv…";
+    meta.textContent = "Lade Daten…";
 
     Papa.parse("data/locations.csv", {
       download: true,
@@ -221,30 +631,26 @@
       dynamicTyping: false,
       complete: (res) => {
         rows = (res.data || []).filter(r => r && r.location_id);
-        meta.textContent = `Geladen: ${rows.length} Einträge`;
+        updateStats();
         render();
       },
       error: (err) => {
-        meta.innerHTML = `<span class="bad">Fehler beim Laden: ${err}</span>`;
+        meta.textContent = `Fehler beim Laden: ${err}`;
       }
     });
   }
 
-  // Filter event listeners
-  ["q","eligible"].forEach(id=>{
+  ["q", "eligible"].forEach(id => {
     document.getElementById(id).addEventListener("input", render);
     document.getElementById(id).addEventListener("change", render);
   });
 
-  // Column header click handlers for sorting
   document.querySelectorAll("th.sortable").forEach(th => {
     th.addEventListener("click", () => {
       const col = th.dataset.sort;
       if (sortColumn === col) {
-        // Toggle direction
         sortDirection = sortDirection === "asc" ? "desc" : "asc";
       } else {
-        // New column, default to descending for bounty/dates, ascending for text
         sortColumn = col;
         sortDirection = (col === "bounty" || col === "last_check" || col === "cooldown") ? "desc" : "asc";
       }
