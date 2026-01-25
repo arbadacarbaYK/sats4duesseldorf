@@ -79,6 +79,40 @@ def get_source_last_update(row):
     else:
         return "", ""
 
+
+def calculate_bounty(source_date: str) -> int:
+    """
+    Calculate bounty based on age since last check according to RULES.md:
+    - 3-6 months: 10,000 sats
+    - 6-12 months: 13,000 sats
+    - 12-24 months: 17,000 sats
+    - >24 months (or never checked): 21,000 sats
+    """
+    if not source_date:
+        # Never checked = treat as >24 months
+        return 21000
+
+    try:
+        last_check = datetime.date.fromisoformat(source_date[:10])
+    except ValueError:
+        return 21000
+
+    today = datetime.date.today()
+    days_since = (today - last_check).days
+    months_since = days_since / 30.44  # Average days per month
+
+    if months_since < 3:
+        # Still in cooldown, but show minimum bounty
+        return 10000
+    elif months_since < 6:
+        return 10000
+    elif months_since < 12:
+        return 13000
+    elif months_since < 24:
+        return 17000
+    else:
+        return 21000
+
 def main():
     if not RAW.exists():
         raise SystemExit(f"Missing {RAW}")
@@ -106,6 +140,7 @@ def main():
 
         location_id = f"DE-BE-{idx:05d}"
         source_date, source_tag = get_source_last_update(r)
+        bounty = calculate_bounty(source_date)
 
         out_rows.append({
             "location_id": location_id,
@@ -127,7 +162,7 @@ def main():
             "last_verified_at": "",
             "verified_by_count": "0",
             "verification_confidence": "low",
-            "bounty_base_sats": "10000",
+            "bounty_base_sats": str(bounty),
             "bounty_critical_sats": "21000",
             "bounty_new_entry_sats": "21000",
             "eligible_now": "yes",  # initial, will be updated by cooldown script
