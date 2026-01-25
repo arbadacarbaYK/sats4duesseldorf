@@ -1,25 +1,32 @@
 #!/usr/bin/env python3
 """
-Fetch Bitcoin-accepting locations in Berlin from BTCMap.org API.
+Fetch Bitcoin-accepting locations in Berlin from OpenStreetMap via Overpass API.
 
-BTCMap provides a static JSON endpoint with all elements globally.
-We filter by Berlin bounding box and extract relevant fields.
+Queries OSM directly for the most up-to-date check_date and survey:date values.
 """
 import csv
 import json
 import urllib.request
+import urllib.parse
 from pathlib import Path
 
 # Berlin bounding box (approximate city limits)
-BERLIN_BBOX = {
-    "min_lat": 52.33,
-    "max_lat": 52.68,
-    "min_lon": 13.07,
-    "max_lon": 13.78,
-}
+BERLIN_BBOX = "52.33,13.07,52.68,13.78"  # south,west,north,east
 
-BTCMAP_ELEMENTS_URL = "https://static.btcmap.org/api/v2/elements.json"
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OUTPUT_PATH = Path("data/berlin_raw.csv")
+
+# Overpass query for Bitcoin-accepting places in Berlin
+OVERPASS_QUERY = f"""
+[out:json][timeout:120];
+(
+  node["currency:XBT"="yes"]({BERLIN_BBOX});
+  way["currency:XBT"="yes"]({BERLIN_BBOX});
+  node["payment:bitcoin"="yes"]({BERLIN_BBOX});
+  way["payment:bitcoin"="yes"]({BERLIN_BBOX});
+);
+out center tags;
+"""
 
 # CSV columns for berlin_raw.csv
 FIELDNAMES = [
@@ -50,53 +57,34 @@ FIELDNAMES = [
 ]
 
 
-def fetch_elements() -> list[dict]:
-    """Fetch all elements from BTCMap API."""
-    print(f"Fetching elements from {BTCMAP_ELEMENTS_URL}...")
+def fetch_from_overpass() -> list[dict]:
+    """Fetch Bitcoin locations from OSM via Overpass API."""
+    print(f"Fetching from Overpass API...")
+
+    data = urllib.parse.urlencode({"data": OVERPASS_QUERY}).encode("utf-8")
     req = urllib.request.Request(
-        BTCMAP_ELEMENTS_URL,
+        OVERPASS_URL,
+        data=data,
         headers={"User-Agent": "sats4berlin/1.0 (https://github.com/satoshiinberlin/sats4berlin)"},
     )
+
     with urllib.request.urlopen(req, timeout=120) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-    print(f"Fetched {len(data)} elements globally.")
-    return data
+        result = json.loads(resp.read().decode("utf-8"))
 
-
-def is_in_berlin(element: dict) -> bool:
-    """Check if element is within Berlin bounding box."""
-    osm = element.get("osm_json", {})
-    lat = osm.get("lat")
-    lon = osm.get("lon")
-    if lat is None or lon is None:
-        return False
-    try:
-        lat, lon = float(lat), float(lon)
-    except (TypeError, ValueError):
-        return False
-    return (
-        BERLIN_BBOX["min_lat"] <= lat <= BERLIN_BBOX["max_lat"]
-        and BERLIN_BBOX["min_lon"] <= lon <= BERLIN_BBOX["max_lon"]
-    )
-
-
-def is_active(element: dict) -> bool:
-    """Check if element is not deleted."""
-    deleted = element.get("deleted_at", "")
-    return not deleted or deleted == ""
+    elements = result.get("elements", [])
+    print(f"Fetched {len(elements)} Bitcoin-accepting elements from OSM.")
+    return elements
 
 
 def extract_row(element: dict) -> dict:
-    """Extract CSV row from BTCMap element."""
-    osm = element.get("osm_json", {})
-    tags = osm.get("tags", {})
-    btcmap_tags = element.get("tags", {})
+    """Extract CSV row from OSM element."""
+    tags = element.get("tags", {})
+    osm_type = element.get("type", "")
+    osm_id = str(element.get("id", ""))
 
-    # Determine OSM type and ID from element ID (format: "node:123456")
-    elem_id = element.get("id", "")
-    osm_type, osm_id = "", ""
-    if ":" in elem_id:
-        osm_type, osm_id = elem_id.split(":", 1)
+    # Get coordinates (for ways, use center)
+    lat = element.get("lat") or element.get("center", {}).get("lat", "")
+    lon = element.get("lon") or element.get("center", {}).get("lon", "")
 
     # Build address string
     addr_parts = []
@@ -112,7 +100,7 @@ def extract_row(element: dict) -> dict:
 
     # Determine category from OSM tags
     category_key = ""
-    category = btcmap_tags.get("category", "other")
+    category = "other"
     for key in ["amenity", "shop", "office", "tourism", "leisure", "craft"]:
         if key in tags:
             category_key = key
@@ -127,6 +115,9 @@ def extract_row(element: dict) -> dict:
             return "False"
         return ""
 
+    # Get the most recent check_date (prefer check_date:currency:XBT, then check_date)
+    check_date = tags.get("check_date:currency:XBT", "") or tags.get("check_date", "")
+
     return {
         "name": tags.get("name", ""),
         "category_key": category_key,
@@ -137,8 +128,8 @@ def extract_row(element: dict) -> dict:
         "addr:postcode": tags.get("addr:postcode", ""),
         "addr:city": tags.get("addr:city", "Berlin"),
         "addr:suburb": tags.get("addr:suburb", ""),
-        "lat": osm.get("lat", ""),
-        "lon": osm.get("lon", ""),
+        "lat": lat,
+        "lon": lon,
         "xbt": yn(tags.get("currency:XBT")),
         "btc": yn(tags.get("currency:BTC")),
         "onchain": yn(tags.get("payment:onchain")),
@@ -148,8 +139,7 @@ def extract_row(element: dict) -> dict:
         "website": tags.get("website", ""),
         "phone": tags.get("phone", ""),
         "survey:date": tags.get("survey:date", ""),
-        # OSM uses check_date:currency:XBT for Bitcoin-specific verification
-        "check_date": tags.get("check_date:currency:XBT", "") or tags.get("check_date", ""),
+        "check_date": check_date,
         "osm_type": osm_type,
         "osm_id": osm_id,
         "osm_url": f"https://www.openstreetmap.org/{osm_type}/{osm_id}" if osm_type and osm_id else "",
@@ -157,14 +147,10 @@ def extract_row(element: dict) -> dict:
 
 
 def main():
-    elements = fetch_elements()
-
-    # Filter for Berlin and active elements
-    berlin_elements = [e for e in elements if is_in_berlin(e) and is_active(e)]
-    print(f"Found {len(berlin_elements)} active elements in Berlin.")
+    elements = fetch_from_overpass()
 
     # Extract rows
-    rows = [extract_row(e) for e in berlin_elements]
+    rows = [extract_row(e) for e in elements]
 
     # Sort by name for consistent output
     rows.sort(key=lambda r: (r.get("name") or "").lower())
