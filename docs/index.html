@@ -15,7 +15,7 @@
     .sub { color:var(--m); margin: 0 0 14px 0; }
     .pill { display:inline-block; padding:3px 10px; border:1px solid var(--b); border-radius:999px; margin-right:8px; }
     .grid { display:grid; gap:10px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+    @media(min-width: 900px){ .grid { grid-template-columns: 2fr 1fr 1fr; } }
 
     input, select { width:100%; padding:10px; font-size: 15px; border:1px solid var(--b); border-radius:10px; }
     .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -52,12 +52,6 @@
 
   <div class="grid" style="margin-top:12px;">
     <input id="q" placeholder="Suche (Name, Kategorie, Adresse, PLZ)…" />
-    <select id="status">
-      <option value="">Status: alle</option>
-      <option value="yes">Status: yes</option>
-      <option value="no">Status: no</option>
-      <option value="unknown">Status: unknown</option>
-    </select>
     <select id="eligible">
       <option value="">Bounty: alle</option>
       <option value="yes">Bounty: jetzt möglich</option>
@@ -76,7 +70,6 @@
       <tr>
         <th>Name</th>
         <th>Adresse</th>
-        <th>Status</th>
         <th class="nowrap">Bounty</th>
         <th class="nowrap">Letzter Check</th>
         <th class="nowrap">Cooldown bis</th>
@@ -118,16 +111,8 @@
     return [r.street, r.housenumber, r.postcode, r.city].map(norm).filter(Boolean).join(" ");
   }
 
-  function statusBadge(s){
-    s = norm(s).toLowerCase();
-    if (s === "yes") return `<span class="ok">yes</span>`;
-    if (s === "no") return `<span class="bad">no</span>`;
-    return `<span class="unk">unknown</span>`;
-  }
-
   function render() {
     const q = norm(document.getElementById("q").value).toLowerCase();
-    const st = norm(document.getElementById("status").value).toLowerCase();
     const el = norm(document.getElementById("eligible").value).toLowerCase();
     const sort = norm(document.getElementById("sort").value);
 
@@ -136,7 +121,6 @@
         r.name, r.category, r.street, r.housenumber, r.postcode, r.city
       ].map(x => norm(x).toLowerCase()).join(" ");
       if (q && !hay.includes(q)) return false;
-      if (st && norm(r.bitcoin_payment_status).toLowerCase() !== st) return false;
       if (el && norm(r.eligible_now).toLowerCase() !== el) return false;
       return true;
     });
@@ -165,7 +149,6 @@
             <span class="small">${norm(r.category) || "—"}</span>
           </td>
           <td>${addr(r) || "—"}</td>
-          <td class="nowrap">${statusBadge(r.bitcoin_payment_status)}</td>
           <td class="nowrap">${bounty}<br><span class="small">eligible: ${norm(r.eligible_now) || "—"}</span></td>
           <td class="nowrap">${norm(r.source_last_update) || "—"}</td>
           <td class="nowrap">${norm(r.cooldown_until) || "—"}</td>
@@ -208,7 +191,7 @@
     });
   }
 
-  ["q","status","eligible","sort"].forEach(id=>{
+  ["q","eligible","sort"].forEach(id=>{
     document.getElementById(id).addEventListener("input", render);
     document.getElementById(id).addEventListener("change", render);
   });

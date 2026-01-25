@@ -12,7 +12,7 @@ TODAY = datetime.date.today().isoformat()
 OUT_FIELDS = [
     "location_id","osm_type","osm_id","btcmap_url","name","category",
     "street","housenumber","postcode","city","lat","lon","website","opening_hours",
-    "bitcoin_payment_status","status_note_public","last_verified_at","verified_by_count",
+    "last_verified_at","verified_by_count",
     "verification_confidence","bounty_base_sats","bounty_critical_sats","bounty_new_entry_sats",
     "eligible_now","last_check_id","last_updated_at",
     "source_last_update","source_last_update_tag","cooldown_until","cooldown_days_left","eligible_for_check"
@@ -28,18 +28,6 @@ def normalize_category(row):
     # je nach Export heißen Spalten z. B. category oder amenity/shop/tourism
     cat = get(row, "category", "amenity", "shop", "tourism", "office", default="")
     return cat.strip()
-
-def normalize_bitcoin_status(row):
-    # In deinem Export war das Feld oft "btc_yes" oder ähnliches.
-    v = get(row, "bitcoin_payment_status", "btc_yes", "currency:BTC", "currency:XBT", "payment:bitcoin", default="").strip().lower()
-    if v in ("yes","true","1"):
-        return "yes"
-    if v in ("no","false","0"):
-        return "no"
-    # wenn irgendwas gesetzt ist, aber nicht eindeutig:
-    if v:
-        return "unknown"
-    return "unknown"
 
 def normalize_url(row, osm_type, osm_id):
     # falls btcmap_url im raw fehlt, wenigstens OSM-Link
@@ -157,8 +145,6 @@ def main():
             "lon": str(get(r, "lon", "longitude", default="")).strip(),
             "website": get(r, "website", "contact:website", default="").strip(),
             "opening_hours": get(r, "opening_hours", default="").strip(),
-            "bitcoin_payment_status": normalize_bitcoin_status(r),
-            "status_note_public": "",
             "last_verified_at": "",
             "verified_by_count": "0",
             "verification_confidence": "low",
