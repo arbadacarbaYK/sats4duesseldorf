@@ -196,7 +196,26 @@ def main():
             name = body_field(body, "Name des Ortes") or ""
             address = body_field(body, "Adresse") or ""
             latlon = body_field(body, "Koordinaten (optional, hilft sehr)") or ""
-            osm_url = body_field(body, "OSM-Link (optional, falls vorhanden)") or ""
+            osm_url = (
+                body_field(body, "OpenStreetMap-Link (optional)") or
+                body_field(body, "OSM-Link (optional, falls vorhanden)") or
+                ""
+            )
+            website = body_field(body, "Website (optional)") or ""
+            category_raw = body_field(body, "Kategorie") or ""
+
+            # Map category to simple form
+            category = ""
+            if "restaurant" in category_raw.lower() or "café" in category_raw.lower() or "bar" in category_raw.lower():
+                category = "restaurant"
+            elif "einzelhandel" in category_raw.lower() or "shop" in category_raw.lower():
+                category = "shop"
+            elif "dienstleistung" in category_raw.lower():
+                category = "service"
+            elif "hotel" in category_raw.lower() or "unterkunft" in category_raw.lower():
+                category = "hotel"
+            else:
+                category = "other"
 
             # Parse lat/lon
             lat, lon = "", ""
@@ -235,14 +254,14 @@ def main():
                 "osm_id": osm_id,
                 "btcmap_url": osm_url,
                 "name": name,
-                "category": "",
+                "category": category,
                 "street": street,
                 "housenumber": housenumber,
                 "postcode": postcode,
                 "city": "Berlin",
                 "lat": lat,
                 "lon": lon,
-                "website": "",
+                "website": website,
                 "opening_hours": "",
                 "last_verified_at": today_iso(),
                 "verified_by_count": "1",
@@ -279,10 +298,22 @@ def main():
         if isinstance(user_obj, dict):
             submitter_id = user_obj.get("login", "")
 
-        # Determine check type
-        check_type = body_field(body, "Check-Typ").strip().lower()
-        if check_type not in ("base", "critical_change"):
-            check_type = "critical_change" if "critical-change" in labels else "base"
+        # Determine check type (handle both old and new format)
+        check_type_raw = (
+            body_field(body, "Art des Checks") or
+            body_field(body, "Check-Typ") or
+            ""
+        ).strip().lower()
+
+        # Map to normalized type
+        if "kritisch" in check_type_raw or "critical" in check_type_raw or check_type_raw == "critical_change":
+            check_type = "critical_change"
+        elif "normal" in check_type_raw or check_type_raw == "base":
+            check_type = "base"
+        elif "critical-change" in labels:
+            check_type = "critical_change"
+        else:
+            check_type = "base"
 
         # Get bounty from locations.csv (age-based) or use critical change amount
         if check_type == "critical_change":

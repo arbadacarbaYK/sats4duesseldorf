@@ -1,107 +1,144 @@
-name: Check einreichen (Kauf in Bitcoin)
-description: Vor-Ort-Kauf in Berlin mit Bitcoin belegen, BTCMap/OSM-Eintrag prüfen und ggf. aktualisieren.
-title: "Check: <Location-ID oder Name> – <YYYY-MM-DD>"
+name: "Bounty claimen: Check einreichen"
+description: "Du hast vor Ort in Bitcoin bezahlt? Reiche deinen Check ein und verdiene Sats!"
+title: "Check: [LOCATION-ID] – [DATUM]"
 labels: ["pending", "check"]
 body:
   - type: markdown
     attributes:
       value: |
-        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**
-        Bounty nur bei Kauf vor Ort **in Bitcoin** und vollständigen Nachweisen.
+        ## Satoshis für Berlin – Bounty claimen
 
-        **Vor dem Einreichen prüfen:**
-        1. Öffne [die Übersicht](https://satoshiinberlin.github.io/sats4berlin/) und suche den Ort
-        2. Prüfe die Spalte **„Bounty"** – steht dort **„verfügbar"** (grün)?
-        3. Wenn **„im Cooldown"** (orange): Warte bis zum Datum in der Spalte „Cooldown bis"
+        Du hast in Berlin vor Ort mit **Bitcoin** bezahlt? Super! Fülle dieses Formular aus und sichere dir deinen Bounty.
 
-        Checks für Orte im Cooldown werden **nicht** ausbezahlt.
+        ---
+
+        ### Vor dem Einreichen
+
+        1. Öffne die [Übersicht](https://satoshiinberlin.github.io/sats4berlin/) und suche den Ort
+        2. Prüfe, ob der Bounty **verfügbar** ist (grüner Button)
+        3. Klicke auf **„Claim Bounty"** – das Formular wird automatisch ausgefüllt
+
+        > **Hinweis:** Orte im Cooldown (orangener Button) können erst nach Ablauf der Frist erneut geprüft werden.
+
+        ---
 
   - type: input
     id: location_id
     attributes:
-      label: Location-ID (aus locations.csv)
-      description: Z.B. DE-BE-00042
-      placeholder: DE-BE-00042
+      label: "Location-ID"
+      description: "Die ID findest du in der Übersicht (z.B. DE-BE-00042). Wenn du über 'Claim Bounty' kommst, ist sie bereits eingetragen."
+      placeholder: "DE-BE-00042"
     validations:
       required: true
 
   - type: input
     id: date_time
     attributes:
-      label: Datum/Uhrzeit des Kaufs
-      description: Lokalzeit Berlin reicht
-      placeholder: 2026-01-23 18:30
+      label: "Datum und Uhrzeit des Kaufs"
+      description: "Wann hast du bezahlt? Ungefähre Uhrzeit reicht."
+      placeholder: "25.01.2026, ca. 14:30"
     validations:
       required: true
 
   - type: dropdown
     id: check_type
     attributes:
-      label: Check-Typ
+      label: "Art des Checks"
+      description: "Was trifft zu?"
       options:
-        - base
-        - critical_change
+        - "Normaler Check – Ort akzeptiert weiterhin Bitcoin"
+        - "Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen"
     validations:
       required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Nachweise hochladen
+
+        Lade deine Nachweise bei einem Bilderhoster hoch (z.B. [Imgur](https://imgur.com), [Imgbb](https://imgbb.com), oder ähnlich) und füge die Links unten ein.
+
+        **Wichtig:** Schwärze persönliche Daten (Name, Adresse, etc.) auf allen Bildern!
 
   - type: input
     id: public_post_url
     attributes:
-      label: Öffentlicher Beweis-Post (muss "Berlin" und "Bitcoin" enthalten)
-      placeholder: https://...
+      label: "1. Öffentlicher Post (Social Media)"
+      description: "Link zu deinem öffentlichen Post mit Foto/Video. Muss die Worte „Berlin" und „Bitcoin" enthalten."
+      placeholder: "https://x.com/deinname/status/..."
     validations:
       required: true
 
   - type: input
     id: receipt_proof_url
     attributes:
-      label: Beleg (Bon) – Link (Daten schwärzen)
-      placeholder: https://...
+      label: "2. Kaufbeleg (Bon/Rechnung)"
+      description: "Foto vom Kassenbon oder der Rechnung. Persönliche Daten schwärzen!"
+      placeholder: "https://imgur.com/..."
     validations:
       required: true
 
   - type: input
     id: payment_proof_url
     attributes:
-      label: Bitcoin-Zahlungsnachweis – Link (Bestätigung "bezahlt", Betrag/Datum sichtbar; Daten schwärzen)
-      placeholder: https://...
+      label: "3. Bitcoin-Zahlung"
+      description: "Screenshot der Wallet mit Bestätigung „bezahlt" – Betrag und Datum müssen sichtbar sein."
+      placeholder: "https://imgur.com/..."
     validations:
       required: true
 
   - type: input
     id: venue_photo_url
     attributes:
-      label: Ort erkennbar – Foto/Video-Link (Schild/Eingang/Kasse)
-      placeholder: https://...
+      label: "4. Foto vom Ort"
+      description: "Foto von Schild, Eingang oder Kasse – damit der Ort eindeutig erkennbar ist."
+      placeholder: "https://imgur.com/..."
     validations:
       required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Zusätzliche Infos
 
   - type: textarea
     id: observations
     attributes:
-      label: Beobachtungen (kurz)
-      description: Was genau wurde geprüft? Gab es Besonderheiten beim Bezahlen?
-      placeholder: Zahlung an der Kasse problemlos. Hinweis "Bitcoin accepted" am Tresen.
+      label: "Wie lief die Zahlung?"
+      description: "Kurze Beschreibung: War es einfach? Gab es Probleme? Welche Wallet/App wurde genutzt?"
+      placeholder: |
+        Zahlung per Lightning an der Kasse, hat sofort funktioniert.
+        "Bitcoin accepted" Aufkleber am Eingang sichtbar.
     validations:
       required: true
 
   - type: textarea
     id: suggested_updates
     attributes:
-      label: Änderungsbedarf am Eintrag? (optional)
-      description: Öffnungszeiten/Website/Adresse/Status-Änderung etc.
-      placeholder: Öffnungszeiten laut Aushang Mo-Fr 10-19, statt 10-18.
+      label: "Änderungen am Eintrag nötig? (optional)"
+      description: "Falls du Fehler in den Daten bemerkt hast (Öffnungszeiten, Adresse, Website, etc.)"
+      placeholder: |
+        Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr (statt 10-18)
     validations:
       required: false
 
   - type: markdown
     attributes:
       value: |
-        **Auszahlung (anonym):**  
-        Bitte poste **keine** Lightning-Adresse und kein eCash-Ziel öffentlich ins Issue.  
-        Nach erfolgreichem Review (Label **approved**) bekommst du eine kurze Aufforderung, dein Auszahlungsziel privat zu senden.
+        ---
 
-  - type: markdown
-    attributes:
-      value: |
-        **Datenschutz:** Bitte schwärze persönliche Daten auf Belegen/Screenshots. Keine Personen filmen.
+        ### Auszahlung
+
+        Nach erfolgreicher Prüfung (Label **approved**) erhältst du eine Nachricht mit Anweisungen zur Auszahlung.
+
+        **Bitte poste deine Lightning-Adresse NICHT öffentlich in diesem Issue!**
+
+        Die Auszahlung erfolgt anonym per Lightning oder eCash.
+
+        ---
+
+        **Danke für deinen Beitrag zu Satoshis für Berlin!**

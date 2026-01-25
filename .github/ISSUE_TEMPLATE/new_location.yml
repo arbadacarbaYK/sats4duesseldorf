@@ -1,6 +1,6 @@
-name: Neuen Ort melden (Kauf in Bitcoin)
-description: Neuer Berliner Ort, an dem vor Ort in Bitcoin bezahlt wurde. Auszahlung erst nach 2 weiteren Bestätigungen.
-title: "Neuer Ort: <Name> – <YYYY-MM-DD>"
+name: "Neuen Ort melden"
+description: "Du hast einen neuen Bitcoin-Ort in Berlin entdeckt? Melde ihn und verdiene 21.000 Sats!"
+title: "Neuer Ort: [NAME] – [DATUM]"
 labels:
   - pending
   - new-location
@@ -9,100 +9,166 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**  
-        Neuer Ort = **21.000 sats**, Auszahlung erst wenn **2 weitere Bitcoiner** den Ort ebenfalls durch **Kauf vor Ort in Bitcoin** bestätigt haben.
+        ## Satoshis für Berlin – Neuen Ort melden
+
+        Du hast einen Ort gefunden, der Bitcoin akzeptiert, aber noch nicht in unserer Liste ist? Super!
+
+        **Bounty: 21.000 sats** – Auszahlung erfolgt, sobald **2 weitere Bitcoiner** den Ort bestätigt haben.
+
+        ---
+
+        ### So funktioniert's
+
+        1. Du meldest den neuen Ort (dieses Formular)
+        2. Zwei weitere Personen machen jeweils einen Check (Kauf vor Ort + Nachweise)
+        3. Nach insgesamt 3 bestätigten Checks wird dein Bounty freigegeben
+
+        ---
+
+        ### Angaben zum Ort
 
   - type: input
     id: name
     attributes:
-      label: Name des Ortes
-      placeholder: Café Beispiel
+      label: "Name des Ortes"
+      description: "Wie heißt das Geschäft/Restaurant/etc.?"
+      placeholder: "Café Beispiel"
     validations:
       required: true
 
   - type: input
     id: address
     attributes:
-      label: Adresse
-      placeholder: Musterstraße 1, 10115 Berlin
+      label: "Adresse"
+      description: "Vollständige Adresse mit PLZ"
+      placeholder: "Musterstraße 1, 10115 Berlin"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Kategorie"
+      description: "Was für ein Ort ist es?"
+      options:
+        - "Restaurant / Café / Bar"
+        - "Einzelhandel / Shop"
+        - "Dienstleistung"
+        - "Hotel / Unterkunft"
+        - "Sonstiges"
     validations:
       required: true
 
   - type: input
-    id: latlon
+    id: website
     attributes:
-      label: Koordinaten (optional, hilft sehr)
-      placeholder: 52.5200, 13.4050
+      label: "Website (optional)"
+      description: "Falls vorhanden"
+      placeholder: "https://www.beispiel.de"
     validations:
       required: false
 
   - type: input
     id: osm_url
     attributes:
-      label: OSM-Link (optional, falls vorhanden)
-      description: Wenn du den Ort in OpenStreetMap findest oder bereits angelegt hast.
-      placeholder: https://www.openstreetmap.org/node/...
+      label: "OpenStreetMap-Link (optional)"
+      description: "Falls der Ort bereits in OSM existiert"
+      placeholder: "https://www.openstreetmap.org/node/..."
     validations:
       required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Dein Kauf vor Ort
 
   - type: input
     id: date_time
     attributes:
-      label: Datum/Uhrzeit des Kaufs
-      placeholder: 2026-01-23 18:30
-    validations:
-      required: true
-
-  - type: input
-    id: public_post_url
-    attributes:
-      label: Öffentlicher Beweis-Post (muss "Berlin" und "Bitcoin" enthalten)
-      placeholder: https://...
-    validations:
-      required: true
-
-  - type: input
-    id: receipt_proof_url
-    attributes:
-      label: Beleg (Bon) – Link (Daten schwärzen)
-      placeholder: https://...
-    validations:
-      required: true
-
-  - type: input
-    id: payment_proof_url
-    attributes:
-      label: Bitcoin-Zahlungsnachweis – Link (Bestätigung "bezahlt", Betrag/Datum sichtbar; Daten schwärzen)
-      placeholder: https://...
-    validations:
-      required: true
-
-  - type: input
-    id: venue_photo_url
-    attributes:
-      label: Ort erkennbar – Foto/Video-Link (Schild/Eingang/Kasse)
-      placeholder: https://...
-    validations:
-      required: true
-
-  - type: textarea
-    id: notes
-    attributes:
-      label: Hinweise (kurz)
-      description: Z.B. Öffnungszeiten/Website/Wie lief das Bezahlen?
-      placeholder: Zahlung an der Kasse problemlos. Öffnungszeiten laut Aushang...
+      label: "Datum und Uhrzeit des Kaufs"
+      description: "Wann hast du dort bezahlt?"
+      placeholder: "25.01.2026, ca. 14:30"
     validations:
       required: true
 
   - type: markdown
     attributes:
       value: |
-        **Auszahlung (anonym):**  
-        Bitte poste **keine** Lightning-Adresse und kein eCash-Ziel öffentlich ins Issue.  
-        Nach erfolgreichem Review (Label **approved**) bekommst du eine Aufforderung, dein Auszahlungsziel privat zu senden.
+        ---
 
-        **Bestätigung durch 2 weitere Bitcoiner:**  
-        Bitte motiviere zwei weitere Personen, einen normalen **Check** für denselben Ort zu machen (jeweils Kauf vor Ort in Bitcoin + vollständige Nachweise).  
-        Sobald **3 gültige Checks** vorliegen (du + 2 weitere), wird das Neueintrag-Bounty freigegeben.
+        ### Nachweise hochladen
 
-        **Datenschutz:** Bitte schwärze persönliche Daten auf Belegen/Screenshots. Keine Personen filmen.
+        Lade deine Nachweise bei einem Bilderhoster hoch (z.B. [Imgur](https://imgur.com), [Imgbb](https://imgbb.com)) und füge die Links unten ein.
+
+        **Wichtig:** Schwärze persönliche Daten auf allen Bildern!
+
+  - type: input
+    id: public_post_url
+    attributes:
+      label: "1. Öffentlicher Post (Social Media)"
+      description: "Link zu deinem öffentlichen Post. Muss „Berlin" und „Bitcoin" enthalten."
+      placeholder: "https://x.com/deinname/status/..."
+    validations:
+      required: true
+
+  - type: input
+    id: receipt_proof_url
+    attributes:
+      label: "2. Kaufbeleg (Bon/Rechnung)"
+      description: "Foto vom Kassenbon oder der Rechnung."
+      placeholder: "https://imgur.com/..."
+    validations:
+      required: true
+
+  - type: input
+    id: payment_proof_url
+    attributes:
+      label: "3. Bitcoin-Zahlung"
+      description: "Screenshot der Wallet mit Bestätigung „bezahlt"."
+      placeholder: "https://imgur.com/..."
+    validations:
+      required: true
+
+  - type: input
+    id: venue_photo_url
+    attributes:
+      label: "4. Foto vom Ort"
+      description: "Foto von Schild, Eingang oder Kasse."
+      placeholder: "https://imgur.com/..."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Zusätzliche Infos
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Wie lief die Zahlung?"
+      description: "Beschreibe kurz deine Erfahrung und nenne gerne Öffnungszeiten, falls bekannt."
+      placeholder: |
+        Zahlung per Lightning an der Kasse, hat sofort funktioniert.
+        Öffnungszeiten laut Aushang: Mo-Fr 10-18 Uhr
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### Auszahlung
+
+        Nach erfolgreicher Prüfung und **2 weiteren Bestätigungen** durch andere Bitcoiner erhältst du eine Nachricht zur Auszahlung.
+
+        **Bitte poste deine Lightning-Adresse NICHT öffentlich!**
+
+        ---
+
+        **Tipp:** Teile diesen Ort mit anderen Bitcoinern, damit er schneller bestätigt wird!
