@@ -56,26 +56,42 @@ jobs:
           git diff --cached --quiet || git commit -m "Apply approved issues (v1)"
           git push
 
-      - name: Comment on approved issue (request payout info)
+      - name: Comment on approved issue
         if: github.event_name == 'issues' && github.event.label.name == 'approved'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Check if this is a new-location issue (payout held until confirmed)
+          # Get issue body and labels
+          ISSUE_BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q '.body')
           LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name' | tr '\n' ' ')
 
+          # Check if submission came via Tally (has Submission ID)
+          SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\* `\K[^`]+' || echo "")
+
           if echo "$LABELS" | grep -q "new-location"; then
+            # New location - payout held until confirmed
             gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
 
           Dein Check wurde geprüft und **approved**.
 
           **Hinweis für Neueinträge:** Die Auszahlung erfolgt erst, wenn **2 weitere Bitcoiner** den Ort durch einen eigenen Kauf bestätigt haben (insgesamt 3 gültige Checks).
 
-          Sobald die Bestätigungen vorliegen, melden wir uns bei dir für die Auszahlung.
+          Sobald die Bestätigungen vorliegen, erfolgt die Auszahlung automatisch an die von dir angegebene Adresse.
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+          elif [ -n "$SUBMISSION_ID" ]; then
+            # Submitted via Tally - contact info is stored privately
+            gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
+
+          Dein Check wurde geprüft und **approved**. Vielen Dank!
+
+          Die Auszahlung erfolgt in Kürze an die von dir im Formular angegebene Adresse.
 
           ---
           *Automatische Nachricht von sats4berlin-bot*"
           else
+            # Submitted via GitHub form - need to request payout info
             gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
 
           Dein Check wurde geprüft und **approved**. Vielen Dank!
@@ -88,7 +104,7 @@ jobs:
 
           ⚠️ **Wichtig:** Poste deine Lightning-Adresse **nicht** öffentlich in diesem Issue!
 
-          Kontakt für Auszahlung: *[wird vom Maintainer ergänzt]*
+          Kontakt für Auszahlung: satoshiinberlin@proton.me
 
           ---
           *Automatische Nachricht von sats4berlin-bot*"
