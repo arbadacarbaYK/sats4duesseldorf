@@ -16,7 +16,7 @@ body:
 
         1. Öffne die [Übersicht](https://satoshiinberlin.github.io/sats4berlin/) und suche den Ort
         2. Prüfe, ob der Bounty **verfügbar** ist (grüner Button)
-        3. Klicke auf **„Claim Bounty"** – das Formular wird automatisch ausgefüllt
+        3. Klicke auf **"Claim Bounty"** – das Formular wird automatisch ausgefüllt
 
         > **Hinweis:** Orte im Cooldown (orangener Button) können erst nach Ablauf der Frist erneut geprüft werden.
 
@@ -66,7 +66,7 @@ body:
     id: public_post_url
     attributes:
       label: "1. Öffentlicher Post (Social Media)"
-      description: "Link zu deinem öffentlichen Post mit Foto/Video. Muss die Worte „Berlin" und „Bitcoin" enthalten."
+      description: 'Link zu deinem öffentlichen Post mit Foto/Video. Muss die Worte "Berlin" und "Bitcoin" enthalten.'
       placeholder: "https://x.com/deinname/status/..."
     validations:
       required: true
@@ -84,7 +84,7 @@ body:
     id: payment_proof_url
     attributes:
       label: "3. Bitcoin-Zahlung"
-      description: "Screenshot der Wallet mit Bestätigung „bezahlt" – Betrag und Datum müssen sichtbar sein."
+      description: 'Screenshot der Wallet mit Bestätigung "bezahlt" – Betrag und Datum müssen sichtbar sein.'
       placeholder: "https://imgur.com/..."
     validations:
       required: true

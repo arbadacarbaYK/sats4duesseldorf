@@ -108,7 +108,7 @@ body:
     id: public_post_url
     attributes:
       label: "1. Öffentlicher Post (Social Media)"
-      description: "Link zu deinem öffentlichen Post. Muss „Berlin" und „Bitcoin" enthalten."
+      description: 'Link zu deinem öffentlichen Post. Muss "Berlin" und "Bitcoin" enthalten.'
       placeholder: "https://x.com/deinname/status/..."
     validations:
       required: true
@@ -126,7 +126,7 @@ body:
     id: payment_proof_url
     attributes:
       label: "3. Bitcoin-Zahlung"
-      description: "Screenshot der Wallet mit Bestätigung „bezahlt"."
+      description: 'Screenshot der Wallet mit Bestätigung "bezahlt".'
       placeholder: "https://imgur.com/..."
     validations:
       required: true
