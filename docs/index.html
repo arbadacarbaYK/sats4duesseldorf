@@ -36,6 +36,14 @@
     th.sortable.asc::after { content: " \2191"; color: var(--t); }
     th.sortable.desc::after { content: " \2193"; color: var(--t); }
 
+    /* Bounty/Cooldown status colors */
+    .status-eligible { background: #e8f5e9; }
+    .status-eligible .bounty-amount { color: #2e7d32; font-weight: 600; }
+    .status-cooldown { background: #fff3e0; }
+    .status-cooldown .bounty-amount { color: #e65100; }
+    .cooldown-active { color: #e65100; font-weight: 500; }
+    .cooldown-passed { color: #2e7d32; }
+
     .toast { position: fixed; bottom: 14px; left: 14px; padding: 10px 12px; border:1px solid var(--b); border-radius:12px; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); display:none; }
   </style>
 </head>
@@ -156,10 +164,20 @@
       `Treffer: ${view.length} / ${rows.length}`;
 
     const body = document.getElementById("body");
+    const today = new Date().toISOString().slice(0, 10);
+
     body.innerHTML = view.map(r => {
       const link = norm(r.btcmap_url) || (norm(r.osm_type) && norm(r.osm_id) ? `https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}` : "");
       const bounty = `${toInt(r.bounty_base_sats).toLocaleString("de-DE")} sats`;
       const lid = norm(r.location_id);
+
+      // Determine status for color coding
+      const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
+      const cooldownDate = norm(r.cooldown_until);
+      const hasCooldown = cooldownDate && cooldownDate >= today;
+      const statusClass = isEligible ? "status-eligible" : "status-cooldown";
+      const cooldownClass = hasCooldown ? "cooldown-active" : (cooldownDate ? "cooldown-passed" : "");
+
       return `
         <tr>
           <td>
@@ -167,9 +185,12 @@
             <span class="small">${norm(r.category) || "—"}</span>
           </td>
           <td>${addr(r) || "—"}</td>
-          <td class="nowrap">${bounty}<br><span class="small">eligible: ${norm(r.eligible_now) || "—"}</span></td>
+          <td class="nowrap ${statusClass}">
+            <span class="bounty-amount">${bounty}</span><br>
+            <span class="small">${isEligible ? "verfügbar" : "im Cooldown"}</span>
+          </td>
           <td class="nowrap">${norm(r.source_last_update) || "—"}</td>
-          <td class="nowrap">${norm(r.cooldown_until) || "—"}</td>
+          <td class="nowrap ${cooldownClass}">${cooldownDate || "—"}</td>
           <td class="mono nowrap">
             <button class="btn" style="padding:6px 8px;" data-copy="${lid}">Copy</button>
             <div style="margin-top:6px;">${lid}</div>
