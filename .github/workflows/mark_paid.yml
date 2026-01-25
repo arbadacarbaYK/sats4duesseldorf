@@ -1,0 +1,86 @@
+name: Mark check as paid
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  mark-paid:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'paid'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update paid status in CSV
+        run: |
+          python3 << 'EOF'
+          import csv
+          from pathlib import Path
+          import datetime
+
+          CHECKS = Path("data/checks_public.csv")
+          issue_number = "${{ github.event.issue.number }}"
+          check_id = f"ISSUE-{issue_number}"
+          today = datetime.date.today().isoformat()
+
+          rows, fields = [], []
+          with CHECKS.open(newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              fields = r.fieldnames
+              rows = list(r)
+
+          updated = False
+          for row in rows:
+              if row.get("check_id") == check_id:
+                  row["paid_status"] = "paid"
+                  row["paid_at"] = today
+                  updated = True
+                  print(f"Marked {check_id} as paid")
+                  break
+
+          if updated:
+              with CHECKS.open("w", newline="", encoding="utf-8") as f:
+                  w = csv.DictWriter(f, fieldnames=fields)
+                  w.writeheader()
+                  for row in rows:
+                      w.writerow(row)
+          else:
+              print(f"Check {check_id} not found in CSV")
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "sfb-bot"
+          git config user.email "sfb-bot@users.noreply.github.com"
+          git add data/checks_public.csv
+          git diff --cached --quiet || git commit -m "Mark ISSUE-${{ github.event.issue.number }} as paid"
+          git push
+
+      - name: Comment on issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "## 💰 Bounty ausgezahlt!
+
+          Die Auszahlung für diesen Check wurde verarbeitet.
+
+          Vielen Dank für deinen Beitrag zu **Satoshis für Berlin**!
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+
+      - name: Close issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue close ${{ github.event.issue.number }}

@@ -14,6 +14,7 @@ OUT_FIELDS = [
     "street","housenumber","postcode","city","lat","lon","website","opening_hours",
     "last_verified_at","verified_by_count",
     "verification_confidence","bounty_base_sats","bounty_critical_sats","bounty_new_entry_sats",
+    "new_location_status",  # empty=existing, pending=needs confirmations, confirmed=3+ checks
     "eligible_now","last_check_id","last_updated_at",
     "source_last_update","source_last_update_tag","cooldown_until","cooldown_days_left","eligible_for_check"
 ]
@@ -151,6 +152,7 @@ def main():
             "bounty_base_sats": str(bounty),
             "bounty_critical_sats": "21000",
             "bounty_new_entry_sats": "21000",
+            "new_location_status": "",  # empty for existing OSM/BTCMap locations
             "eligible_now": "yes",  # initial, will be updated by cooldown script
             "last_check_id": "",
             "last_updated_at": TODAY,

@@ -2,14 +2,20 @@ name: Apply approved issues to CSV (v1)
 
 on:
   workflow_dispatch:
+  issues:
+    types: [labeled]
 
 permissions:
   contents: write
-  issues: read
+  issues: write
 
 jobs:
   apply:
     runs-on: ubuntu-latest
+    # Run on manual trigger OR when "approved" label is added
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && github.event.label.name == 'approved')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,3 +55,41 @@ jobs:
           git add data/locations.csv data/checks_public.csv
           git diff --cached --quiet || git commit -m "Apply approved issues (v1)"
           git push
+
+      - name: Comment on approved issue (request payout info)
+        if: github.event_name == 'issues' && github.event.label.name == 'approved'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if this is a new-location issue (payout held until confirmed)
+          LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name' | tr '\n' ' ')
+
+          if echo "$LABELS" | grep -q "new-location"; then
+            gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
+
+          Dein Check wurde geprüft und **approved**.
+
+          **Hinweis für Neueinträge:** Die Auszahlung erfolgt erst, wenn **2 weitere Bitcoiner** den Ort durch einen eigenen Kauf bestätigt haben (insgesamt 3 gültige Checks).
+
+          Sobald die Bestätigungen vorliegen, melden wir uns bei dir für die Auszahlung.
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
+
+          Dein Check wurde geprüft und **approved**. Vielen Dank!
+
+          ### Nächster Schritt: Auszahlungsziel mitteilen
+
+          Bitte sende uns dein Auszahlungsziel **privat** per E-Mail oder Direktnachricht:
+          - **Lightning-Adresse** (z.B. name@wallet.com)
+          - oder **eCash-Token-Anfrage**
+
+          ⚠️ **Wichtig:** Poste deine Lightning-Adresse **nicht** öffentlich in diesem Issue!
+
+          Kontakt für Auszahlung: *[wird vom Maintainer ergänzt]*
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+          fi

@@ -6,8 +6,15 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**  
+        **Satoshis für Berlin – die Millionenchallenge (1.000.000 sats Gesamtbounty)**
         Bounty nur bei Kauf vor Ort **in Bitcoin** und vollständigen Nachweisen.
+
+        **Vor dem Einreichen prüfen:**
+        1. Öffne [die Übersicht](https://satoshiinberlin.github.io/sats4berlin/) und suche den Ort
+        2. Prüfe die Spalte **„Bounty"** – steht dort **„verfügbar"** (grün)?
+        3. Wenn **„im Cooldown"** (orange): Warte bis zum Datum in der Spalte „Cooldown bis"
+
+        Checks für Orte im Cooldown werden **nicht** ausbezahlt.
 
   - type: input
     id: location_id

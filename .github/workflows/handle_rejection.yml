@@ -1,0 +1,131 @@
+name: Handle rejected checks
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  handle-rejection:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'rejected'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine rejection reason
+        id: reason
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get all labels on the issue
+          LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name' | tr '\n' ' ')
+
+          # Check for specific rejection reason labels
+          if echo "$LABELS" | grep -q "reject:cooldown"; then
+            echo "reason=Der Ort befindet sich noch im **Cooldown** (90 Tage seit dem letzten gültigen Check). Bitte prüfe auf der [Übersichtsseite](https://satoshiinberlin.github.io/sats4berlin/), wann der nächste Check möglich ist." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:proof-missing"; then
+            echo "reason=**Nachweise unvollständig.** Bitte stelle sicher, dass alle vier Nachweise (Bon, Bitcoin-Zahlung, Ort erkennbar, öffentlicher Post) vorhanden und gültig sind." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:proof-invalid"; then
+            echo "reason=**Nachweise nicht akzeptiert.** Die eingereichten Belege konnten nicht verifiziert werden oder entsprechen nicht den Anforderungen." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:no-bitcoin-payment"; then
+            echo "reason=**Keine Bitcoin-Zahlung erkennbar.** Der Nachweis zeigt keine eindeutige Bitcoin-Transaktion (Lightning/On-Chain)." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:wrong-location"; then
+            echo "reason=**Falscher Ort.** Die Location-ID stimmt nicht mit dem besuchten Ort überein oder der Ort liegt nicht in Berlin." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:duplicate"; then
+            echo "reason=**Duplikat.** Für diesen Ort wurde bereits ein Check im aktuellen Zeitraum eingereicht." >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "reject:old-proof"; then
+            echo "reason=**Veraltete Nachweise.** Die Belege sind nicht aktuell oder das Datum ist nicht eindeutig erkennbar." >> $GITHUB_OUTPUT
+          else
+            echo "reason=Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Record rejection in CSV
+        run: |
+          python3 << 'EOF'
+          import csv
+          from pathlib import Path
+          import datetime
+
+          CHECKS = Path("data/checks_public.csv")
+          issue_number = "${{ github.event.issue.number }}"
+          check_id = f"ISSUE-{issue_number}"
+          today = datetime.date.today().isoformat()
+          reason = """${{ steps.reason.outputs.reason }}"""
+
+          # Check if entry already exists
+          rows, fields = [], []
+          if CHECKS.exists():
+              with CHECKS.open(newline="", encoding="utf-8") as f:
+                  r = csv.DictReader(f)
+                  fields = r.fieldnames or []
+                  rows = list(r)
+
+          existing = {r.get("check_id") for r in rows}
+          if check_id in existing:
+              # Update existing entry
+              for row in rows:
+                  if row.get("check_id") == check_id:
+                      row["review_status"] = "rejected"
+                      row["reviewed_at"] = today
+                      row["rejection_reason_public"] = reason[:200]
+                      print(f"Updated {check_id} as rejected")
+                      break
+          else:
+              # Entry doesn't exist yet, create minimal record
+              if fields:
+                  new_row = {f: "" for f in fields}
+                  new_row["check_id"] = check_id
+                  new_row["review_status"] = "rejected"
+                  new_row["reviewed_at"] = today
+                  new_row["rejection_reason_public"] = reason[:200]
+                  rows.append(new_row)
+                  print(f"Created rejected entry for {check_id}")
+
+          if fields:
+              with CHECKS.open("w", newline="", encoding="utf-8") as f:
+                  w = csv.DictWriter(f, fieldnames=fields)
+                  w.writeheader()
+                  for row in rows:
+                      w.writerow(row)
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "sfb-bot"
+          git config user.email "sfb-bot@users.noreply.github.com"
+          git add data/checks_public.csv
+          git diff --cached --quiet || git commit -m "Record rejection for ISSUE-${{ github.event.issue.number }}"
+          git push
+
+      - name: Comment on issue with rejection reason
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "## ❌ Check nicht akzeptiert
+
+          ${{ steps.reason.outputs.reason }}
+
+          ---
+
+          **Was nun?**
+          - Prüfe die Ablehnungsgründe und die [Regeln](https://github.com/${{ github.repository }}/blob/main/RULES.md)
+          - Bei Fragen oder wenn du glaubst, dass ein Fehler vorliegt, kommentiere dieses Issue
+          - Du kannst einen neuen Check einreichen, sobald die Voraussetzungen erfüllt sind
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+
+      - name: Close issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue close ${{ github.event.issue.number }}
