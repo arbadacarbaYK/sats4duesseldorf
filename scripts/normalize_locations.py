@@ -50,6 +50,35 @@ def normalize_url(row, osm_type, osm_id):
         return f"https://www.openstreetmap.org/{osm_type}/{osm_id}"
     return ""
 
+def parse_date(value: str):
+    """Parse date string, return (date_str, is_valid)."""
+    if not value:
+        return "", False
+    s = value.strip()[:10]  # Take YYYY-MM-DD part
+    try:
+        datetime.date.fromisoformat(s)
+        return s, True
+    except ValueError:
+        return "", False
+
+def get_source_last_update(row):
+    """Get the most recent check/survey date and which tag it came from."""
+    check_date, check_valid = parse_date(get(row, "check_date", default=""))
+    survey_date, survey_valid = parse_date(get(row, "survey:date", default=""))
+
+    if check_valid and survey_valid:
+        # Return the more recent one
+        if check_date >= survey_date:
+            return check_date, "check_date"
+        else:
+            return survey_date, "survey:date"
+    elif check_valid:
+        return check_date, "check_date"
+    elif survey_valid:
+        return survey_date, "survey:date"
+    else:
+        return "", ""
+
 def main():
     if not RAW.exists():
         raise SystemExit(f"Missing {RAW}")
@@ -76,6 +105,7 @@ def main():
         osm_id   = str(get(r, "osm_id", "id", default="")).strip()
 
         location_id = f"DE-BE-{idx:05d}"
+        source_date, source_tag = get_source_last_update(r)
 
         out_rows.append({
             "location_id": location_id,
@@ -95,17 +125,16 @@ def main():
             "bitcoin_payment_status": normalize_bitcoin_status(r),
             "status_note_public": "",
             "last_verified_at": "",
-            "cooldown_until": "",
             "verified_by_count": "0",
             "verification_confidence": "low",
             "bounty_base_sats": "10000",
             "bounty_critical_sats": "21000",
             "bounty_new_entry_sats": "21000",
-            "eligible_now": "yes",  # initial: ja (weil noch keine Checks eingetragen)
+            "eligible_now": "yes",  # initial, will be updated by cooldown script
             "last_check_id": "",
             "last_updated_at": TODAY,
-            "source_last_update": "",
-            "source_last_update_tag": "",
+            "source_last_update": source_date,
+            "source_last_update_tag": source_tag,
             "cooldown_until": "",
             "cooldown_days_left": "0",
             "eligible_for_check": "yes",
