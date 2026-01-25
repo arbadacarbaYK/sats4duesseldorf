@@ -148,7 +148,8 @@ def extract_row(element: dict) -> dict:
         "website": tags.get("website", ""),
         "phone": tags.get("phone", ""),
         "survey:date": tags.get("survey:date", ""),
-        "check_date": tags.get("check_date", ""),
+        # OSM uses check_date:currency:XBT for Bitcoin-specific verification
+        "check_date": tags.get("check_date:currency:XBT", "") or tags.get("check_date", ""),
         "osm_type": osm_type,
         "osm_id": osm_id,
         "osm_url": f"https://www.openstreetmap.org/{osm_type}/{osm_id}" if osm_type and osm_id else "",
