@@ -144,7 +144,7 @@
     const cmp = {
       bounty_desc: (a,b)=> toInt(b.bounty_base_sats) - toInt(a.bounty_base_sats),
       bounty_asc:  (a,b)=> toInt(a.bounty_base_sats) - toInt(b.bounty_base_sats),
-      last_verified_desc: (a,b)=> norm(b.last_verified_at).localeCompare(norm(a.last_verified_at)),
+      last_verified_desc: (a,b)=> norm(b.source_last_update).localeCompare(norm(a.source_last_update)),
       name_asc: (a,b)=> norm(a.name).localeCompare(norm(b.name)),
     }[sort] || ((a,b)=>0);
 
@@ -167,7 +167,7 @@
           <td>${addr(r) || "—"}</td>
           <td class="nowrap">${statusBadge(r.bitcoin_payment_status)}</td>
           <td class="nowrap">${bounty}<br><span class="small">eligible: ${norm(r.eligible_now) || "—"}</span></td>
-          <td class="nowrap">${norm(r.last_verified_at) || "—"}</td>
+          <td class="nowrap">${norm(r.source_last_update) || "—"}</td>
           <td class="nowrap">${norm(r.cooldown_until) || "—"}</td>
           <td class="mono nowrap">
             <button class="btn" style="padding:6px 8px;" data-copy="${lid}">Copy</button>
