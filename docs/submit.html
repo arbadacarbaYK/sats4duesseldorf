@@ -675,6 +675,14 @@
 
         // Build content safely without innerHTML
         statusEl.textContent = '';
+
+        // Add celebration GIF
+        const gif = document.createElement('img');
+        gif.src = 'https://media.giphy.com/media/lQh95VIYba5yba2H08/giphy.gif';
+        gif.alt = 'Bitcoin celebration';
+        gif.style.cssText = 'width: 120px; height: auto; display: block; margin: 0 auto 12px; border-radius: 8px;';
+        statusEl.appendChild(gif);
+
         const strong = document.createElement('strong');
         strong.textContent = '✓ Erfolgreich eingereicht!';
         statusEl.appendChild(strong);
