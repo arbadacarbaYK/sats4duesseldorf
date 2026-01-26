@@ -26,6 +26,7 @@ usage() {
     echo "  calc <issue_number>     Calculate payout amount for an issue"
     echo "  get <submission_id>     Get contact info for a submission"
     echo "  paid <submission_id>    Mark a submission as paid"
+    echo "  btcmap <location_id> [issue]  Generate BTCMap verification link"
     echo "  list-pending            List pending payouts from checks_public.csv"
     echo ""
     echo "Environment variables:"
@@ -36,7 +37,8 @@ usage() {
     echo "  2. $0 get SUB-XXXXX        # Get contact info"
     echo "  3. Send the payment"
     echo "  4. $0 paid SUB-XXXXX       # Mark as paid"
-    echo "  5. Add 'paid' label and close the issue"
+    echo "  5. $0 btcmap DE-BE-00042 42  # Get BTCMap verification link"
+    echo "  6. Submit BTCMap verification, add 'paid' label, close issue"
     exit 1
 }
 
@@ -162,11 +164,26 @@ calc_payout() {
     python3 "$SCRIPT_DIR/calculate_payout.py" "$issue_number"
 }
 
+btcmap_link() {
+    local location_id="$1"
+    local issue_number="${2:-}"
+
+    if [ -n "$issue_number" ]; then
+        python3 "$SCRIPT_DIR/generate_btcmap_link.py" "$location_id" --issue "$issue_number"
+    else
+        python3 "$SCRIPT_DIR/generate_btcmap_link.py" "$location_id"
+    fi
+}
+
 # Main
 case "${1:-}" in
     calc)
         [ -z "${2:-}" ] && usage
         calc_payout "$2"
+        ;;
+    btcmap)
+        [ -z "${2:-}" ] && usage
+        btcmap_link "$2" "${3:-}"
         ;;
     get)
         [ -z "${2:-}" ] && usage

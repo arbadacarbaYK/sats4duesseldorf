@@ -68,6 +68,43 @@ jobs:
           # Check if submission came via web form (has Submission ID)
           SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\* `\K[^`]+' || echo "")
 
+          # Extract Location-ID from issue body
+          LOCATION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Location-ID:\*\*\s*`\K[^`]+' || \
+                        echo "$ISSUE_BODY" | grep -oP 'Location-ID\s*\n+\K[A-Z]{2}-[A-Z]{2}-\d+' || echo "")
+
+          # Look up OSM info from locations.csv
+          BTCMAP_LINK=""
+          OSM_LINK=""
+          if [ -n "$LOCATION_ID" ] && [ -f "data/locations.csv" ]; then
+            OSM_INFO=$(grep "^$LOCATION_ID," data/locations.csv | head -1)
+            if [ -n "$OSM_INFO" ]; then
+              OSM_TYPE=$(echo "$OSM_INFO" | cut -d',' -f2)
+              OSM_ID=$(echo "$OSM_INFO" | cut -d',' -f3)
+              if [ -n "$OSM_TYPE" ] && [ -n "$OSM_ID" ]; then
+                BTCMAP_LINK="https://btcmap.org/verify-location?id=${OSM_TYPE}:${OSM_ID}"
+                OSM_LINK="https://www.openstreetmap.org/${OSM_TYPE}/${OSM_ID}"
+              fi
+            fi
+          fi
+
+          # Build BTCMap section for maintainer comment
+          BTCMAP_SECTION=""
+          if [ -n "$BTCMAP_LINK" ]; then
+            ISSUE_URL="https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}"
+            BTCMAP_SECTION="
+
+          ---
+
+          ### 🗺️ BTCMap aktualisieren
+
+          Bitte aktualisiere BTCMap mit diesem Check:
+          1. **[BTCMap Verification öffnen](${BTCMAP_LINK})**
+          2. Im Feld \"Additional notes\" diesen Issue-Link einfügen: \`${ISSUE_URL}\`
+          3. Formular absenden
+
+          [OSM-Eintrag ansehen](${OSM_LINK})"
+          fi
+
           if echo "$LABELS" | grep -q "new-location"; then
             # New location - payout held until confirmed
             gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
@@ -77,6 +114,7 @@ jobs:
           **Hinweis für Neueinträge:** Die Auszahlung erfolgt erst, wenn **2 weitere Bitcoiner** den Ort durch einen eigenen Kauf bestätigt haben (insgesamt 3 gültige Checks).
 
           Sobald die Bestätigungen vorliegen, erfolgt die Auszahlung automatisch an die von dir angegebene Adresse.
+          ${BTCMAP_SECTION}
 
           ---
           *Automatische Nachricht von sats4berlin-bot*"
@@ -87,6 +125,7 @@ jobs:
           Dein Check wurde geprüft und **approved**. Vielen Dank!
 
           Die Auszahlung erfolgt in Kürze an die von dir im Formular angegebene Adresse.
+          ${BTCMAP_SECTION}
 
           ---
           *Automatische Nachricht von sats4berlin-bot*"
@@ -105,6 +144,7 @@ jobs:
           ⚠️ **Wichtig:** Poste deine Lightning-Adresse **nicht** öffentlich in diesem Issue!
 
           Kontakt für Auszahlung: satoshiinberlin@proton.me
+          ${BTCMAP_SECTION}
 
           ---
           *Automatische Nachricht von sats4berlin-bot*"
