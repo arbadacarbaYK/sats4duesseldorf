@@ -79,11 +79,6 @@ export default {
       return new Response('Not found', { status: 404 });
     }
 
-    // Only accept POST requests for webhook
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
-    }
-
     // CORS headers for the response
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*', // Will be overwritten if origin is allowed
@@ -91,9 +86,14 @@ export default {
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
-    // Handle CORS preflight
+    // Handle CORS preflight - must be before POST check!
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    // Only accept POST requests for webhook
+    if (request.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405 });
     }
 
     // CSRF protection: Validate Origin header
