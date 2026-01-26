@@ -6,8 +6,10 @@ Queries OSM directly for the most up-to-date check_date and survey:date values.
 """
 import csv
 import json
+import time
 import urllib.request
 import urllib.parse
+import urllib.error
 from pathlib import Path
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
@@ -57,8 +59,8 @@ FIELDNAMES = [
 
 
 def fetch_from_overpass() -> list[dict]:
-    """Fetch Bitcoin locations from OSM via Overpass API."""
-    print(f"Fetching from Overpass API...")
+    """Fetch Bitcoin locations from OSM via Overpass API with retry logic."""
+    print("Fetching from Overpass API...")
 
     data = urllib.parse.urlencode({"data": OVERPASS_QUERY}).encode("utf-8")
     req = urllib.request.Request(
@@ -67,12 +69,32 @@ def fetch_from_overpass() -> list[dict]:
         headers={"User-Agent": "sats4berlin/1.0 (https://github.com/satoshiinberlin/sats4berlin)"},
     )
 
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
 
-    elements = result.get("elements", [])
-    print(f"Fetched {len(elements)} Bitcoin-accepting elements from OSM.")
-    return elements
+            elements = result.get("elements", [])
+            print(f"Fetched {len(elements)} Bitcoin-accepting elements from OSM.")
+            return elements
+
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 502, 503, 504) and attempt < max_retries - 1:
+                wait_time = (attempt + 1) * 30  # 30s, 60s, 90s
+                print(f"API error {e.code}, retrying in {wait_time}s... (attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                raise
+        except urllib.error.URLError as e:
+            if attempt < max_retries - 1:
+                wait_time = (attempt + 1) * 30
+                print(f"Network error: {e}, retrying in {wait_time}s... (attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                raise
+
+    return []  # Should not reach here
 
 
 def extract_row(element: dict) -> dict:
