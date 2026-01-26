@@ -30,13 +30,16 @@ jobs:
         run: |
           python3 << 'EOF'
           import csv
+          import json
           from pathlib import Path
           import datetime
 
           CHECKS = Path("data/checks_public.csv")
+          BUDGET = Path("data/budget.json")
           issue_number = "${{ github.event.issue.number }}"
           check_id = f"ISSUE-{issue_number}"
           today = datetime.date.today().isoformat()
+          now = datetime.datetime.utcnow().isoformat() + "Z"
 
           rows, fields = [], []
           with CHECKS.open(newline="", encoding="utf-8") as f:
@@ -59,6 +62,29 @@ jobs:
                   w.writeheader()
                   for row in rows:
                       w.writerow(row)
+
+              # Recalculate budget from all paid checks
+              total_paid = 0
+              paid_count = 0
+              for row in rows:
+                  if row.get("paid_status") == "paid":
+                      try:
+                          total_paid += int(row.get("final_bounty_sats", 0) or 0)
+                          paid_count += 1
+                      except ValueError:
+                          pass
+
+              total_budget = 1000000
+              budget_data = {
+                  "total_budget_sats": total_budget,
+                  "total_paid_sats": total_paid,
+                  "remaining_sats": total_budget - total_paid,
+                  "paid_count": paid_count,
+                  "last_updated": now
+              }
+              with BUDGET.open("w", encoding="utf-8") as f:
+                  json.dump(budget_data, f, indent=2)
+              print(f"Budget updated: {total_paid} paid, {total_budget - total_paid} remaining")
           else:
               print(f"Check {check_id} not found in CSV")
           EOF
@@ -67,7 +93,7 @@ jobs:
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/checks_public.csv
+          git add data/checks_public.csv data/budget.json
           git diff --cached --quiet || git commit -m "Mark ISSUE-${{ github.event.issue.number }} as paid"
           git push
 

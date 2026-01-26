@@ -490,8 +490,8 @@
         <div class="stat-label">Gesamtbounty (sats)</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="statAvailable">–</div>
-        <div class="stat-label">Auszahlbar (sats)</div>
+        <div class="stat-value" id="statRemaining">–</div>
+        <div class="stat-label">Verbleibendes Budget</div>
       </div>
       <div class="stat">
         <div class="stat-value" id="statLocations">–</div>
@@ -586,11 +586,25 @@
 
   function updateStats() {
     const eligible = rows.filter(r => norm(r.eligible_now).toLowerCase() === "yes");
-    const availableSats = eligible.reduce((sum, r) => sum + toInt(r.bounty_base_sats), 0);
 
     document.getElementById("statLocations").textContent = rows.length.toLocaleString("de-DE");
     document.getElementById("statEligible").textContent = eligible.length.toLocaleString("de-DE");
-    document.getElementById("statAvailable").textContent = availableSats.toLocaleString("de-DE");
+  }
+
+  // Load budget data and update remaining budget display
+  async function loadBudget() {
+    try {
+      const resp = await fetch("data/budget.json");
+      if (resp.ok) {
+        const budget = await resp.json();
+        document.getElementById("statRemaining").textContent =
+          budget.remaining_sats.toLocaleString("de-DE");
+      }
+    } catch (e) {
+      console.error("Failed to load budget:", e);
+      // Fallback: show total budget if budget.json not available
+      document.getElementById("statRemaining").textContent = "1.000.000";
+    }
   }
 
   function updateSortIndicators() {
@@ -731,6 +745,9 @@
         '<tr><td colspan="5" class="empty">Laden dauert länger als erwartet. Bitte Seite neu laden.</td></tr>';
     }
   }, 15000); // 15 second timeout
+
+  // Load budget data
+  loadBudget();
 
   Papa.parse("data/locations.csv", {
     download: true,

@@ -26,6 +26,8 @@ jobs:
       - name: Copy data to Pages folder
         run: |
           cp -f data/locations.csv docs/data/locations.csv
+          # Budget tracking
+          if [ -f data/budget.json ]; then cp -f data/budget.json docs/data/budget.json; fi
           # optional: checks.csv für öffentliche Transparenz
           if [ -f data/checks_public.csv ]; then cp -f data/checks_public.csv docs/data/checks_public.csv; fi
           # optional: participants.csv (würde ich eher NICHT öffentlich machen)
@@ -35,6 +37,6 @@ jobs:
         run: |
           git config user.name "pages-data-bot"
           git config user.email "pages-data-bot@users.noreply.github.com"
-          git add docs/data/locations.csv docs/data/checks_public.csv || true
+          git add docs/data/locations.csv docs/data/checks_public.csv docs/data/budget.json || true
           git diff --cached --quiet || git commit -m "Publish data to GitHub Pages"
           git push
