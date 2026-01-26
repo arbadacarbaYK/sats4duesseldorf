@@ -961,53 +961,58 @@
   }
 
   // Check type toggle - show different fields for normal vs critical checks
-  const checkTypeSelect = document.getElementById('check-type-select');
-  const normalFields = document.getElementById('normal-check-fields');
-  const criticalFields = document.getElementById('critical-check-fields');
-  const observationsLabel = document.getElementById('observations-label');
-  const observationsInput = document.getElementById('observations-input');
+  // Wrapped in try-catch to prevent breaking form submission if something goes wrong
+  try {
+    const checkTypeSelect = document.getElementById('check-type-select');
+    const normalFields = document.getElementById('normal-check-fields');
+    const criticalFields = document.getElementById('critical-check-fields');
+    const observationsLabel = document.getElementById('observations-label');
+    const observationsInput = document.getElementById('observations-input');
 
-  if (checkTypeSelect && normalFields && criticalFields) {
-    checkTypeSelect.addEventListener('change', () => {
-      const isCritical = checkTypeSelect.value === 'critical';
+    if (checkTypeSelect && normalFields && criticalFields) {
+      checkTypeSelect.addEventListener('change', () => {
+        const isCritical = checkTypeSelect.value === 'critical';
 
-      if (isCritical) {
-        // Show critical fields, hide normal fields
-        normalFields.style.display = 'none';
-        criticalFields.style.display = 'block';
+        if (isCritical) {
+          // Show critical fields, hide normal fields
+          normalFields.style.display = 'none';
+          criticalFields.style.display = 'block';
 
-        // Remove required from normal fields
-        normalFields.querySelectorAll('input[required]').forEach(input => {
-          input.removeAttribute('required');
-          input.dataset.wasRequired = 'true';
-        });
+          // Remove required from normal fields
+          normalFields.querySelectorAll('input[required]').forEach(input => {
+            input.removeAttribute('required');
+            input.dataset.wasRequired = 'true';
+          });
 
-        // Add required to critical evidence field
-        const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
-        if (evidenceInput) evidenceInput.required = true;
+          // Add required to critical evidence field
+          const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
+          if (evidenceInput) evidenceInput.required = true;
 
-        // Update observations label and placeholder
-        if (observationsLabel) observationsLabel.innerHTML = 'Was ist passiert? <span class="required">*</span>';
-        if (observationsInput) observationsInput.placeholder = 'Wollte mit Bitcoin zahlen, aber Mitarbeiter sagte, sie akzeptieren das nicht mehr...';
-      } else {
-        // Show normal fields, hide critical fields
-        normalFields.style.display = 'block';
-        criticalFields.style.display = 'none';
+          // Update observations label and placeholder
+          if (observationsLabel) observationsLabel.innerHTML = 'Was ist passiert? <span class="required">*</span>';
+          if (observationsInput) observationsInput.placeholder = 'Wollte mit Bitcoin zahlen, aber Mitarbeiter sagte, sie akzeptieren das nicht mehr...';
+        } else {
+          // Show normal fields, hide critical fields
+          normalFields.style.display = 'block';
+          criticalFields.style.display = 'none';
 
-        // Restore required on normal fields
-        normalFields.querySelectorAll('input[data-was-required="true"]').forEach(input => {
-          input.required = true;
-        });
+          // Restore required on normal fields
+          normalFields.querySelectorAll('input[data-was-required="true"]').forEach(input => {
+            input.required = true;
+          });
 
-        // Remove required from critical evidence field
-        const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
-        if (evidenceInput) evidenceInput.required = false;
+          // Remove required from critical evidence field
+          const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
+          if (evidenceInput) evidenceInput.required = false;
 
-        // Restore observations label and placeholder
-        if (observationsLabel) observationsLabel.innerHTML = 'Wie lief die Zahlung? <span class="required">*</span>';
-        if (observationsInput) observationsInput.placeholder = 'Zahlung per Lightning an der Kasse, hat sofort funktioniert...';
-      }
-    });
+          // Restore observations label and placeholder
+          if (observationsLabel) observationsLabel.innerHTML = 'Wie lief die Zahlung? <span class="required">*</span>';
+          if (observationsInput) observationsInput.placeholder = 'Zahlung per Lightning an der Kasse, hat sofort funktioniert...';
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Check type toggle failed to initialize:', e);
   }
 </script>
 
