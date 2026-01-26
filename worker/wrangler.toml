@@ -1,5 +1,5 @@
 # Cloudflare Worker configuration for sats4berlin
-# Handles Tally form submissions and creates GitHub issues
+# Handles form submissions and creates GitHub issues
 
 account_id = "8cd2d3ffa09d1c77200b90ebbf5b1803"
 name = "sats4berlin-form-handler"

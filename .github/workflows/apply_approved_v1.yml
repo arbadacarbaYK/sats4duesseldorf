@@ -65,7 +65,7 @@ jobs:
           ISSUE_BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q '.body')
           LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name' | tr '\n' ' ')
 
-          # Check if submission came via Tally (has Submission ID)
+          # Check if submission came via web form (has Submission ID)
           SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\* `\K[^`]+' || echo "")
 
           if echo "$LABELS" | grep -q "new-location"; then
@@ -81,7 +81,7 @@ jobs:
           ---
           *Automatische Nachricht von sats4berlin-bot*"
           elif [ -n "$SUBMISSION_ID" ]; then
-            # Submitted via Tally - contact info is stored privately
+            # Submitted via web form - contact info is stored privately
             gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
 
           Dein Check wurde geprüft und **approved**. Vielen Dank!

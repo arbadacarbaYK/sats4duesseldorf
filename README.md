@@ -4,7 +4,7 @@
 
 Echte Bitcoin-Zahlungen vor Ort belegen, BTCMap aktuell halten, Sats verdienen.
 
-**[Zur Übersicht](https://satoshiinberlin.github.io/sats4berlin/)** | **[Check einreichen](https://github.com/satoshiinberlin/sats4berlin/issues/new/choose)** | **[Regeln](RULES.md)**
+**[Zur Übersicht](https://satoshiinberlin.github.io/sats4berlin/)** | **[Check einreichen](https://satoshiinberlin.github.io/sats4berlin/submit.html)** | **[Regeln](RULES.md)**
 
 ---
 
@@ -18,7 +18,7 @@ BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll.
 2. **Ort wählen:** Suche einen Ort mit Status „verfügbar" (grün)
 3. **Vor Ort kaufen:** Bezahle in Bitcoin (Lightning oder On-Chain)
 4. **Nachweise sammeln:** Bon, Zahlungsbestätigung, Foto vom Ort, öffentlicher Post
-5. **Check einreichen:** [Neues Issue erstellen](https://github.com/satoshiinberlin/sats4berlin/issues/new/choose)
+5. **Check einreichen:** [Formular ausfüllen](https://satoshiinberlin.github.io/sats4berlin/submit.html)
 6. **Sats kassieren:** Nach Prüfung wird der Bounty ausgezahlt
 
 ## Wer kann mitmachen?
@@ -90,7 +90,7 @@ Ein Ort kann frühestens **3 Monate** nach dem letzten gültigen Check erneut ge
 ## Links
 
 - **Übersicht:** https://satoshiinberlin.github.io/sats4berlin/
-- **Check einreichen:** [Issue erstellen](https://github.com/satoshiinberlin/sats4berlin/issues/new/choose)
+- **Check einreichen:** [Formular](https://satoshiinberlin.github.io/sats4berlin/submit.html)
 - **Vollständige Regeln:** [RULES.md](RULES.md)
 - **Rohdaten:** [locations.csv](https://satoshiinberlin.github.io/sats4berlin/data/locations.csv)
 

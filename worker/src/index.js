@@ -1,13 +1,13 @@
 /**
  * sats4berlin Form Handler
  *
- * Receives Tally form submissions, creates GitHub issues with public data,
+ * Receives form submissions, creates GitHub issues with public data,
  * and stores private contact information in Cloudflare KV.
  */
 
 import { handleAdminRequest } from './admin.js';
 
-// Field mappings from Tally form IDs to our internal names
+// Field mappings from form field names to our internal names
 const FIELD_MAPPING = {
   // Check submission fields
   'location_id': 'location_id',
@@ -65,11 +65,11 @@ export default {
     }
 
     try {
-      // Parse the Tally webhook payload
+      // Parse the webhook payload
       const payload = await request.json();
 
-      // Extract form data from Tally's format
-      const formData = extractTallyFields(payload);
+      // Extract form data from the payload
+      const formData = extractFormFields(payload);
 
       if (!formData || Object.keys(formData).length === 0) {
         return new Response(JSON.stringify({ error: 'No form data found' }), {
@@ -156,13 +156,14 @@ export default {
 };
 
 /**
- * Extract fields from Tally webhook payload
+ * Extract fields from form webhook payload
+ * Supports multiple formats: flat object, fields array, or nested data object
  */
-function extractTallyFields(payload) {
+function extractFormFields(payload) {
   const formData = {};
 
-  // Tally sends data in different formats depending on the webhook version
-  // Handle both the fields array format and the flat format
+  // Handle different payload formats
+  // Support both the fields array format and the flat format
 
   if (payload.data && payload.data.fields) {
     // Array format: { data: { fields: [{ key: 'field_id', value: 'xxx' }, ...] } }
@@ -327,7 +328,7 @@ ${data.suggested_updates || '_keine Angabe_'}
 
 ---
 
-_Eingereicht via Tally-Formular. Kontaktdaten wurden separat gespeichert._
+_Eingereicht via Webformular. Kontaktdaten wurden separat gespeichert._
 `;
 }
 
@@ -396,6 +397,6 @@ ${data.notes || '_keine Angabe_'}
 
 ---
 
-_Eingereicht via Tally-Formular. Kontaktdaten wurden separat gespeichert._
+_Eingereicht via Webformular. Kontaktdaten wurden separat gespeichert._
 `;
 }
