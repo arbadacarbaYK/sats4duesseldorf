@@ -7,217 +7,134 @@
   <style>
     :root {
       --btc-orange: #F7931A;
-      --btc-dark: #1a1a2e;
-      --btc-darker: #0f0f1a;
+      --btc-orange-dark: #e8850f;
+      --bg-dark: #0f0f1a;
+      --bg-card: #1a1a2e;
+      --bg-input: #0f0f1a;
+      --border-color: #2d2d44;
+      --text-primary: #e0e0e0;
+      --text-secondary: #888;
+      --text-muted: #666;
       --success-green: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.1);
       --error-red: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.1);
+      --radius: 8px;
+      --radius-lg: 12px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: var(--btc-darker);
-      color: #e0e0e0;
-      line-height: 1.6;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.5;
       min-height: 100vh;
     }
 
-    .container {
+    a { color: var(--btc-orange); }
+    a:hover { color: var(--btc-orange-dark); }
+
+    /* Header */
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px;
+    }
+
+    .header-content {
       max-width: 640px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
     }
 
-    header h1 {
-      color: var(--btc-orange);
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    header p {
-      color: #888;
-      font-size: 0.95rem;
-    }
-
-    .form-card {
-      background: var(--btc-dark);
-      border-radius: 12px;
-      padding: 2rem;
-      border: 1px solid #333;
-    }
-
-    .section-title {
-      color: var(--btc-orange);
-      font-size: 1.1rem;
-      margin: 1.5rem 0 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #333;
-    }
-
-    .section-title:first-of-type {
-      margin-top: 0;
-    }
-
-    .field {
-      margin-bottom: 1.25rem;
-    }
-
-    label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 0.4rem;
-      color: #ccc;
-    }
-
-    label .required {
-      color: var(--btc-orange);
-    }
-
-    .field-hint {
-      font-size: 0.85rem;
-      color: #777;
-      margin-bottom: 0.4rem;
-    }
-
-    input[type="text"],
-    input[type="url"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background: var(--btc-darker);
-      color: #e0e0e0;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      outline: none;
-      border-color: var(--btc-orange);
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: #555;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    select {
-      cursor: pointer;
-    }
-
-    .privacy-notice {
-      background: rgba(247, 147, 26, 0.1);
-      border: 1px solid rgba(247, 147, 26, 0.3);
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1.5rem 0;
-      font-size: 0.9rem;
-    }
-
-    .privacy-notice strong {
-      color: var(--btc-orange);
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 1rem;
+    .header h1 .btc-icon {
+      width: 32px;
+      height: 32px;
       background: var(--btc-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
       color: #000;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 1rem;
     }
 
-    button[type="submit"]:hover {
-      background: #e8850f;
-    }
-
-    button[type="submit"]:active {
-      transform: scale(0.98);
-    }
-
-    button[type="submit"]:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
-    .status-message {
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      display: none;
-    }
-
-    .status-message.success {
-      display: block;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid var(--success-green);
-      color: var(--success-green);
-    }
-
-    .status-message.error {
-      display: block;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--error-red);
-      color: var(--error-red);
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 1.5rem;
-      color: var(--btc-orange);
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
       text-decoration: none;
+      color: var(--text-primary);
+      background: var(--bg-dark);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
 
-    .back-link:hover {
-      text-decoration: underline;
+    .btn:hover {
+      background: var(--bg-card);
+      border-color: var(--btc-orange);
+      color: var(--text-primary);
     }
 
-    /* Form tabs */
+    /* Main */
+    .main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    /* Tabs */
     .form-tabs {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      gap: 8px;
+      margin-bottom: 24px;
     }
 
     .form-tab {
       flex: 1;
-      padding: 0.75rem;
-      background: var(--btc-darker);
-      border: 1px solid #444;
-      border-radius: 8px;
-      color: #888;
+      padding: 12px 16px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
     }
 
     .form-tab:hover {
-      border-color: #666;
+      border-color: var(--btc-orange);
+      color: var(--text-primary);
     }
 
     .form-tab.active {
@@ -235,363 +152,544 @@
       display: block;
     }
 
+    /* Section titles */
+    .section-title {
+      color: var(--btc-orange);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 24px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Fields */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    label .required {
+      color: var(--btc-orange);
+    }
+
+    .field-hint {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .field-hint a {
+      color: var(--btc-orange);
+    }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--btc-orange);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    /* Privacy notice */
+    .privacy-notice {
+      background: rgba(247, 147, 26, 0.1);
+      border: 1px solid rgba(247, 147, 26, 0.3);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin: 24px 0 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .privacy-notice strong {
+      color: var(--btc-orange);
+    }
+
+    .privacy-notice a {
+      color: var(--btc-orange);
+    }
+
+    /* Submit button */
+    button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      background: var(--btc-orange);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-top: 8px;
+    }
+
+    button[type="submit"]:hover {
+      background: var(--btc-orange-dark);
+    }
+
+    button[type="submit"]:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* Status message */
+    .status-message {
+      padding: 16px;
+      border-radius: var(--radius);
+      margin-top: 16px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .status-message.success {
+      display: block;
+      background: var(--success-bg);
+      border: 1px solid var(--success-green);
+      color: var(--success-green);
+    }
+
+    .status-message.success a {
+      color: var(--success-green);
+    }
+
+    .status-message.error {
+      display: block;
+      background: var(--error-bg);
+      border: 1px solid var(--error-red);
+      color: var(--error-red);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .footer a {
+      color: var(--text-secondary);
+    }
+
+    .footer a:hover {
+      color: var(--btc-orange);
+    }
+
+    /* Responsive */
     @media (max-width: 480px) {
-      .container {
-        padding: 1rem 0.75rem;
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       .form-card {
-        padding: 1.25rem;
+        padding: 16px;
       }
 
-      header h1 {
-        font-size: 1.4rem;
+      .form-tabs {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>₿ Satoshis für Berlin</h1>
-      <p>Bounty claimen – Check einreichen</p>
-    </header>
 
-    <div class="form-card">
-      <div class="form-tabs">
-        <div class="form-tab active" data-form="check">Check einreichen</div>
-        <div class="form-tab" data-form="new-location">Neuen Ort melden</div>
-      </div>
+<header class="header">
+  <div class="header-content">
+    <h1>
+      <span class="btc-icon">₿</span>
+      Satoshis für Berlin
+    </h1>
+    <a href="./" class="btn">← Zur Übersicht</a>
+  </div>
+</header>
 
-      <!-- CHECK FORM -->
-      <form id="check-form" class="form-section active">
-        <div class="section-title">Ort & Zeitpunkt</div>
-
-        <div class="field">
-          <label>Location-ID <span class="required">*</span></label>
-          <div class="field-hint">Findest du in der <a href="./" style="color: var(--btc-orange);">Übersicht</a> (z.B. DE-BE-00042)</div>
-          <input type="text" name="location_id" placeholder="DE-BE-00042" required>
-        </div>
-
-        <div class="field">
-          <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
-          <div class="field-hint">Wann hast du bezahlt?</div>
-          <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
-        </div>
-
-        <div class="field">
-          <label>Art des Checks <span class="required">*</span></label>
-          <select name="check_type" required>
-            <option value="">– Bitte wählen –</option>
-            <option value="normal">Normaler Check – Ort akzeptiert weiterhin Bitcoin</option>
-            <option value="critical">Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen</option>
-          </select>
-        </div>
-
-        <div class="section-title">Nachweise (alle vier erforderlich)</div>
-
-        <div class="field">
-          <label>1. Öffentlicher Post <span class="required">*</span></label>
-          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
-          <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
-        </div>
-
-        <div class="field">
-          <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
-          <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
-          <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="field">
-          <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
-          <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
-          <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="field">
-          <label>4. Foto vom Ort <span class="required">*</span></label>
-          <div class="field-hint">Schild, Eingang oder Kasse</div>
-          <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="section-title">Zusätzliche Infos</div>
-
-        <div class="field">
-          <label>Wie lief die Zahlung? <span class="required">*</span></label>
-          <textarea name="observations" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
-        </div>
-
-        <div class="field">
-          <label>Änderungen am Eintrag nötig?</label>
-          <div class="field-hint">Optional: Falls du Fehler bemerkt hast</div>
-          <textarea name="suggested_updates" placeholder="Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr"></textarea>
-        </div>
-
-        <div class="privacy-notice">
-          <strong>🔒 Auszahlung (privat)</strong><br>
-          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet. Sie dienen nur zur Auszahlung deines Bounties.<br><br>
-          <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom <a href="https://github.com/satoshiinberlin/sats4berlin/blob/main/README.md#aktivit%C3%A4tsfaktor-bis-20" target="_blank" style="color: var(--btc-orange);">Aktivitätsfaktor</a> (bis zu 2× Bounty) zu profitieren!
-        </div>
-
-        <div class="field">
-          <label>Auszahlungsmethode <span class="required">*</span></label>
-          <select name="contact_method" id="check-contact-method" required>
-            <option value="">– Bitte wählen –</option>
-            <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
-            <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
-            <option value="email">E-Mail (Cashu-Token per Mail)</option>
-            <option value="telegram">Telegram (Cashu-Token per DM)</option>
-            <option value="simplex">SimpleX Chat (Cashu-Token)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Deine Kontaktadresse <span class="required">*</span></label>
-          <div class="field-hint" id="check-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
-          <input type="text" name="contact_value" id="check-contact-value" placeholder="name@getalby.com" required>
-        </div>
-
-        <button type="submit">Check einreichen</button>
-
-        <div id="check-status" class="status-message"></div>
-      </form>
-
-      <!-- NEW LOCATION FORM -->
-      <form id="new-location-form" class="form-section">
-        <div class="section-title">Angaben zum Ort</div>
-
-        <div class="field">
-          <label>Name des Ortes <span class="required">*</span></label>
-          <input type="text" name="name" placeholder="Café Beispiel" required>
-        </div>
-
-        <div class="field">
-          <label>Adresse <span class="required">*</span></label>
-          <div class="field-hint">Vollständige Adresse mit PLZ</div>
-          <input type="text" name="address" placeholder="Musterstraße 1, 10115 Berlin" required>
-        </div>
-
-        <div class="field">
-          <label>Kategorie <span class="required">*</span></label>
-          <select name="category" required>
-            <option value="">– Bitte wählen –</option>
-            <option value="restaurant">Restaurant / Café / Bar</option>
-            <option value="shop">Einzelhandel / Shop</option>
-            <option value="service">Dienstleistung</option>
-            <option value="hotel">Hotel / Unterkunft</option>
-            <option value="other">Sonstiges</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Website</label>
-          <input type="url" name="website" placeholder="https://www.beispiel.de">
-        </div>
-
-        <div class="field">
-          <label>OpenStreetMap-Link</label>
-          <div class="field-hint">Falls der Ort bereits in OSM existiert</div>
-          <input type="url" name="osm_url" placeholder="https://www.openstreetmap.org/node/...">
-        </div>
-
-        <div class="section-title">Dein Kauf vor Ort</div>
-
-        <div class="field">
-          <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
-          <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
-        </div>
-
-        <div class="section-title">Nachweise (alle vier erforderlich)</div>
-
-        <div class="field">
-          <label>1. Öffentlicher Post <span class="required">*</span></label>
-          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
-          <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
-        </div>
-
-        <div class="field">
-          <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
-          <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
-          <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="field">
-          <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
-          <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
-          <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="field">
-          <label>4. Foto vom Ort <span class="required">*</span></label>
-          <div class="field-hint">Schild, Eingang oder Kasse</div>
-          <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
-        </div>
-
-        <div class="section-title">Zusätzliche Infos</div>
-
-        <div class="field">
-          <label>Wie lief die Zahlung? <span class="required">*</span></label>
-          <div class="field-hint">Beschreibe deine Erfahrung, nenne Öffnungszeiten falls bekannt</div>
-          <textarea name="notes" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert. Öffnungszeiten laut Aushang: Mo-Fr 10-18 Uhr" required></textarea>
-        </div>
-
-        <div class="privacy-notice">
-          <strong>🔒 Auszahlung (privat)</strong><br>
-          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet.<br><br>
-          <strong>Hinweis:</strong> Bei Neueinträgen erfolgt die Auszahlung erst nach Bestätigung durch 2 weitere Bitcoiner (insgesamt 3 Checks).<br><br>
-          <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom Aktivitätsfaktor (bis zu 2× Bounty) zu profitieren!
-        </div>
-
-        <div class="field">
-          <label>Auszahlungsmethode <span class="required">*</span></label>
-          <select name="contact_method" id="newloc-contact-method" required>
-            <option value="">– Bitte wählen –</option>
-            <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
-            <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
-            <option value="email">E-Mail (Cashu-Token per Mail)</option>
-            <option value="telegram">Telegram (Cashu-Token per DM)</option>
-            <option value="simplex">SimpleX Chat (Cashu-Token)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Deine Kontaktadresse <span class="required">*</span></label>
-          <div class="field-hint" id="newloc-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
-          <input type="text" name="contact_value" id="newloc-contact-value" placeholder="name@getalby.com" required>
-        </div>
-
-        <button type="submit">Neuen Ort melden</button>
-
-        <div id="new-location-status" class="status-message"></div>
-      </form>
+<main class="main">
+  <div class="form-card">
+    <div class="form-tabs">
+      <div class="form-tab active" data-form="check">Check einreichen</div>
+      <div class="form-tab" data-form="new-location">Neuen Ort melden</div>
     </div>
 
-    <a href="./" class="back-link">← Zurück zur Übersicht</a>
+    <!-- CHECK FORM -->
+    <form id="check-form" class="form-section active">
+      <div class="section-title">Ort & Zeitpunkt</div>
+
+      <div class="field">
+        <label>Location-ID <span class="required">*</span></label>
+        <div class="field-hint">Findest du in der <a href="./">Übersicht</a> (z.B. DE-BE-00042)</div>
+        <input type="text" name="location_id" placeholder="DE-BE-00042" required>
+      </div>
+
+      <div class="field">
+        <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
+        <div class="field-hint">Wann hast du bezahlt?</div>
+        <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+      </div>
+
+      <div class="field">
+        <label>Art des Checks <span class="required">*</span></label>
+        <select name="check_type" required>
+          <option value="">– Bitte wählen –</option>
+          <option value="normal">Normaler Check – Ort akzeptiert weiterhin Bitcoin</option>
+          <option value="critical">Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen</option>
+        </select>
+      </div>
+
+      <div class="section-title">Nachweise</div>
+
+      <div class="field">
+        <label>1. Öffentlicher Post <span class="required">*</span></label>
+        <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
+        <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+      </div>
+
+      <div class="field">
+        <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
+        <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
+        <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="field">
+        <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
+        <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
+        <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="field">
+        <label>4. Foto vom Ort <span class="required">*</span></label>
+        <div class="field-hint">Schild, Eingang oder Kasse</div>
+        <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="section-title">Zusätzliche Infos</div>
+
+      <div class="field">
+        <label>Wie lief die Zahlung? <span class="required">*</span></label>
+        <textarea name="observations" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label>Änderungen am Eintrag nötig?</label>
+        <div class="field-hint">Optional: Falls du Fehler bemerkt hast</div>
+        <textarea name="suggested_updates" placeholder="Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr"></textarea>
+      </div>
+
+      <div class="privacy-notice">
+        <strong>🔒 Auszahlung (privat)</strong><br>
+        Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet. Sie dienen nur zur Auszahlung deines Bounties.<br><br>
+        <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom <a href="https://github.com/satoshiinberlin/sats4berlin/blob/main/README.md#aktivit%C3%A4tsfaktor-bis-20" target="_blank">Aktivitätsfaktor</a> (bis zu 2× Bounty) zu profitieren!
+      </div>
+
+      <div class="field">
+        <label>Auszahlungsmethode <span class="required">*</span></label>
+        <select name="contact_method" id="check-contact-method" required>
+          <option value="">– Bitte wählen –</option>
+          <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+          <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
+          <option value="email">E-Mail (Cashu-Token per Mail)</option>
+          <option value="telegram">Telegram (Cashu-Token per DM)</option>
+          <option value="simplex">SimpleX Chat (Cashu-Token)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Deine Kontaktadresse <span class="required">*</span></label>
+        <div class="field-hint" id="check-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
+        <input type="text" name="contact_value" id="check-contact-value" placeholder="name@getalby.com" required>
+      </div>
+
+      <button type="submit">Check einreichen</button>
+
+      <div id="check-status" class="status-message"></div>
+    </form>
+
+    <!-- NEW LOCATION FORM -->
+    <form id="new-location-form" class="form-section">
+      <div class="section-title">Angaben zum Ort</div>
+
+      <div class="field">
+        <label>Name des Ortes <span class="required">*</span></label>
+        <input type="text" name="name" placeholder="Café Beispiel" required>
+      </div>
+
+      <div class="field">
+        <label>Adresse <span class="required">*</span></label>
+        <div class="field-hint">Vollständige Adresse mit PLZ</div>
+        <input type="text" name="address" placeholder="Musterstraße 1, 10115 Berlin" required>
+      </div>
+
+      <div class="field">
+        <label>Kategorie <span class="required">*</span></label>
+        <select name="category" required>
+          <option value="">– Bitte wählen –</option>
+          <option value="restaurant">Restaurant / Café / Bar</option>
+          <option value="shop">Einzelhandel / Shop</option>
+          <option value="service">Dienstleistung</option>
+          <option value="hotel">Hotel / Unterkunft</option>
+          <option value="other">Sonstiges</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Website</label>
+        <input type="url" name="website" placeholder="https://www.beispiel.de">
+      </div>
+
+      <div class="field">
+        <label>OpenStreetMap-Link</label>
+        <div class="field-hint">Falls der Ort bereits in OSM existiert</div>
+        <input type="url" name="osm_url" placeholder="https://www.openstreetmap.org/node/...">
+      </div>
+
+      <div class="section-title">Dein Kauf vor Ort</div>
+
+      <div class="field">
+        <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
+        <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+      </div>
+
+      <div class="section-title">Nachweise</div>
+
+      <div class="field">
+        <label>1. Öffentlicher Post <span class="required">*</span></label>
+        <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
+        <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+      </div>
+
+      <div class="field">
+        <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
+        <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
+        <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="field">
+        <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
+        <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
+        <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="field">
+        <label>4. Foto vom Ort <span class="required">*</span></label>
+        <div class="field-hint">Schild, Eingang oder Kasse</div>
+        <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
+      </div>
+
+      <div class="section-title">Zusätzliche Infos</div>
+
+      <div class="field">
+        <label>Wie lief die Zahlung? <span class="required">*</span></label>
+        <div class="field-hint">Beschreibe deine Erfahrung, nenne Öffnungszeiten falls bekannt</div>
+        <textarea name="notes" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert. Öffnungszeiten laut Aushang: Mo-Fr 10-18 Uhr" required></textarea>
+      </div>
+
+      <div class="privacy-notice">
+        <strong>🔒 Auszahlung (privat)</strong><br>
+        Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet.<br><br>
+        <strong>Hinweis:</strong> Bei Neueinträgen erfolgt die Auszahlung erst nach Bestätigung durch 2 weitere Bitcoiner (insgesamt 3 Checks).<br><br>
+        <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom Aktivitätsfaktor (bis zu 2× Bounty) zu profitieren!
+      </div>
+
+      <div class="field">
+        <label>Auszahlungsmethode <span class="required">*</span></label>
+        <select name="contact_method" id="newloc-contact-method" required>
+          <option value="">– Bitte wählen –</option>
+          <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+          <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
+          <option value="email">E-Mail (Cashu-Token per Mail)</option>
+          <option value="telegram">Telegram (Cashu-Token per DM)</option>
+          <option value="simplex">SimpleX Chat (Cashu-Token)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Deine Kontaktadresse <span class="required">*</span></label>
+        <div class="field-hint" id="newloc-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
+        <input type="text" name="contact_value" id="newloc-contact-value" placeholder="name@getalby.com" required>
+      </div>
+
+      <button type="submit">Neuen Ort melden</button>
+
+      <div id="new-location-status" class="status-message"></div>
+    </form>
   </div>
+</main>
 
-  <script>
-    const WORKER_URL = 'https://sats4berlin-form-handler.satoshiinberlin.workers.dev/webhook/tally';
+<footer class="footer">
+  <a href="./">← Zurück zur Übersicht</a>
+</footer>
 
-    // Tab switching
-    document.querySelectorAll('.form-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+<script>
+  const WORKER_URL = 'https://sats4berlin-form-handler.satoshiinberlin.workers.dev/webhook/tally';
 
-        tab.classList.add('active');
-        const formId = tab.dataset.form === 'check' ? 'check-form' : 'new-location-form';
-        document.getElementById(formId).classList.add('active');
-      });
+  // Tab switching
+  document.querySelectorAll('.form-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+
+      tab.classList.add('active');
+      const formId = tab.dataset.form === 'check' ? 'check-form' : 'new-location-form';
+      document.getElementById(formId).classList.add('active');
     });
+  });
 
-    // Form submission
-    async function submitForm(form, statusEl) {
-      const formData = new FormData(form);
-      const data = {};
+  // Form submission
+  async function submitForm(form, statusEl) {
+    const formData = new FormData(form);
+    const data = {};
 
-      formData.forEach((value, key) => {
-        if (value.trim()) {
-          data[key] = value.trim();
-        }
-      });
-
-      statusEl.className = 'status-message';
-      statusEl.style.display = 'none';
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Wird gesendet...';
-
-      try {
-        const response = await fetch(WORKER_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          statusEl.className = 'status-message success';
-          statusEl.innerHTML = `
-            <strong>✓ Erfolgreich eingereicht!</strong><br><br>
-            Dein Check wurde erstellt: <a href="${result.issueUrl}" target="_blank" style="color: inherit;">${result.issueUrl}</a><br><br>
-            Du wirst benachrichtigt, sobald der Check geprüft wurde.
-          `;
-          form.reset();
-        } else {
-          throw new Error(result.error || 'Unbekannter Fehler');
-        }
-      } catch (error) {
-        statusEl.className = 'status-message error';
-        statusEl.innerHTML = `<strong>✗ Fehler:</strong> ${error.message}<br>Bitte versuche es erneut.`;
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+    formData.forEach((value, key) => {
+      if (value.trim()) {
+        data[key] = value.trim();
       }
-    }
-
-    document.getElementById('check-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      submitForm(e.target, document.getElementById('check-status'));
     });
 
-    document.getElementById('new-location-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      submitForm(e.target, document.getElementById('new-location-status'));
-    });
+    statusEl.className = 'status-message';
+    statusEl.style.display = 'none';
 
-    // Pre-fill location_id from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const locationId = urlParams.get('location_id');
-    if (locationId) {
-      document.querySelector('#check-form input[name="location_id"]').value = locationId;
-    }
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gesendet...';
 
-    // Contact method hints and placeholders
-    const contactConfig = {
-      lightning: {
-        hint: 'Deine Lightning-Adresse für direkten Empfang',
-        placeholder: 'satoshi@getalby.com'
-      },
-      nostr: {
-        hint: 'Dein Nostr Public Key (npub) für verschlüsselte DM',
-        placeholder: 'npub1...'
-      },
-      email: {
-        hint: 'Deine E-Mail-Adresse für Cashu-Token',
-        placeholder: 'satoshi@example.com'
-      },
-      telegram: {
-        hint: 'Dein Telegram-Username (mit @)',
-        placeholder: '@satoshi'
-      },
-      simplex: {
-        hint: 'Dein SimpleX-Einladungslink oder Kontaktadresse',
-        placeholder: 'https://simplex.chat/contact#...'
-      }
-    };
-
-    function updateContactFields(selectId, hintId, inputId) {
-      const select = document.getElementById(selectId);
-      const hint = document.getElementById(hintId);
-      const input = document.getElementById(inputId);
-
-      select.addEventListener('change', () => {
-        const method = select.value;
-        if (method && contactConfig[method]) {
-          hint.textContent = contactConfig[method].hint;
-          input.placeholder = contactConfig[method].placeholder;
-        } else {
-          hint.textContent = 'Gib deine Adresse für die gewählte Methode ein';
-          input.placeholder = '';
-        }
+    try {
+      const response = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
       });
-    }
 
-    updateContactFields('check-contact-method', 'check-contact-hint', 'check-contact-value');
-    updateContactFields('newloc-contact-method', 'newloc-contact-hint', 'newloc-contact-value');
-  </script>
+      const result = await response.json();
+
+      if (result.success) {
+        statusEl.className = 'status-message success';
+        statusEl.innerHTML = `
+          <strong>✓ Erfolgreich eingereicht!</strong><br><br>
+          Dein Check wurde erstellt: <a href="${result.issueUrl}" target="_blank">${result.issueUrl}</a><br><br>
+          Du wirst benachrichtigt, sobald der Check geprüft wurde.
+        `;
+        form.reset();
+      } else {
+        throw new Error(result.error || 'Unbekannter Fehler');
+      }
+    } catch (error) {
+      statusEl.className = 'status-message error';
+      statusEl.innerHTML = `<strong>✗ Fehler:</strong> ${error.message}<br>Bitte versuche es erneut.`;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  }
+
+  document.getElementById('check-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitForm(e.target, document.getElementById('check-status'));
+  });
+
+  document.getElementById('new-location-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitForm(e.target, document.getElementById('new-location-status'));
+  });
+
+  // Pre-fill location_id from URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const locationId = urlParams.get('location_id');
+  if (locationId) {
+    document.querySelector('#check-form input[name="location_id"]').value = locationId;
+  }
+
+  // Contact method hints and placeholders
+  const contactConfig = {
+    lightning: {
+      hint: 'Deine Lightning-Adresse für direkten Empfang',
+      placeholder: 'satoshi@getalby.com'
+    },
+    nostr: {
+      hint: 'Dein Nostr Public Key (npub) für verschlüsselte DM',
+      placeholder: 'npub1...'
+    },
+    email: {
+      hint: 'Deine E-Mail-Adresse für Cashu-Token',
+      placeholder: 'satoshi@example.com'
+    },
+    telegram: {
+      hint: 'Dein Telegram-Username (mit @)',
+      placeholder: '@satoshi'
+    },
+    simplex: {
+      hint: 'Dein SimpleX-Einladungslink oder Kontaktadresse',
+      placeholder: 'https://simplex.chat/contact#...'
+    }
+  };
+
+  function updateContactFields(selectId, hintId, inputId) {
+    const select = document.getElementById(selectId);
+    const hint = document.getElementById(hintId);
+    const input = document.getElementById(inputId);
+
+    select.addEventListener('change', () => {
+      const method = select.value;
+      if (method && contactConfig[method]) {
+        hint.textContent = contactConfig[method].hint;
+        input.placeholder = contactConfig[method].placeholder;
+      } else {
+        hint.textContent = 'Gib deine Adresse für die gewählte Methode ein';
+        input.placeholder = '';
+      }
+    });
+  }
+
+  updateContactFields('check-contact-method', 'check-contact-hint', 'check-contact-value');
+  updateContactFields('newloc-contact-method', 'newloc-contact-hint', 'newloc-contact-value');
+</script>
+
 </body>
 </html>

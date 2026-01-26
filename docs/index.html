@@ -11,42 +11,41 @@
 
   <style>
     :root {
-      --primary: #f7931a;
-      --primary-dark: #e8850f;
-      --green: #22c55e;
-      --green-bg: #dcfce7;
-      --green-dark: #16a34a;
-      --orange: #f97316;
-      --orange-bg: #ffedd5;
-      --orange-dark: #ea580c;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-500: #6b7280;
-      --gray-700: #374151;
-      --gray-900: #111827;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --btc-orange: #F7931A;
+      --btc-orange-dark: #e8850f;
+      --bg-dark: #0f0f1a;
+      --bg-card: #1a1a2e;
+      --bg-input: #0f0f1a;
+      --border-color: #2d2d44;
+      --text-primary: #e0e0e0;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --success-green: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.1);
+      --warning-orange: #f97316;
+      --warning-bg: rgba(249, 115, 22, 0.1);
+      --radius: 8px;
+      --radius-lg: 12px;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: var(--gray-50);
-      color: var(--gray-900);
+      background: var(--bg-dark);
+      color: var(--text-primary);
       line-height: 1.5;
+      min-height: 100vh;
     }
+
+    a { color: var(--btc-orange); }
+    a:hover { color: var(--btc-orange-dark); }
 
     /* Header */
     .header {
-      background: linear-gradient(135deg, var(--gray-900) 0%, #1f2937 100%);
-      color: white;
-      padding: 32px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px 20px;
     }
 
     .header-content {
@@ -54,177 +53,157 @@
       margin: 0 auto;
     }
 
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
     .header h1 {
-      margin: 0 0 8px 0;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 12px;
+      color: var(--text-primary);
     }
 
     .header h1 .btc-icon {
       width: 36px;
       height: 36px;
-      background: var(--primary);
+      background: var(--btc-orange);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
       font-size: 20px;
+      color: #000;
     }
 
-    .header p {
-      margin: 0;
-      color: var(--gray-300);
-      font-size: 16px;
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     /* Stats bar */
     .stats {
       display: flex;
-      gap: 24px;
-      margin-top: 24px;
+      gap: 16px;
+      margin-top: 20px;
       flex-wrap: wrap;
     }
 
     .stat {
-      background: rgba(255,255,255,0.1);
-      padding: 16px 20px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
       border-radius: var(--radius);
-      min-width: 140px;
+      min-width: 120px;
     }
 
     .stat-value {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--btc-orange);
     }
 
     .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text-primary);
+      background: var(--bg-dark);
       font-size: 13px;
-      color: var(--gray-300);
-      margin-top: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-card);
+      border-color: var(--btc-orange);
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      background: var(--btc-orange);
+      border-color: var(--btc-orange);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: var(--btc-orange-dark);
+      border-color: var(--btc-orange-dark);
+      color: #000;
     }
 
     /* Main content */
     .main {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 20px;
-    }
-
-    /* Action buttons */
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      text-decoration: none;
-      color: var(--gray-700);
-      background: white;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      box-shadow: var(--shadow);
-    }
-
-    .btn:hover {
-      background: var(--gray-50);
-      border-color: var(--gray-300);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-      border-color: var(--primary-dark);
-    }
-
-    .btn-claim {
-      background: var(--green);
-      border-color: var(--green);
-      color: white;
-      padding: 8px 14px;
-      font-size: 13px;
-    }
-
-    .btn-claim:hover {
-      background: var(--green-dark);
-      border-color: var(--green-dark);
-    }
-
-    .btn-claim-disabled {
-      background: var(--gray-200);
-      border-color: var(--gray-200);
-      color: var(--gray-500);
-      cursor: not-allowed;
-    }
-
-    .btn-claim-disabled:hover {
-      background: var(--gray-200);
-      border-color: var(--gray-200);
+      padding: 20px;
     }
 
     /* Filters */
     .filters {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr;
-      margin-bottom: 20px;
-    }
-
-    @media (min-width: 640px) {
-      .filters { grid-template-columns: 2fr 1fr; }
-    }
-
-    .filter-input, .filter-select {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 15px;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      background: white;
-      color: var(--gray-900);
-      box-shadow: var(--shadow);
-    }
-
-    .filter-input:focus, .filter-select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.1);
-    }
-
-    /* Results info */
-    .results-info {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 12px;
       margin-bottom: 16px;
-      color: var(--gray-500);
-      font-size: 14px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
-    /* Table container */
-    .table-container {
-      background: white;
+    .filters input,
+    .filters select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      font-size: 14px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .filters input {
+      min-width: 200px;
+    }
+
+    .filters input:focus,
+    .filters select:focus {
+      outline: none;
+      border-color: var(--btc-orange);
+    }
+
+    .filters input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
       overflow: hidden;
     }
 
@@ -233,260 +212,319 @@
     }
 
     table {
-      border-collapse: collapse;
       width: 100%;
-      min-width: 800px;
+      border-collapse: collapse;
+      font-size: 14px;
     }
 
     th, td {
-      padding: 14px 16px;
+      padding: 12px 16px;
       text-align: left;
-      border-bottom: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--border-color);
     }
 
     th {
-      background: var(--gray-50);
+      background: var(--bg-dark);
       font-weight: 600;
-      font-size: 13px;
+      color: var(--text-secondary);
+      font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--gray-500);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      white-space: nowrap;
     }
 
     th.sortable {
       cursor: pointer;
       user-select: none;
-      transition: background 0.15s ease;
     }
 
-    th.sortable:hover { background: var(--gray-100); }
+    th.sortable:hover {
+      color: var(--btc-orange);
+    }
 
     th.sortable::after {
-      content: " ↕";
-      color: var(--gray-300);
-      font-size: 12px;
+      content: "";
+      margin-left: 6px;
+      opacity: 0.3;
     }
 
-    th.sortable.asc::after { content: " ↑"; color: var(--gray-700); }
-    th.sortable.desc::after { content: " ↓"; color: var(--gray-700); }
+    th.sortable.asc::after {
+      content: "▲";
+      opacity: 1;
+      color: var(--btc-orange);
+    }
 
-    tbody tr:hover { background: var(--gray-50); }
+    th.sortable.desc::after {
+      content: "▼";
+      opacity: 1;
+      color: var(--btc-orange);
+    }
+
+    tr:hover {
+      background: rgba(247, 147, 26, 0.05);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td {
+      color: var(--text-primary);
+    }
 
     .location-name {
-      font-weight: 600;
-      color: var(--gray-900);
+      font-weight: 500;
     }
 
     .location-category {
-      font-size: 13px;
-      color: var(--gray-500);
-      margin-top: 2px;
-    }
-
-    .address {
-      color: var(--gray-700);
-      font-size: 14px;
-    }
-
-    /* Bounty cell */
-    .bounty-cell {
-      text-align: center;
-    }
-
-    .bounty-amount {
-      font-weight: 700;
-      font-size: 16px;
-    }
-
-    .bounty-status {
       font-size: 12px;
-      margin-top: 4px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      display: inline-block;
+      color: var(--text-secondary);
     }
 
-    .status-eligible .bounty-amount { color: var(--green-dark); }
-    .status-eligible .bounty-status {
-      background: var(--green-bg);
-      color: var(--green-dark);
+    .location-address {
+      color: var(--text-secondary);
+      font-size: 13px;
     }
 
-    .status-cooldown .bounty-amount { color: var(--orange-dark); }
-    .status-cooldown .bounty-status {
-      background: var(--orange-bg);
-      color: var(--orange-dark);
-    }
-
-    .date-cell {
-      font-size: 14px;
-      color: var(--gray-700);
+    /* Bounty badge */
+    .bounty {
+      font-weight: 600;
+      color: var(--btc-orange);
       white-space: nowrap;
     }
 
-    .cooldown-active { color: var(--orange-dark); font-weight: 500; }
-    .cooldown-passed { color: var(--green-dark); }
-
-    .location-id {
-      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+    /* Status badges */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
       font-size: 12px;
-      color: var(--gray-500);
-      background: var(--gray-100);
-      padding: 4px 8px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .status-available {
+      background: var(--success-bg);
+      color: var(--success-green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-cooldown {
+      background: var(--warning-bg);
+      color: var(--warning-orange);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    /* Claim button */
+    .btn-claim {
+      padding: 6px 12px;
+      font-size: 12px;
       border-radius: 6px;
     }
 
-    .link-cell a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 14px;
+    .btn-claim.available {
+      background: var(--success-green);
+      border-color: var(--success-green);
+      color: #000;
     }
 
-    .link-cell a:hover { text-decoration: underline; }
+    .btn-claim.available:hover {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
 
-    .action-cell {
-      text-align: center;
+    .btn-claim.cooldown {
+      background: transparent;
+      border-color: var(--border-color);
+      color: var(--text-muted);
+      cursor: not-allowed;
     }
 
     /* Toast */
-    .toast {
+    #toast {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
       padding: 12px 20px;
-      background: var(--gray-900);
-      color: white;
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
       display: none;
+      z-index: 1000;
       font-size: 14px;
-      z-index: 100;
     }
 
     /* Footer */
     .footer {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
       text-align: center;
-      color: var(--gray-500);
+      padding: 24px 20px;
+      color: var(--text-muted);
       font-size: 13px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
     }
 
-    .footer a { color: var(--gray-700); }
+    .footer a {
+      color: var(--text-secondary);
+    }
 
-    /* Mobile adjustments */
-    @media (max-width: 640px) {
-      .header { padding: 24px 16px; }
-      .header h1 { font-size: 22px; }
-      .stats { gap: 12px; }
-      .stat { padding: 12px 16px; min-width: 100px; }
-      .stat-value { font-size: 20px; }
-      .main { padding: 16px; }
-      .btn { padding: 8px 12px; font-size: 13px; }
+    .footer a:hover {
+      color: var(--btc-orange);
+    }
+
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .header h1 .btc-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+      }
+
+      .stats {
+        gap: 8px;
+      }
+
+      .stat {
+        min-width: 100px;
+        padding: 10px 12px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+
+      .filters input {
+        min-width: 150px;
+      }
+
+      th, td {
+        padding: 10px 12px;
+      }
+
+      .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
     }
   </style>
 </head>
-
 <body>
-  <header class="header">
-    <div class="header-content">
-      <h1>
-        <span class="btc-icon">₿</span>
-        Satoshis für Berlin
-      </h1>
-      <p>Die Millionenchallenge – Verifiziere Bitcoin-Akzeptanzstellen und verdiene Sats</p>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-value">1.000.000</div>
-          <div class="stat-label">Sats Gesamtbounty</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="statAvailable">—</div>
-          <div class="stat-label">Sats verfügbar</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="statLocations">—</div>
-          <div class="stat-label">Locations</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="statEligible">—</div>
-          <div class="stat-label">Jetzt prüfbar</div>
-        </div>
+<header class="header">
+  <div class="header-content">
+    <div class="header-top">
+      <div>
+        <h1>
+          <span class="btc-icon">₿</span>
+          Satoshis für Berlin
+        </h1>
+        <p class="header-subtitle">Die Millionenchallenge – 1.000.000 sats Gesamtbounty</p>
+      </div>
+      <div class="header-actions">
+        <a class="btn btn-primary" id="btnSubmit" href="submit.html">Check einreichen</a>
+        <a class="btn" id="btnNewLocation" href="submit.html">Neuen Ort melden</a>
+        <a class="btn" id="btnRules" href="#">Regeln</a>
       </div>
     </div>
-  </header>
 
-  <main class="main">
-    <div class="actions">
-      <a class="btn btn-primary" id="btnSubmit" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Check einreichen
-      </a>
-      <a class="btn" id="btnNewLocation" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Neuen Ort melden
-      </a>
-      <a class="btn" id="btnRules" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Regeln
-      </a>
-      <a class="btn" href="https://github.com/satoshiinberlin/sats4berlin" target="_blank" rel="noopener">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        GitHub
-      </a>
-    </div>
-
-    <div class="filters">
-      <input class="filter-input" id="q" type="text" placeholder="Suche nach Name, Kategorie, Adresse oder PLZ…" />
-      <select class="filter-select" id="eligible">
-        <option value="">Alle Locations</option>
-        <option value="yes">Nur verfügbare Bounties</option>
-        <option value="no">Im Cooldown</option>
-      </select>
-    </div>
-
-    <div class="results-info">
-      <span id="meta">Lade Daten…</span>
-      <span>Sortieren: Klicke auf Spaltenüberschriften</span>
-    </div>
-
-    <div class="table-container">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th class="sortable" data-sort="name">Location</th>
-              <th class="sortable" data-sort="address">Adresse</th>
-              <th class="sortable" data-sort="bounty">Bounty</th>
-              <th class="sortable" data-sort="last_check">Letzter Check</th>
-              <th class="sortable" data-sort="cooldown">Cooldown bis</th>
-              <th>ID</th>
-              <th>Links</th>
-              <th>Aktion</th>
-            </tr>
-          </thead>
-          <tbody id="body"></tbody>
-        </table>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">1.000.000</div>
+        <div class="stat-label">Gesamtbounty (sats)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="statAvailable">–</div>
+        <div class="stat-label">Verfügbar (sats)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="statLocations">–</div>
+        <div class="stat-label">Orte</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="statEligible">–</div>
+        <div class="stat-label">Prüfbar</div>
       </div>
     </div>
-  </main>
+  </div>
+</header>
 
-  <footer class="footer">
-    <p>
-      Daten: <a href="https://btcmap.org" target="_blank">BTCMap</a> / <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a> ·
-      <a href="data/locations.csv">locations.csv</a> ·
-      <a href="data/checks_public.csv">checks_public.csv</a>
-    </p>
-    <p>© OpenStreetMap contributors (ODbL) · Aktualisierung: täglich um 00:00 und 12:00 Uhr</p>
-  </footer>
+<main class="main">
+  <div class="filters">
+    <input type="text" id="q" placeholder="Suchen (Name, Adresse, Kategorie)..." />
+    <select id="eligible">
+      <option value="">Alle Status</option>
+      <option value="yes">Verfügbar</option>
+      <option value="no">Im Cooldown</option>
+    </select>
+  </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="table-container">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="name">Name</th>
+            <th class="sortable" data-sort="address">Adresse</th>
+            <th class="sortable" data-sort="bounty">Bounty</th>
+            <th class="sortable" data-sort="status">Status</th>
+            <th>Aktion</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="5" class="loading">Lade Daten...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>
+    Daten: <a href="https://btcmap.org" target="_blank" rel="noopener">BTCMap</a> /
+    <a href="https://www.openstreetmap.org" target="_blank" rel="noopener">OpenStreetMap</a> (ODbL) ·
+    <a href="https://github.com/satoshiinberlin/sats4berlin" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+<div id="toast"></div>
 
 <script>
   const REPO_URL = "https://github.com/satoshiinberlin/sats4berlin";
@@ -556,92 +594,78 @@
       return true;
     });
 
-    const comparators = {
-      name: (a, b) => norm(a.name).localeCompare(norm(b.name)),
-      address: (a, b) => addr(a).localeCompare(addr(b)),
-      bounty: (a, b) => toInt(a.bounty_base_sats) - toInt(b.bounty_base_sats),
-      last_check: (a, b) => norm(a.source_last_update).localeCompare(norm(b.source_last_update)),
-      cooldown: (a, b) => norm(a.cooldown_until).localeCompare(norm(b.cooldown_until)),
-    };
-
-    const cmp = comparators[sortColumn] || comparators.bounty;
+    // Sort
     view.sort((a, b) => {
-      const result = cmp(a, b);
-      return sortDirection === "desc" ? -result : result;
+      let av, bv;
+      switch (sortColumn) {
+        case "name":
+          av = norm(a.name).toLowerCase();
+          bv = norm(b.name).toLowerCase();
+          break;
+        case "address":
+          av = addr(a).toLowerCase();
+          bv = addr(b).toLowerCase();
+          break;
+        case "bounty":
+          av = toInt(a.bounty_base_sats);
+          bv = toInt(b.bounty_base_sats);
+          break;
+        case "status":
+          av = norm(a.eligible_now).toLowerCase() === "yes" ? 0 : 1;
+          bv = norm(b.eligible_now).toLowerCase() === "yes" ? 0 : 1;
+          break;
+        default:
+          av = norm(a.name).toLowerCase();
+          bv = norm(b.name).toLowerCase();
+      }
+      if (av < bv) return sortDirection === "asc" ? -1 : 1;
+      if (av > bv) return sortDirection === "asc" ? 1 : -1;
+      return 0;
     });
 
-    updateSortIndicators();
+    const tbody = document.getElementById("tbody");
 
-    document.getElementById("meta").textContent = `${view.length} von ${rows.length} Locations`;
+    if (view.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">Keine Orte gefunden.</td></tr>';
+      return;
+    }
 
-    const body = document.getElementById("body");
-    const today = new Date().toISOString().slice(0, 10);
-
-    body.innerHTML = view.map(r => {
-      const link = norm(r.btcmap_url) || (norm(r.osm_type) && norm(r.osm_id) ? `https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}` : "");
-      const bounty = toInt(r.bounty_base_sats).toLocaleString("de-DE");
+    tbody.innerHTML = view.map(r => {
       const lid = norm(r.location_id);
-      const name = norm(r.name) || "Unbekannt";
-
+      const name = norm(r.name) || "–";
+      const category = norm(r.category);
+      const address = addr(r) || "–";
+      const bounty = toInt(r.bounty_base_sats);
       const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
-      const cooldownDate = norm(r.cooldown_until);
-      const hasCooldown = cooldownDate && cooldownDate >= today;
-      const statusClass = isEligible ? "status-eligible" : "status-cooldown";
-      const cooldownClass = hasCooldown ? "cooldown-active" : (cooldownDate ? "cooldown-passed" : "");
+      const cooldownDays = toInt(r.cooldown_days_left);
 
       const claimUrl = createClaimUrl(lid, name);
-      const claimBtnClass = isEligible ? "btn btn-claim" : "btn btn-claim-disabled";
-      const claimBtnText = isEligible ? "Claim Bounty" : "Im Cooldown";
-      const claimBtnAttr = isEligible ? `href="${claimUrl}" target="_blank" rel="noopener"` : 'href="#" onclick="return false;"';
 
-      return `
-        <tr>
-          <td>
-            <div class="location-name">${name}</div>
-            <div class="location-category">${norm(r.category) || "—"}</div>
-          </td>
-          <td class="address">${addr(r) || "—"}</td>
-          <td class="bounty-cell ${statusClass}">
-            <div class="bounty-amount">${bounty}</div>
-            <div class="bounty-status">${isEligible ? "verfügbar" : "Cooldown"}</div>
-          </td>
-          <td class="date-cell">${norm(r.source_last_update) || "—"}</td>
-          <td class="date-cell ${cooldownClass}">${cooldownDate || "—"}</td>
-          <td><span class="location-id">${lid}</span></td>
-          <td class="link-cell">${link ? `<a href="${link}" target="_blank" rel="noopener">OSM</a>` : "—"}</td>
-          <td class="action-cell">
-            <a class="${claimBtnClass}" ${claimBtnAttr}>${claimBtnText}</a>
-          </td>
-        </tr>
-      `;
+      const statusClass = isEligible ? "status-available" : "status-cooldown";
+      const statusText = isEligible ? "Verfügbar" : `${cooldownDays}d Cooldown`;
+
+      const claimBtnClass = isEligible ? "available" : "cooldown";
+      const claimBtnText = isEligible ? "Claim Bounty" : "Im Cooldown";
+
+      return `<tr>
+        <td>
+          <div class="location-name">${name}</div>
+          ${category ? `<div class="location-category">${category}</div>` : ""}
+        </td>
+        <td class="location-address">${address}</td>
+        <td class="bounty">${bounty.toLocaleString("de-DE")} sats</td>
+        <td><span class="status ${statusClass}">${statusText}</span></td>
+        <td>
+          ${isEligible
+            ? `<a class="btn btn-claim ${claimBtnClass}" href="${claimUrl}">${claimBtnText}</a>`
+            : `<span class="btn btn-claim ${claimBtnClass}">${claimBtnText}</span>`
+          }
+        </td>
+      </tr>`;
     }).join("");
   }
 
-  function load() {
-    const meta = document.getElementById("meta");
-    meta.textContent = "Lade Daten…";
-
-    Papa.parse("data/locations.csv", {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: false,
-      complete: (res) => {
-        rows = (res.data || []).filter(r => r && r.location_id);
-        updateStats();
-        render();
-      },
-      error: (err) => {
-        meta.textContent = `Fehler beim Laden: ${err}`;
-      }
-    });
-  }
-
-  ["q", "eligible"].forEach(id => {
-    document.getElementById(id).addEventListener("input", render);
-    document.getElementById(id).addEventListener("change", render);
-  });
-
+  // Sort handlers
   document.querySelectorAll("th.sortable").forEach(th => {
     th.addEventListener("click", () => {
       const col = th.dataset.sort;
@@ -649,13 +673,35 @@
         sortDirection = sortDirection === "asc" ? "desc" : "asc";
       } else {
         sortColumn = col;
-        sortDirection = (col === "bounty" || col === "last_check" || col === "cooldown") ? "desc" : "asc";
+        sortDirection = col === "bounty" ? "desc" : "asc";
       }
+      updateSortIndicators();
       render();
     });
   });
 
-  load();
+  // Filter handlers
+  document.getElementById("q").addEventListener("input", render);
+  document.getElementById("eligible").addEventListener("change", render);
+
+  // Load data
+  Papa.parse("data/locations.csv", {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      rows = results.data.filter(r => norm(r.location_id));
+      updateStats();
+      updateSortIndicators();
+      render();
+    },
+    error: (err) => {
+      document.getElementById("tbody").innerHTML =
+        '<tr><td colspan="5" class="empty">Fehler beim Laden der Daten.</td></tr>';
+      console.error(err);
+    }
+  });
 </script>
+
 </body>
 </html>
