@@ -29,6 +29,9 @@ const FIELD_MAPPING = {
   'venue_photo_url': 'venue_photo_url',
   'observations': 'observations',
   'suggested_updates': 'suggested_updates',
+  // Critical change fields (for reporting locations that no longer accept BTC)
+  'critical_evidence_url': 'critical_evidence_url',
+  'critical_post_url': 'critical_post_url',
   // New location fields
   'name': 'name',
   'address': 'address',
@@ -45,7 +48,10 @@ const FIELD_MAPPING = {
 const PRIVATE_FIELDS = ['contact_method', 'contact_value'];
 
 // Fields that identify form type
-const CHECK_REQUIRED_FIELDS = ['location_id', 'date_time', 'public_post_url'];
+// Note: For critical checks, public_post_url is optional, but critical_evidence_url is required
+const CHECK_BASE_REQUIRED_FIELDS = ['location_id', 'date_time'];
+const CHECK_NORMAL_REQUIRED_FIELDS = ['public_post_url'];
+const CHECK_CRITICAL_REQUIRED_FIELDS = ['critical_evidence_url'];
 const NEW_LOCATION_REQUIRED_FIELDS = ['name', 'address', 'category'];
 
 // Cache for valid location IDs (refreshed every 5 minutes)
@@ -198,7 +204,7 @@ export default {
       }
 
       // Validate URL formats
-      const urlFields = ['public_post_url', 'receipt_proof_url', 'payment_proof_url', 'venue_photo_url', 'website', 'osm_url'];
+      const urlFields = ['public_post_url', 'receipt_proof_url', 'payment_proof_url', 'venue_photo_url', 'website', 'osm_url', 'critical_evidence_url', 'critical_post_url'];
       for (const field of urlFields) {
         if (formData[field] && formData[field] !== '_nicht angegeben_') {
           try {
@@ -214,7 +220,20 @@ export default {
 
       // Determine form type
       const isNewLocation = NEW_LOCATION_REQUIRED_FIELDS.every(f => formData[f]);
-      const isCheck = CHECK_REQUIRED_FIELDS.every(f => formData[f]);
+      const hasCheckBaseFields = CHECK_BASE_REQUIRED_FIELDS.every(f => formData[f]);
+      const isCriticalCheck = formData.check_type === 'critical';
+
+      // Check submissions: base fields + either normal fields (for normal checks) or critical fields (for critical checks)
+      let isCheck = false;
+      if (hasCheckBaseFields) {
+        if (isCriticalCheck) {
+          // Critical checks require evidence URL
+          isCheck = CHECK_CRITICAL_REQUIRED_FIELDS.every(f => formData[f]);
+        } else {
+          // Normal checks require public post URL
+          isCheck = CHECK_NORMAL_REQUIRED_FIELDS.every(f => formData[f]);
+        }
+      }
 
       if (!isNewLocation && !isCheck) {
         return new Response(JSON.stringify({ error: 'Invalid form data - missing required fields' }), {
@@ -418,8 +437,13 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
   } else {
     // Check submission
     const locationId = publicData.location_id || 'UNKNOWN';
-    title = `Check: ${locationId} – ${today}`;
-    labels = ['pending', 'check'];
+    const isCritical = publicData.check_type === 'critical';
+    title = isCritical
+      ? `⚠️ Kritische Änderung: ${locationId} – ${today}`
+      : `Check: ${locationId} – ${today}`;
+    labels = isCritical
+      ? ['pending', 'check', 'critical']
+      : ['pending', 'check'];
     body = formatCheckBody(publicData, submissionId, submitterId);
   }
 
@@ -456,9 +480,44 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
  * Format the issue body for a check submission
  */
 function formatCheckBody(data, submissionId, submitterId) {
-  const checkTypeText = data.check_type === 'critical' || data.check_type?.includes('Kritisch')
-    ? 'Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen'
+  const isCritical = data.check_type === 'critical' || data.check_type?.includes('Kritisch');
+  const checkTypeText = isCritical
+    ? '⚠️ Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen'
     : 'Normaler Check – Ort akzeptiert weiterhin Bitcoin';
+
+  // Different proof sections for normal vs critical checks
+  let proofsSection;
+  if (isCritical) {
+    proofsSection = `### Nachweise (Kritische Änderung)
+
+### Beweis-Foto
+
+${data.critical_evidence_url || '_nicht angegeben_'}
+
+### Öffentlicher Post (optional)
+
+${data.critical_post_url || '_nicht angegeben_'}`;
+  } else {
+    proofsSection = `### Nachweise
+
+### 1. Öffentlicher Post (Social Media)
+
+${data.public_post_url || '_nicht angegeben_'}
+
+### 2. Kaufbeleg (Bon/Rechnung)
+
+${data.receipt_proof_url || '_nicht angegeben_'}
+
+### 3. Bitcoin-Zahlung
+
+${data.payment_proof_url || '_nicht angegeben_'}
+
+### 4. Foto vom Ort
+
+${data.venue_photo_url || '_nicht angegeben_'}`;
+  }
+
+  const observationsLabel = isCritical ? 'Was ist passiert?' : 'Wie lief die Zahlung?';
 
   return `## Satoshis für Berlin – Check
 
@@ -481,27 +540,11 @@ ${checkTypeText}
 
 ---
 
-### Nachweise
-
-### 1. Öffentlicher Post (Social Media)
-
-${data.public_post_url || '_nicht angegeben_'}
-
-### 2. Kaufbeleg (Bon/Rechnung)
-
-${data.receipt_proof_url || '_nicht angegeben_'}
-
-### 3. Bitcoin-Zahlung
-
-${data.payment_proof_url || '_nicht angegeben_'}
-
-### 4. Foto vom Ort
-
-${data.venue_photo_url || '_nicht angegeben_'}
+${proofsSection}
 
 ---
 
-### Wie lief die Zahlung?
+### ${observationsLabel}
 
 ${data.observations || '_keine Angabe_'}
 

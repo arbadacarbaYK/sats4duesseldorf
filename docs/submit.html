@@ -434,7 +434,7 @@
 
       <div class="field">
         <label>Art des Checks <span class="required">*</span></label>
-        <select name="check_type" required>
+        <select name="check_type" id="check-type-select" required>
           <option value="">– Bitte wählen –</option>
           <option value="normal">Normaler Check – Ort akzeptiert weiterhin Bitcoin</option>
           <option value="critical">Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen</option>
@@ -443,35 +443,53 @@
 
       <div class="section-title">Nachweise</div>
 
-      <div class="field">
-        <label>1. Öffentlicher Post <span class="required">*</span></label>
-        <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
-        <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+      <!-- Fields for normal checks only -->
+      <div id="normal-check-fields">
+        <div class="field">
+          <label>1. Öffentlicher Post <span class="required">*</span></label>
+          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
+          <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+        </div>
+
+        <div class="field">
+          <label>2. Kaufnachweis <span class="required">*</span></label>
+          <div class="field-hint">Bon, POS-Display, Handy-Screenshot oder ähnliches. Hochladen bei <a href="https://catbox.moe/" target="_blank">Catbox</a>, <a href="https://pic.infini.fr/" target="_blank">Lutim</a> oder <a href="https://imgbb.com/" target="_blank">Imgbb</a> – persönliche Daten schwärzen!</div>
+          <input type="url" name="receipt_proof_url" placeholder="https://files.catbox.moe/..." required>
+        </div>
+
+        <div class="field">
+          <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
+          <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
+          <input type="url" name="payment_proof_url" placeholder="https://files.catbox.moe/..." required>
+        </div>
+
+        <div class="field">
+          <label>4. Foto vom Ort <span class="required">*</span></label>
+          <div class="field-hint">Schild, Eingang oder Kasse</div>
+          <input type="url" name="venue_photo_url" placeholder="https://files.catbox.moe/..." required>
+        </div>
       </div>
 
-      <div class="field">
-        <label>2. Kaufnachweis <span class="required">*</span></label>
-        <div class="field-hint">Bon, POS-Display, Handy-Screenshot oder ähnliches. Hochladen bei <a href="https://catbox.moe/" target="_blank">Catbox</a>, <a href="https://pic.infini.fr/" target="_blank">Lutim</a> oder <a href="https://imgbb.com/" target="_blank">Imgbb</a> – persönliche Daten schwärzen!</div>
-        <input type="url" name="receipt_proof_url" placeholder="https://files.catbox.moe/..." required>
-      </div>
+      <!-- Fields for critical changes only -->
+      <div id="critical-check-fields" style="display: none;">
+        <div class="field">
+          <label>Beweis-Foto <span class="required">*</span></label>
+          <div class="field-hint">Foto vom Ort: entferntes Bitcoin-Schild, "Kein Bitcoin"-Hinweis, geschlossener Laden, etc. Hochladen bei <a href="https://catbox.moe/" target="_blank">Catbox</a>, <a href="https://pic.infini.fr/" target="_blank">Lutim</a> oder <a href="https://imgbb.com/" target="_blank">Imgbb</a></div>
+          <input type="url" name="critical_evidence_url" placeholder="https://files.catbox.moe/...">
+        </div>
 
-      <div class="field">
-        <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
-        <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
-        <input type="url" name="payment_proof_url" placeholder="https://files.catbox.moe/..." required>
-      </div>
-
-      <div class="field">
-        <label>4. Foto vom Ort <span class="required">*</span></label>
-        <div class="field-hint">Schild, Eingang oder Kasse</div>
-        <input type="url" name="venue_photo_url" placeholder="https://files.catbox.moe/..." required>
+        <div class="field">
+          <label>Öffentlicher Post (optional)</label>
+          <div class="field-hint">Falls du über die Änderung gepostet hast</div>
+          <input type="url" name="critical_post_url" placeholder="https://x.com/deinname/status/...">
+        </div>
       </div>
 
       <div class="section-title">Zusätzliche Infos</div>
 
-      <div class="field">
-        <label>Wie lief die Zahlung? <span class="required">*</span></label>
-        <textarea name="observations" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
+      <div class="field" id="observations-field">
+        <label id="observations-label">Wie lief die Zahlung? <span class="required">*</span></label>
+        <textarea name="observations" id="observations-input" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
       </div>
 
       <div class="field">
@@ -940,6 +958,56 @@
     }
   } catch (e) {
     console.error('Location status checker failed to initialize:', e);
+  }
+
+  // Check type toggle - show different fields for normal vs critical checks
+  const checkTypeSelect = document.getElementById('check-type-select');
+  const normalFields = document.getElementById('normal-check-fields');
+  const criticalFields = document.getElementById('critical-check-fields');
+  const observationsLabel = document.getElementById('observations-label');
+  const observationsInput = document.getElementById('observations-input');
+
+  if (checkTypeSelect && normalFields && criticalFields) {
+    checkTypeSelect.addEventListener('change', () => {
+      const isCritical = checkTypeSelect.value === 'critical';
+
+      if (isCritical) {
+        // Show critical fields, hide normal fields
+        normalFields.style.display = 'none';
+        criticalFields.style.display = 'block';
+
+        // Remove required from normal fields
+        normalFields.querySelectorAll('input[required]').forEach(input => {
+          input.removeAttribute('required');
+          input.dataset.wasRequired = 'true';
+        });
+
+        // Add required to critical evidence field
+        const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
+        if (evidenceInput) evidenceInput.required = true;
+
+        // Update observations label and placeholder
+        if (observationsLabel) observationsLabel.innerHTML = 'Was ist passiert? <span class="required">*</span>';
+        if (observationsInput) observationsInput.placeholder = 'Wollte mit Bitcoin zahlen, aber Mitarbeiter sagte, sie akzeptieren das nicht mehr...';
+      } else {
+        // Show normal fields, hide critical fields
+        normalFields.style.display = 'block';
+        criticalFields.style.display = 'none';
+
+        // Restore required on normal fields
+        normalFields.querySelectorAll('input[data-was-required="true"]').forEach(input => {
+          input.required = true;
+        });
+
+        // Remove required from critical evidence field
+        const evidenceInput = criticalFields.querySelector('input[name="critical_evidence_url"]');
+        if (evidenceInput) evidenceInput.required = false;
+
+        // Restore observations label and placeholder
+        if (observationsLabel) observationsLabel.innerHTML = 'Wie lief die Zahlung? <span class="required">*</span>';
+        if (observationsInput) observationsInput.placeholder = 'Zahlung per Lightning an der Kasse, hat sofort funktioniert...';
+      }
+    });
   }
 </script>
 
