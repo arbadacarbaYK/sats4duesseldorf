@@ -750,6 +750,15 @@
     });
   });
 
+  // Switch to new-location tab if ?form=new-location is in URL
+  const formParam = new URLSearchParams(window.location.search).get('form');
+  if (formParam === 'new-location') {
+    document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.querySelector('.form-tab[data-form="new-location"]').classList.add('active');
+    document.getElementById('new-location-form').classList.add('active');
+  }
+
   // Form submission
   async function submitForm(form, statusEl) {
     const formData = new FormData(form);
