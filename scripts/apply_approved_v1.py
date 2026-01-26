@@ -119,13 +119,44 @@ def write_csv(path: Path, rows, fieldnames):
 
 def body_field(body: str, label: str) -> str:
     """
-    GitHub Issue Forms render fields roughly as:
-      Label
-      value
-    We grab the first non-empty line after the label.
+    GitHub Issue Forms render fields in various formats:
+      - ### Label\\n\\nvalue
+      - **Label**\\nvalue
+      - **Label:** `value`
+      - Label\\nvalue
+    We try multiple patterns to be robust against format changes.
     """
-    m = re.search(rf"{re.escape(label)}\s*\n+([^\n]+)", body or "", re.IGNORECASE)
-    return (m.group(1).strip() if m else "")
+    if not body:
+        return ""
+
+    escaped_label = re.escape(label)
+
+    # Pattern 1: Markdown header format (### Label\n\nvalue)
+    m = re.search(rf"###\s*{escaped_label}\s*\n+([^\n#]+)", body, re.IGNORECASE)
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+
+    # Pattern 2: Bold label with backtick value (**Label:** `value`)
+    m = re.search(rf"\*\*{escaped_label}:?\*\*\s*`([^`]+)`", body, re.IGNORECASE)
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+
+    # Pattern 3: Bold label with plain value (**Label:** value or **Label**\nvalue)
+    m = re.search(rf"\*\*{escaped_label}:?\*\*\s*\n*([^\n*]+)", body, re.IGNORECASE)
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+
+    # Pattern 4: Plain label followed by value (Label\nvalue)
+    m = re.search(rf"{escaped_label}\s*\n+([^\n]+)", body, re.IGNORECASE)
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+
+    # Pattern 5: Label with colon inline (Label: value)
+    m = re.search(rf"{escaped_label}:\s*([^\n]+)", body, re.IGNORECASE)
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+
+    return ""
 
 def generate_new_location_id(loc_rows: list) -> str:
     """Generate next available location ID with uniqueness check."""

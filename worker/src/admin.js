@@ -11,6 +11,34 @@
 // Submission ID format validation
 const SUBMISSION_ID_REGEX = /^SUB-[A-Z0-9]+-[A-Z0-9]+$/;
 
+// Allowed origins for admin API (more restrictive than webhook)
+// Only allow from the main GitHub Pages site, no localhost
+const ADMIN_ALLOWED_ORIGINS = [
+  'https://satoshiinberlin.github.io',
+];
+
+/**
+ * Log admin action for audit trail
+ */
+async function logAdminAction(env, action, details, clientIP) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    action,
+    details,
+    clientIP: clientIP || 'unknown',
+  };
+
+  // Store audit log with 1 year expiration
+  const logKey = `audit:${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  try {
+    await env.PRIVATE_DATA.put(logKey, JSON.stringify(logEntry), {
+      expirationTtl: 365 * 24 * 60 * 60
+    });
+  } catch (e) {
+    console.error('Failed to write audit log:', e);
+  }
+}
+
 /**
  * Timing-safe string comparison to prevent timing attacks
  */
@@ -38,10 +66,35 @@ function timingSafeEqual(a, b) {
  */
 export async function handleAdminRequest(request, env) {
   const url = new URL(request.url);
+  const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+  // Validate Origin header for CSRF protection
+  const origin = request.headers.get('Origin');
+  // Allow dev origins if ADMIN_ALLOWED_ORIGINS_DEV is set (comma-separated)
+  const devOrigins = env.ADMIN_ALLOWED_ORIGINS_DEV ? env.ADMIN_ALLOWED_ORIGINS_DEV.split(',') : [];
+  const allAllowedOrigins = [...ADMIN_ALLOWED_ORIGINS, ...devOrigins];
+
+  if (origin && !allAllowedOrigins.some(allowed => origin.startsWith(allowed.trim()))) {
+    await logAdminAction(env, 'BLOCKED_ORIGIN', { origin, path: url.pathname }, clientIP);
+    return new Response(JSON.stringify({ error: 'Invalid origin' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Validate that ADMIN_API_TOKEN is configured (not empty)
+  if (!env.ADMIN_API_TOKEN || env.ADMIN_API_TOKEN.length < 16) {
+    console.error('ADMIN_API_TOKEN is not configured or too short');
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
   // Verify admin authentication
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    await logAdminAction(env, 'AUTH_MISSING', { path: url.pathname }, clientIP);
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' }
@@ -50,7 +103,8 @@ export async function handleAdminRequest(request, env) {
 
   const token = authHeader.substring(7);
   // Use timing-safe comparison to prevent timing attacks
-  if (!timingSafeEqual(token, env.ADMIN_API_TOKEN || '')) {
+  if (!timingSafeEqual(token, env.ADMIN_API_TOKEN)) {
+    await logAdminAction(env, 'AUTH_FAILED', { path: url.pathname }, clientIP);
     return new Response(JSON.stringify({ error: 'Invalid token' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -59,11 +113,11 @@ export async function handleAdminRequest(request, env) {
 
   // Route admin requests
   if (url.pathname === '/admin/contact' && request.method === 'GET') {
-    return await getContactInfo(url, env);
+    return await getContactInfo(url, env, clientIP);
   }
 
   if (url.pathname === '/admin/mark-paid' && request.method === 'POST') {
-    return await markAsPaid(request, env);
+    return await markAsPaid(request, env, clientIP);
   }
 
   return new Response(JSON.stringify({ error: 'Not found' }), {
@@ -76,7 +130,7 @@ export async function handleAdminRequest(request, env) {
  * Get contact info for a submission
  * GET /admin/contact?submission_id=SUB-XXXXX
  */
-async function getContactInfo(url, env) {
+async function getContactInfo(url, env, clientIP) {
   const submissionId = url.searchParams.get('submission_id');
 
   if (!submissionId) {
@@ -97,11 +151,15 @@ async function getContactInfo(url, env) {
   const data = await env.PRIVATE_DATA.get(`submission:${submissionId}`);
 
   if (!data) {
+    await logAdminAction(env, 'CONTACT_NOT_FOUND', { submissionId }, clientIP);
     return new Response(JSON.stringify({ error: 'Submission not found or expired' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  // Log successful access to contact info
+  await logAdminAction(env, 'CONTACT_ACCESSED', { submissionId }, clientIP);
 
   return new Response(data, {
     status: 200,
@@ -113,7 +171,7 @@ async function getContactInfo(url, env) {
  * Mark a submission as paid and optionally delete contact info
  * POST /admin/mark-paid { submission_id: 'SUB-XXXXX', delete_data: true }
  */
-async function markAsPaid(request, env) {
+async function markAsPaid(request, env, clientIP) {
   let body;
   try {
     body = await request.json();
@@ -145,6 +203,7 @@ async function markAsPaid(request, env) {
   const data = await env.PRIVATE_DATA.get(`submission:${submissionId}`);
 
   if (!data) {
+    await logAdminAction(env, 'MARK_PAID_NOT_FOUND', { submissionId }, clientIP);
     return new Response(JSON.stringify({ error: 'Submission not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' }
@@ -158,6 +217,7 @@ async function markAsPaid(request, env) {
   if (body.delete_data) {
     // Delete private data after payment
     await env.PRIVATE_DATA.delete(`submission:${submissionId}`);
+    await logAdminAction(env, 'MARKED_PAID_DELETED', { submissionId }, clientIP);
     return new Response(JSON.stringify({ success: true, message: 'Marked as paid and data deleted' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -169,6 +229,7 @@ async function markAsPaid(request, env) {
       JSON.stringify(parsed),
       { expirationTtl: 30 * 24 * 60 * 60 } // Keep for 30 more days
     );
+    await logAdminAction(env, 'MARKED_PAID', { submissionId }, clientIP);
     return new Response(JSON.stringify({ success: true, message: 'Marked as paid' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

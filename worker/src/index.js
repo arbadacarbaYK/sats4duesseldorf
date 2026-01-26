@@ -8,10 +8,9 @@
 import { handleAdminRequest } from './admin.js';
 
 // Allowed origins for CORS/CSRF protection
+// Note: Add localhost origins via ALLOWED_ORIGINS_DEV env var for local testing
 const ALLOWED_ORIGINS = [
   'https://satoshiinberlin.github.io',
-  'http://localhost:3000',  // For local development
-  'http://127.0.0.1:3000',
 ];
 
 // Rate limiting configuration
@@ -89,7 +88,10 @@ export default {
 
     // CSRF protection: Validate Origin header
     const origin = request.headers.get('Origin');
-    if (!origin || !ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
+    // Allow dev origins if ALLOWED_ORIGINS_DEV is set (comma-separated)
+    const devOrigins = env.ALLOWED_ORIGINS_DEV ? env.ALLOWED_ORIGINS_DEV.split(',') : [];
+    const allAllowedOrigins = [...ALLOWED_ORIGINS, ...devOrigins];
+    if (!origin || !allAllowedOrigins.some(allowed => origin.startsWith(allowed.trim()))) {
       return new Response(JSON.stringify({ error: 'Invalid origin' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' }
@@ -97,38 +99,47 @@ export default {
     }
     corsHeaders['Access-Control-Allow-Origin'] = origin;
 
-    // Rate limiting: Check submissions per IP
+    // Rate limiting: Sliding window using timestamps (more robust against race conditions)
     const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
     const rateLimitKey = `ratelimit:${clientIP}`;
+    const now = Date.now();
 
     try {
       const rateLimitData = await env.PRIVATE_DATA.get(rateLimitKey);
-      let requestCount = 0;
-      let windowStart = Date.now();
+      let timestamps = [];
 
       if (rateLimitData) {
         const parsed = JSON.parse(rateLimitData);
-        // Check if we're still in the same window
-        if (Date.now() - parsed.windowStart < RATE_LIMIT_WINDOW_MS) {
-          requestCount = parsed.count;
-          windowStart = parsed.windowStart;
-        }
+        // Filter to only keep timestamps within the window
+        timestamps = (parsed.timestamps || []).filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
       }
 
-      if (requestCount >= RATE_LIMIT_MAX_REQUESTS) {
+      // Check rate limit BEFORE adding new timestamp
+      // This means even if concurrent requests read at the same time,
+      // they'll all add timestamps and subsequent checks will count them
+      if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+        const oldestTs = Math.min(...timestamps);
+        const retryAfterSecs = Math.ceil((oldestTs + RATE_LIMIT_WINDOW_MS - now) / 1000);
         return new Response(JSON.stringify({
           error: 'Rate limit exceeded',
-          message: 'Zu viele Einreichungen. Bitte warte eine Stunde.'
+          message: 'Zu viele Einreichungen. Bitte warte eine Stunde.',
+          retryAfter: retryAfterSecs
         }), {
           status: 429,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(retryAfterSecs),
+            ...corsHeaders
+          }
         });
       }
 
-      // Update rate limit counter
+      // Add current request timestamp
+      timestamps.push(now);
+
+      // Store updated timestamps (keep max 2x limit to prevent unbounded growth)
       await env.PRIVATE_DATA.put(rateLimitKey, JSON.stringify({
-        count: requestCount + 1,
-        windowStart: windowStart
+        timestamps: timestamps.slice(-RATE_LIMIT_MAX_REQUESTS * 2)
       }), { expirationTtl: 3600 }); // Expire after 1 hour
     } catch (rateLimitError) {
       // Don't fail if rate limiting has issues, just log

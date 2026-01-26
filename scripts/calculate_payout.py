@@ -76,12 +76,12 @@ def get_base_bounty(location_id: str, check_type: str) -> tuple[int, str]:
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if row.get("id") == location_id:
+            if row.get("location_id") == location_id:
                 if check_type == "critical":
                     return 21000, "Critical change (fixed)"
 
-                bounty = int(row.get("bounty_sats", 0))
-                last_check = row.get("last_verified", "")
+                bounty = int(row.get("bounty_base_sats", 0) or 0)
+                last_check = row.get("last_verified_at", "")
                 return bounty, f"Based on last check: {last_check or 'never'}"
 
     return 0, f"Location {location_id} not found in CSV"
