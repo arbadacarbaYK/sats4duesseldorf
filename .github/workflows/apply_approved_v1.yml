@@ -77,7 +77,7 @@ jobs:
           LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels -q '.labels[].name' | tr '\n' ' ')
 
           # Check if submission came via web form (has Submission ID)
-          SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\* `\K[^`]+' || echo "")
+          SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\*\s*`\K[^`]+' || echo "")
 
           # Extract Location-ID from issue body
           LOCATION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Location-ID:\*\*\s*`\K[^`]+' || \
