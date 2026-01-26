@@ -197,6 +197,7 @@
 
     input[type="text"],
     input[type="url"],
+    input[type="datetime-local"],
     select,
     textarea {
       width: 100%;
@@ -208,6 +209,11 @@
       font-size: 14px;
       font-family: inherit;
       transition: border-color 0.15s ease;
+    }
+
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
     }
 
     input:focus,
@@ -371,7 +377,7 @@
       <div class="field">
         <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
         <div class="field-hint">Wann hast du bezahlt?</div>
-        <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+        <input type="datetime-local" name="date_time" required>
       </div>
 
       <div class="field">
@@ -493,7 +499,7 @@
 
       <div class="field">
         <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
-        <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+        <input type="datetime-local" name="date_time" required>
       </div>
 
       <div class="section-title">Nachweise</div>
@@ -689,6 +695,19 @@
 
   updateContactFields('check-contact-method', 'check-contact-hint', 'check-contact-value');
   updateContactFields('newloc-contact-method', 'newloc-contact-hint', 'newloc-contact-value');
+
+  // Set max date/time to now for all datetime-local inputs
+  function setDateTimeConstraints() {
+    const now = new Date();
+    // Format: YYYY-MM-DDTHH:MM
+    const maxDateTime = now.toISOString().slice(0, 16);
+
+    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+      input.max = maxDateTime;
+    });
+  }
+
+  setDateTimeConstraints();
 </script>
 
 </body>
