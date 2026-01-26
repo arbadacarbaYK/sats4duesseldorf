@@ -687,6 +687,7 @@
 
       if (result.success) {
         statusEl.className = 'status-message success';
+        statusEl.style.display = 'block';
         // Validate issueUrl is a valid GitHub URL to prevent XSS
         const issueUrl = result.issueUrl || '';
         const isValidGitHubUrl = /^https:\/\/github\.com\/[\w-]+\/[\w-]+\/issues\/\d+$/.test(issueUrl);
@@ -737,6 +738,7 @@
       }
     } catch (error) {
       statusEl.className = 'status-message error';
+      statusEl.style.display = 'block';
       statusEl.textContent = '';
 
       // Translate common error messages to German
