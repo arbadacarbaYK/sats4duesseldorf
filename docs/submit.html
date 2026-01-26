@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check einreichen – Satoshis für Berlin</title>
+  <style>
+    :root {
+      --btc-orange: #F7931A;
+      --btc-dark: #1a1a2e;
+      --btc-darker: #0f0f1a;
+      --success-green: #22c55e;
+      --error-red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--btc-darker);
+      color: #e0e0e0;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      color: var(--btc-orange);
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #888;
+      font-size: 0.95rem;
+    }
+
+    .form-card {
+      background: var(--btc-dark);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid #333;
+    }
+
+    .section-title {
+      color: var(--btc-orange);
+      font-size: 1.1rem;
+      margin: 1.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #333;
+    }
+
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+      color: #ccc;
+    }
+
+    label .required {
+      color: var(--btc-orange);
+    }
+
+    .field-hint {
+      font-size: 0.85rem;
+      color: #777;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: var(--btc-darker);
+      color: #e0e0e0;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--btc-orange);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #555;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .privacy-notice {
+      background: rgba(247, 147, 26, 0.1);
+      border: 1px solid rgba(247, 147, 26, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .privacy-notice strong {
+      color: var(--btc-orange);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 1rem;
+      background: var(--btc-orange);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 1rem;
+    }
+
+    button[type="submit"]:hover {
+      background: #e8850f;
+    }
+
+    button[type="submit"]:active {
+      transform: scale(0.98);
+    }
+
+    button[type="submit"]:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .status-message.success {
+      display: block;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--success-green);
+      color: var(--success-green);
+    }
+
+    .status-message.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error-red);
+      color: var(--error-red);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--btc-orange);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Form tabs */
+    .form-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-tab {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--btc-darker);
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .form-tab:hover {
+      border-color: #666;
+    }
+
+    .form-tab.active {
+      background: var(--btc-orange);
+      color: #000;
+      border-color: var(--btc-orange);
+      font-weight: 600;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem 0.75rem;
+      }
+
+      .form-card {
+        padding: 1.25rem;
+      }
+
+      header h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>₿ Satoshis für Berlin</h1>
+      <p>Bounty claimen – Check einreichen</p>
+    </header>
+
+    <div class="form-card">
+      <div class="form-tabs">
+        <div class="form-tab active" data-form="check">Check einreichen</div>
+        <div class="form-tab" data-form="new-location">Neuen Ort melden</div>
+      </div>
+
+      <!-- CHECK FORM -->
+      <form id="check-form" class="form-section active">
+        <div class="section-title">Ort & Zeitpunkt</div>
+
+        <div class="field">
+          <label>Location-ID <span class="required">*</span></label>
+          <div class="field-hint">Findest du auf <a href="./" style="color: var(--btc-orange);">sats4berlin.de</a> (z.B. DE-BE-00042)</div>
+          <input type="text" name="location_id" placeholder="DE-BE-00042" required>
+        </div>
+
+        <div class="field">
+          <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
+          <div class="field-hint">Wann hast du bezahlt?</div>
+          <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+        </div>
+
+        <div class="field">
+          <label>Art des Checks <span class="required">*</span></label>
+          <select name="check_type" required>
+            <option value="">– Bitte wählen –</option>
+            <option value="normal">Normaler Check – Ort akzeptiert weiterhin Bitcoin</option>
+            <option value="critical">Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen</option>
+          </select>
+        </div>
+
+        <div class="section-title">Nachweise (alle vier erforderlich)</div>
+
+        <div class="field">
+          <label>1. Öffentlicher Post <span class="required">*</span></label>
+          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
+          <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+        </div>
+
+        <div class="field">
+          <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
+          <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
+          <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="field">
+          <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
+          <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
+          <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="field">
+          <label>4. Foto vom Ort <span class="required">*</span></label>
+          <div class="field-hint">Schild, Eingang oder Kasse</div>
+          <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="section-title">Zusätzliche Infos</div>
+
+        <div class="field">
+          <label>Wie lief die Zahlung? <span class="required">*</span></label>
+          <textarea name="observations" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
+        </div>
+
+        <div class="field">
+          <label>Änderungen am Eintrag nötig?</label>
+          <div class="field-hint">Optional: Falls du Fehler bemerkt hast</div>
+          <textarea name="suggested_updates" placeholder="Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr"></textarea>
+        </div>
+
+        <div class="privacy-notice">
+          <strong>🔒 Auszahlung (privat)</strong><br>
+          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet. Sie dienen nur zur Auszahlung deines Bounties.
+        </div>
+
+        <div class="field">
+          <label>Auszahlungsmethode <span class="required">*</span></label>
+          <select name="contact_method" required>
+            <option value="">– Bitte wählen –</option>
+            <option value="lightning">Lightning-Adresse (z.B. name@getalby.com)</option>
+            <option value="cashu">Cashu / eCash Token</option>
+            <option value="nostr">Nostr DM (npub eingeben)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Deine Auszahlungsadresse <span class="required">*</span></label>
+          <div class="field-hint">Lightning-Adresse, eCash-Adresse oder Nostr npub</div>
+          <input type="text" name="contact_value" placeholder="satoshi@getalby.com" required>
+        </div>
+
+        <button type="submit">Check einreichen</button>
+
+        <div id="check-status" class="status-message"></div>
+      </form>
+
+      <!-- NEW LOCATION FORM -->
+      <form id="new-location-form" class="form-section">
+        <div class="section-title">Angaben zum Ort</div>
+
+        <div class="field">
+          <label>Name des Ortes <span class="required">*</span></label>
+          <input type="text" name="name" placeholder="Café Beispiel" required>
+        </div>
+
+        <div class="field">
+          <label>Adresse <span class="required">*</span></label>
+          <div class="field-hint">Vollständige Adresse mit PLZ</div>
+          <input type="text" name="address" placeholder="Musterstraße 1, 10115 Berlin" required>
+        </div>
+
+        <div class="field">
+          <label>Kategorie <span class="required">*</span></label>
+          <select name="category" required>
+            <option value="">– Bitte wählen –</option>
+            <option value="restaurant">Restaurant / Café / Bar</option>
+            <option value="shop">Einzelhandel / Shop</option>
+            <option value="service">Dienstleistung</option>
+            <option value="hotel">Hotel / Unterkunft</option>
+            <option value="other">Sonstiges</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Website</label>
+          <input type="url" name="website" placeholder="https://www.beispiel.de">
+        </div>
+
+        <div class="field">
+          <label>OpenStreetMap-Link</label>
+          <div class="field-hint">Falls der Ort bereits in OSM existiert</div>
+          <input type="url" name="osm_url" placeholder="https://www.openstreetmap.org/node/...">
+        </div>
+
+        <div class="section-title">Dein Kauf vor Ort</div>
+
+        <div class="field">
+          <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
+          <input type="text" name="date_time" placeholder="25.01.2026, ca. 14:30" required>
+        </div>
+
+        <div class="section-title">Nachweise (alle vier erforderlich)</div>
+
+        <div class="field">
+          <label>1. Öffentlicher Post <span class="required">*</span></label>
+          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin"</div>
+          <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
+        </div>
+
+        <div class="field">
+          <label>2. Kaufbeleg (Bon/Rechnung) <span class="required">*</span></label>
+          <div class="field-hint">Bei Imgur/Imgbb hochladen, persönliche Daten schwärzen!</div>
+          <input type="url" name="receipt_proof_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="field">
+          <label>3. Bitcoin-Zahlung <span class="required">*</span></label>
+          <div class="field-hint">Screenshot mit Bestätigung "bezahlt"</div>
+          <input type="url" name="payment_proof_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="field">
+          <label>4. Foto vom Ort <span class="required">*</span></label>
+          <div class="field-hint">Schild, Eingang oder Kasse</div>
+          <input type="url" name="venue_photo_url" placeholder="https://imgur.com/..." required>
+        </div>
+
+        <div class="section-title">Zusätzliche Infos</div>
+
+        <div class="field">
+          <label>Wie lief die Zahlung? <span class="required">*</span></label>
+          <div class="field-hint">Beschreibe deine Erfahrung, nenne Öffnungszeiten falls bekannt</div>
+          <textarea name="notes" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert. Öffnungszeiten laut Aushang: Mo-Fr 10-18 Uhr" required></textarea>
+        </div>
+
+        <div class="privacy-notice">
+          <strong>🔒 Auszahlung (privat)</strong><br>
+          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet.<br><br>
+          <strong>Hinweis:</strong> Bei Neueinträgen erfolgt die Auszahlung erst nach Bestätigung durch 2 weitere Bitcoiner (insgesamt 3 Checks).
+        </div>
+
+        <div class="field">
+          <label>Auszahlungsmethode <span class="required">*</span></label>
+          <select name="contact_method" required>
+            <option value="">– Bitte wählen –</option>
+            <option value="lightning">Lightning-Adresse (z.B. name@getalby.com)</option>
+            <option value="cashu">Cashu / eCash Token</option>
+            <option value="nostr">Nostr DM (npub eingeben)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Deine Auszahlungsadresse <span class="required">*</span></label>
+          <input type="text" name="contact_value" placeholder="satoshi@getalby.com" required>
+        </div>
+
+        <button type="submit">Neuen Ort melden</button>
+
+        <div id="new-location-status" class="status-message"></div>
+      </form>
+    </div>
+
+    <a href="./" class="back-link">← Zurück zur Übersicht</a>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://sats4berlin-form-handler.satoshiinberlin.workers.dev/webhook/tally';
+
+    // Tab switching
+    document.querySelectorAll('.form-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+
+        tab.classList.add('active');
+        const formId = tab.dataset.form === 'check' ? 'check-form' : 'new-location-form';
+        document.getElementById(formId).classList.add('active');
+      });
+    });
+
+    // Form submission
+    async function submitForm(form, statusEl) {
+      const formData = new FormData(form);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        if (value.trim()) {
+          data[key] = value.trim();
+        }
+      });
+
+      statusEl.className = 'status-message';
+      statusEl.style.display = 'none';
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Wird gesendet...';
+
+      try {
+        const response = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          statusEl.className = 'status-message success';
+          statusEl.innerHTML = `
+            <strong>✓ Erfolgreich eingereicht!</strong><br><br>
+            Dein Check wurde erstellt: <a href="${result.issueUrl}" target="_blank" style="color: inherit;">${result.issueUrl}</a><br><br>
+            Du wirst benachrichtigt, sobald der Check geprüft wurde.
+          `;
+          form.reset();
+        } else {
+          throw new Error(result.error || 'Unbekannter Fehler');
+        }
+      } catch (error) {
+        statusEl.className = 'status-message error';
+        statusEl.innerHTML = `<strong>✗ Fehler:</strong> ${error.message}<br>Bitte versuche es erneut.`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+
+    document.getElementById('check-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitForm(e.target, document.getElementById('check-status'));
+    });
+
+    document.getElementById('new-location-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitForm(e.target, document.getElementById('new-location-status'));
+    });
+
+    // Pre-fill location_id from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const locationId = urlParams.get('location_id');
+    if (locationId) {
+      document.querySelector('#check-form input[name="location_id"]').value = locationId;
+    }
+  </script>
+</body>
+</html>

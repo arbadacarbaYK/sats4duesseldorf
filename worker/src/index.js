@@ -40,28 +40,28 @@ const NEW_LOCATION_REQUIRED_FIELDS = ['name', 'address', 'category'];
 
 export default {
   async fetch(request, env, ctx) {
-    // Only accept POST requests
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
-    }
-
     const url = new URL(request.url);
 
-    // Health check endpoint
+    // Health check endpoint (GET)
     if (url.pathname === '/health') {
       return new Response(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }), {
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Admin API endpoints
+    // Admin API endpoints (GET/POST)
     if (url.pathname.startsWith('/admin/')) {
       return handleAdminRequest(request, env);
     }
 
-    // Main webhook endpoint
+    // Main webhook endpoint - POST only
     if (url.pathname !== '/webhook/tally') {
       return new Response('Not found', { status: 404 });
+    }
+
+    // Only accept POST requests for webhook
+    if (request.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405 });
     }
 
     try {

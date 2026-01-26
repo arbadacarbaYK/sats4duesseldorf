@@ -490,11 +490,10 @@
 
 <script>
   const REPO_URL = "https://github.com/satoshiinberlin/sats4berlin";
-  const CHECK_TEMPLATE_URL = `${REPO_URL}/issues/new?template=check.yml`;
-  const NEW_LOCATION_URL = `${REPO_URL}/issues/new?template=new_location.yml`;
+  const SUBMIT_FORM_URL = "submit.html";
 
-  document.getElementById("btnSubmit").href = `${REPO_URL}/issues/new/choose`;
-  document.getElementById("btnNewLocation").href = NEW_LOCATION_URL;
+  document.getElementById("btnSubmit").href = SUBMIT_FORM_URL;
+  document.getElementById("btnNewLocation").href = SUBMIT_FORM_URL;
   document.getElementById("btnRules").href = `${REPO_URL}/blob/main/RULES.md`;
 
   const toast = (msg) => {
@@ -540,10 +539,8 @@
   }
 
   function createClaimUrl(locationId, name) {
-    const today = new Date().toISOString().slice(0, 10);
-    const title = encodeURIComponent(`Check: ${locationId} – ${today}`);
     const lid = encodeURIComponent(locationId);
-    return `${CHECK_TEMPLATE_URL}&title=${title}&location_id=${lid}`;
+    return `${SUBMIT_FORM_URL}?location_id=${lid}`;
   }
 
   function render() {
