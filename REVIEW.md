@@ -7,7 +7,7 @@ Ein Issue kann nur **approved** werden, wenn ein Kauf vor Ort **in Bitcoin** pla
 2) Bon/Beleg ist vorhanden (persönliche Daten geschwärzt).
 3) Bitcoin-Zahlung ist erkennbar bestätigt ("bezahlt", Betrag/Datum).
 4) Ort ist eindeutig erkennbar (Schild/Eingang/Kasse).
-5) Cooldown eingehalten (letzter gültiger Check mindestens 3 Monate her).
+5) Cooldown eingehalten (letzter gültiger Check mindestens 90 Tage her).
 
 ## Einstufung
 - **base**: Zahlung bestätigt, keine kritische Änderung.

@@ -116,7 +116,7 @@ def main():
         i = get(r, "osm_id", "id", default="0")
         try:
             i = int(str(i))
-        except:
+        except (ValueError, TypeError):
             i = 0
         return (t, i)
 

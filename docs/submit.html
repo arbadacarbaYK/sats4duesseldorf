@@ -617,18 +617,71 @@
 
       if (result.success) {
         statusEl.className = 'status-message success';
-        statusEl.innerHTML = `
-          <strong>✓ Erfolgreich eingereicht!</strong><br><br>
-          Dein Check wurde erstellt: <a href="${result.issueUrl}" target="_blank">${result.issueUrl}</a><br><br>
-          Du wirst benachrichtigt, sobald der Check geprüft wurde.
-        `;
+        // Validate issueUrl is a valid GitHub URL to prevent XSS
+        const issueUrl = result.issueUrl || '';
+        const isValidGitHubUrl = /^https:\/\/github\.com\/[\w-]+\/[\w-]+\/issues\/\d+$/.test(issueUrl);
+
+        // Build content safely without innerHTML
+        statusEl.textContent = '';
+        const strong = document.createElement('strong');
+        strong.textContent = '✓ Erfolgreich eingereicht!';
+        statusEl.appendChild(strong);
+        statusEl.appendChild(document.createElement('br'));
+        statusEl.appendChild(document.createElement('br'));
+        statusEl.appendChild(document.createTextNode('Dein Check wurde erstellt: '));
+
+        if (isValidGitHubUrl) {
+          const link = document.createElement('a');
+          link.href = issueUrl;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = issueUrl;
+          statusEl.appendChild(link);
+        } else {
+          statusEl.appendChild(document.createTextNode('(Link nicht verfügbar)'));
+        }
+
+        statusEl.appendChild(document.createElement('br'));
+        statusEl.appendChild(document.createElement('br'));
+        statusEl.appendChild(document.createTextNode('Du wirst benachrichtigt, sobald der Check geprüft wurde.'));
+
         form.reset();
       } else {
         throw new Error(result.error || 'Unbekannter Fehler');
       }
     } catch (error) {
       statusEl.className = 'status-message error';
-      statusEl.innerHTML = `<strong>✗ Fehler:</strong> ${error.message}<br>Bitte versuche es erneut.`;
+      statusEl.textContent = '';
+
+      // Translate common error messages to German
+      let errorMessage = error.message || 'Unbekannter Fehler';
+      let helpText = 'Bitte versuche es erneut.';
+
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        errorMessage = 'Netzwerkfehler';
+        helpText = 'Bitte prüfe deine Internetverbindung und versuche es erneut.';
+      } else if (error.message === 'Invalid origin') {
+        errorMessage = 'Ungültige Anfrage';
+        helpText = 'Bitte lade die Seite neu und versuche es erneut.';
+      } else if (error.message === 'Rate limit exceeded' || error.message?.includes('Rate limit')) {
+        errorMessage = 'Zu viele Anfragen';
+        helpText = 'Bitte warte eine Stunde, bevor du erneut einreichst.';
+      } else if (error.message?.includes('Invalid location ID')) {
+        errorMessage = 'Ungültige Location-ID';
+        helpText = 'Bitte prüfe die Location-ID (Format: DE-BE-00042).';
+      } else if (error.message?.includes('Date cannot be in the future')) {
+        errorMessage = 'Ungültiges Datum';
+        helpText = 'Das Kaufdatum darf nicht in der Zukunft liegen.';
+      } else if (error.message?.includes('Invalid URL')) {
+        errorMessage = 'Ungültige URL';
+        helpText = 'Bitte prüfe, ob alle Links korrekt eingegeben wurden.';
+      }
+
+      const strong = document.createElement('strong');
+      strong.textContent = '✗ ' + errorMessage;
+      statusEl.appendChild(strong);
+      statusEl.appendChild(document.createElement('br'));
+      statusEl.appendChild(document.createTextNode(helpText));
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
@@ -645,10 +698,10 @@
     submitForm(e.target, document.getElementById('new-location-status'));
   });
 
-  // Pre-fill location_id from URL parameter
+  // Pre-fill location_id from URL parameter (validate format to prevent injection)
   const urlParams = new URLSearchParams(window.location.search);
   const locationId = urlParams.get('location_id');
-  if (locationId) {
+  if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
     document.querySelector('#check-form input[name="location_id"]').value = locationId;
   }
 

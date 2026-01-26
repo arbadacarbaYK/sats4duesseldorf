@@ -8,6 +8,28 @@
  * or deployed as a separate protected endpoint.
  */
 
+// Submission ID format validation
+const SUBMISSION_ID_REGEX = /^SUB-[A-Z0-9]+-[A-Z0-9]+$/;
+
+/**
+ * Timing-safe string comparison to prevent timing attacks
+ */
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    return false;
+  }
+  if (a.length !== b.length) {
+    // Still do comparison to maintain constant time for same-length strings
+    // But we know it will fail
+    b = a;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0 && a.length === b.length;
+}
+
 /**
  * Handle admin API requests
  * @param {Request} request
@@ -27,7 +49,8 @@ export async function handleAdminRequest(request, env) {
   }
 
   const token = authHeader.substring(7);
-  if (token !== env.ADMIN_API_TOKEN) {
+  // Use timing-safe comparison to prevent timing attacks
+  if (!timingSafeEqual(token, env.ADMIN_API_TOKEN || '')) {
     return new Response(JSON.stringify({ error: 'Invalid token' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -63,6 +86,14 @@ async function getContactInfo(url, env) {
     });
   }
 
+  // Validate submission ID format to prevent KV key injection
+  if (!SUBMISSION_ID_REGEX.test(submissionId)) {
+    return new Response(JSON.stringify({ error: 'Invalid submission_id format' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const data = await env.PRIVATE_DATA.get(`submission:${submissionId}`);
 
   if (!data) {
@@ -83,11 +114,28 @@ async function getContactInfo(url, env) {
  * POST /admin/mark-paid { submission_id: 'SUB-XXXXX', delete_data: true }
  */
 async function markAsPaid(request, env) {
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const submissionId = body.submission_id;
 
   if (!submissionId) {
     return new Response(JSON.stringify({ error: 'Missing submission_id' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Validate submission ID format to prevent KV key injection
+  if (!SUBMISSION_ID_REGEX.test(submissionId)) {
+    return new Response(JSON.stringify({ error: 'Invalid submission_id format' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     });

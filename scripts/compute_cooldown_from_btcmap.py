@@ -17,7 +17,7 @@ def parse_date(value: str):
     # accept YYYY-MM-DD
     try:
         return dt.date.fromisoformat(s[:10])
-    except Exception:
+    except (ValueError, TypeError):
         return None
 
 def add_days(d: dt.date, days: int) -> dt.date:

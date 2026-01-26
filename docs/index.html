@@ -567,6 +567,13 @@
     return Number.isFinite(n) ? n : 0;
   };
 
+  // Escape HTML to prevent XSS
+  const escapeHtml = (s) => {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  };
+
   let rows = [];
   let sortColumn = "bounty";
   let sortDirection = "desc";
@@ -651,17 +658,23 @@
 
     tbody.innerHTML = view.map(r => {
       const lid = norm(r.location_id);
-      const name = norm(r.name) || "–";
-      const category = norm(r.category);
-      const address = addr(r) || "–";
+      const name = escapeHtml(norm(r.name) || "–");
+      const category = escapeHtml(norm(r.category));
+      const address = escapeHtml(addr(r) || "–");
       const bounty = toInt(r.bounty_base_sats);
       const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
       const cooldownDays = toInt(r.cooldown_days_left);
       const osmType = norm(r.osm_type);
       const osmId = norm(r.osm_id);
 
-      const claimUrl = createClaimUrl(lid, name);
-      const osmUrl = osmType && osmId ? `https://www.openstreetmap.org/${osmType}/${osmId}` : "";
+      // Validate OSM values to prevent injection
+      const safeOsmType = /^(node|way|relation)$/.test(osmType) ? osmType : "";
+      const safeOsmId = /^\d+$/.test(osmId) ? osmId : "";
+      const osmUrl = safeOsmType && safeOsmId ? `https://www.openstreetmap.org/${safeOsmType}/${safeOsmId}` : "";
+
+      // Validate location ID format
+      const safeLid = /^DE-BE-\d{5}$/.test(lid) ? lid : "";
+      const claimUrl = safeLid ? createClaimUrl(safeLid, name) : "#";
 
       const statusClass = isEligible ? "status-available" : "status-cooldown";
       const statusText = isEligible ? "Auszahlbar" : `${cooldownDays}d Cooldown`;
@@ -682,7 +695,7 @@
         <td class="bounty">${bounty.toLocaleString("de-DE")} sats</td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>
-          ${isEligible
+          ${isEligible && safeLid
             ? `<a class="btn btn-claim ${claimBtnClass}" href="${claimUrl}">${claimBtnText}</a>`
             : `<span class="btn btn-claim ${claimBtnClass}">${claimBtnText}</span>`
           }
@@ -710,20 +723,32 @@
   document.getElementById("q").addEventListener("input", render);
   document.getElementById("eligible").addEventListener("change", render);
 
-  // Load data
+  // Load data with timeout
+  let loadingComplete = false;
+  const loadingTimeout = setTimeout(() => {
+    if (!loadingComplete) {
+      document.getElementById("tbody").innerHTML =
+        '<tr><td colspan="5" class="empty">Laden dauert länger als erwartet. Bitte Seite neu laden.</td></tr>';
+    }
+  }, 15000); // 15 second timeout
+
   Papa.parse("data/locations.csv", {
     download: true,
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
+      loadingComplete = true;
+      clearTimeout(loadingTimeout);
       rows = results.data.filter(r => norm(r.location_id));
       updateStats();
       updateSortIndicators();
       render();
     },
     error: (err) => {
+      loadingComplete = true;
+      clearTimeout(loadingTimeout);
       document.getElementById("tbody").innerHTML =
-        '<tr><td colspan="5" class="empty">Fehler beim Laden der Daten.</td></tr>';
+        '<tr><td colspan="5" class="empty">Fehler beim Laden der Daten. Bitte Seite neu laden.</td></tr>';
       console.error(err);
     }
   });

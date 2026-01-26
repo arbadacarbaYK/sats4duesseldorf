@@ -28,7 +28,7 @@ Ein Bounty wird nur ausgezahlt, wenn ein nachweisbarer Kauf vor Ort in Bitcoin s
 4) **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Berlin“** und **„Bitcoin“** (Link wird eingereicht)
 
 ## Cooldown
-Ein Ort kann frühestens 3 Monate nach dem letzten gültigen Check erneut mit einem Bounty geprüft werden.
+Ein Ort kann frühestens 90 Tage nach dem letzten gültigen Check erneut mit einem Bounty geprüft werden.
 
 ## Was wird aktualisiert?
 Nach einem gültigen Check wird der Eintrag bei Bedarf angepasst, z. B.:

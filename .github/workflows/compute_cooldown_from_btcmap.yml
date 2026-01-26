@@ -3,6 +3,11 @@ name: Compute cooldown from BTCMap (Berlin raw)
 on:
   workflow_dispatch:
 
+# Prevent concurrent CSV writes - wait for other workflows to finish
+concurrency:
+  group: csv-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

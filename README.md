@@ -15,7 +15,7 @@ BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll.
 ## Schnellstart
 
 1. **Übersicht öffnen:** [satoshiinberlin.github.io/sats4berlin](https://satoshiinberlin.github.io/sats4berlin/)
-2. **Ort wählen:** Suche einen Ort mit Status „verfügbar" (grün)
+2. **Ort wählen:** Suche einen Ort mit Status „auszahlbar" (grün)
 3. **Vor Ort kaufen:** Bezahle in Bitcoin (Lightning oder On-Chain)
 4. **Nachweise sammeln:** Bon, Zahlungsbestätigung, Foto vom Ort, öffentlicher Post
 5. **Check einreichen:** [Formular ausfüllen](https://satoshiinberlin.github.io/sats4berlin/submit.html)
@@ -67,7 +67,7 @@ Die Auszahlung wird mit einem Aktivitätsfaktor multipliziert:
 
 ## Cooldown
 
-Ein Ort kann frühestens **3 Monate** nach dem letzten gültigen Check erneut geprüft werden.
+Ein Ort kann frühestens **90 Tage** nach dem letzten gültigen Check erneut geprüft werden.
 
 ## Auszahlung
 

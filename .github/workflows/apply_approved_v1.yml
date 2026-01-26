@@ -5,6 +5,11 @@ on:
   issues:
     types: [labeled]
 
+# Prevent concurrent CSV writes - wait for other workflows to finish
+concurrency:
+  group: csv-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
   issues: write
@@ -80,16 +85,28 @@ jobs:
           VENUE_URL=$(echo "$ISSUE_BODY" | grep -oP 'Foto vom Ort[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
           OBSERVATIONS=$(echo "$ISSUE_BODY" | grep -oP 'Wie lief die Zahlung[^*]*\*\*\s*\K[^\n]+' | head -1 || echo "")
 
-          # Look up OSM info from locations.csv
+          # Look up OSM info from locations.csv using Python for proper CSV parsing
           BTCMAP_LINK=""
           OSM_LINK=""
           LOCATION_NAME=""
           if [ -n "$LOCATION_ID" ] && [ -f "data/locations.csv" ]; then
-            OSM_INFO=$(grep "^$LOCATION_ID," data/locations.csv | head -1)
+            OSM_INFO=$(python3 << EOF
+          import csv
+          location_id = "$LOCATION_ID"
+          with open("data/locations.csv", newline="", encoding="utf-8") as f:
+              for row in csv.DictReader(f):
+                  if row.get("location_id") == location_id:
+                      osm_type = row.get("osm_type", "")
+                      osm_id = row.get("osm_id", "")
+                      name = row.get("name", "").replace("|", " ")  # escape delimiter
+                      print(f"{osm_type}|{osm_id}|{name}")
+                      break
+          EOF
+          )
             if [ -n "$OSM_INFO" ]; then
-              OSM_TYPE=$(echo "$OSM_INFO" | cut -d',' -f2)
-              OSM_ID=$(echo "$OSM_INFO" | cut -d',' -f3)
-              LOCATION_NAME=$(echo "$OSM_INFO" | cut -d',' -f5)
+              OSM_TYPE=$(echo "$OSM_INFO" | cut -d'|' -f1)
+              OSM_ID=$(echo "$OSM_INFO" | cut -d'|' -f2)
+              LOCATION_NAME=$(echo "$OSM_INFO" | cut -d'|' -f3)
               if [ -n "$OSM_TYPE" ] && [ -n "$OSM_ID" ]; then
                 BTCMAP_LINK="https://btcmap.org/verify-location?id=${OSM_TYPE}:${OSM_ID}"
                 OSM_LINK="https://www.openstreetmap.org/${OSM_TYPE}/${OSM_ID}"

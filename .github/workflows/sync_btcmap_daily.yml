@@ -9,6 +9,11 @@ on:
     - cron: "0 11 * * *"   # ~12:00 Berlin (winter) / ~13:00 Berlin (summer)
   workflow_dispatch: {}
 
+# Prevent concurrent CSV writes - wait for other workflows to finish
+concurrency:
+  group: csv-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write

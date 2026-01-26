@@ -7,6 +7,17 @@
 
 import { handleAdminRequest } from './admin.js';
 
+// Allowed origins for CORS/CSRF protection
+const ALLOWED_ORIGINS = [
+  'https://satoshiinberlin.github.io',
+  'http://localhost:3000',  // For local development
+  'http://127.0.0.1:3000',
+];
+
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 submissions per hour per IP
+
 // Field mappings from form field names to our internal names
 const FIELD_MAPPING = {
   // Check submission fields
@@ -64,6 +75,66 @@ export default {
       return new Response('Method not allowed', { status: 405 });
     }
 
+    // CORS headers for the response
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*', // Will be overwritten if origin is allowed
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    // CSRF protection: Validate Origin header
+    const origin = request.headers.get('Origin');
+    if (!origin || !ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
+      return new Response(JSON.stringify({ error: 'Invalid origin' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    corsHeaders['Access-Control-Allow-Origin'] = origin;
+
+    // Rate limiting: Check submissions per IP
+    const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const rateLimitKey = `ratelimit:${clientIP}`;
+
+    try {
+      const rateLimitData = await env.PRIVATE_DATA.get(rateLimitKey);
+      let requestCount = 0;
+      let windowStart = Date.now();
+
+      if (rateLimitData) {
+        const parsed = JSON.parse(rateLimitData);
+        // Check if we're still in the same window
+        if (Date.now() - parsed.windowStart < RATE_LIMIT_WINDOW_MS) {
+          requestCount = parsed.count;
+          windowStart = parsed.windowStart;
+        }
+      }
+
+      if (requestCount >= RATE_LIMIT_MAX_REQUESTS) {
+        return new Response(JSON.stringify({
+          error: 'Rate limit exceeded',
+          message: 'Zu viele Einreichungen. Bitte warte eine Stunde.'
+        }), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+
+      // Update rate limit counter
+      await env.PRIVATE_DATA.put(rateLimitKey, JSON.stringify({
+        count: requestCount + 1,
+        windowStart: windowStart
+      }), { expirationTtl: 3600 }); // Expire after 1 hour
+    } catch (rateLimitError) {
+      // Don't fail if rate limiting has issues, just log
+      console.error('Rate limiting error:', rateLimitError);
+    }
+
     try {
       // Parse the webhook payload
       const payload = await request.json();
@@ -74,8 +145,42 @@ export default {
       if (!formData || Object.keys(formData).length === 0) {
         return new Response(JSON.stringify({ error: 'No form data found' }), {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
+      }
+
+      // Validate location_id format if present
+      if (formData.location_id && !/^DE-BE-\d{5}$/.test(formData.location_id)) {
+        return new Response(JSON.stringify({ error: 'Invalid location ID format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+
+      // Validate date is not in the future
+      if (formData.date_time) {
+        const submittedDate = new Date(formData.date_time);
+        if (submittedDate > new Date()) {
+          return new Response(JSON.stringify({ error: 'Date cannot be in the future' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
+      }
+
+      // Validate URL formats
+      const urlFields = ['public_post_url', 'receipt_proof_url', 'payment_proof_url', 'venue_photo_url', 'website', 'osm_url'];
+      for (const field of urlFields) {
+        if (formData[field] && formData[field] !== '_nicht angegeben_') {
+          try {
+            new URL(formData[field]);
+          } catch {
+            return new Response(JSON.stringify({ error: `Invalid URL in ${field}` }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          }
+        }
       }
 
       // Determine form type
@@ -85,7 +190,7 @@ export default {
       if (!isNewLocation && !isCheck) {
         return new Response(JSON.stringify({ error: 'Invalid form data - missing required fields' }), {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
 
@@ -130,7 +235,7 @@ export default {
       if (!issueResult.success) {
         return new Response(JSON.stringify({ error: 'Failed to create GitHub issue', details: issueResult.error }), {
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
 
@@ -142,14 +247,14 @@ export default {
         issueUrl: issueResult.issueUrl
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
 
     } catch (error) {
       console.error('Error processing webhook:', error);
       return new Response(JSON.stringify({ error: 'Internal server error', message: error.message }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
     }
   }

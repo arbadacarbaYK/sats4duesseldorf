@@ -128,17 +128,31 @@ def body_field(body: str, label: str) -> str:
     return (m.group(1).strip() if m else "")
 
 def generate_new_location_id(loc_rows: list) -> str:
-    """Generate next available location ID."""
+    """Generate next available location ID with uniqueness check."""
+    existing_ids = set()
     max_num = 0
     for r in loc_rows:
         lid = r.get("location_id", "")
         if lid.startswith("DE-BE-"):
+            existing_ids.add(lid)
             try:
                 num = int(lid.replace("DE-BE-", ""))
                 max_num = max(max_num, num)
             except ValueError:
-                pass
-    return f"DE-BE-{max_num + 1:05d}"
+                print(f"Warning: Invalid location ID format: {lid}")
+
+    # Generate new ID and verify it doesn't exist
+    new_id = f"DE-BE-{max_num + 1:05d}"
+    attempts = 0
+    while new_id in existing_ids and attempts < 1000:
+        max_num += 1
+        new_id = f"DE-BE-{max_num + 1:05d}"
+        attempts += 1
+
+    if attempts >= 1000:
+        raise RuntimeError("Could not generate unique location ID after 1000 attempts")
+
+    return new_id
 
 
 def main():
@@ -414,7 +428,8 @@ def main():
             try:
                 new_count = int(lr.get("verified_by_count", "0") or "0") + 1
                 lr["verified_by_count"] = str(new_count)
-            except Exception:
+            except (ValueError, TypeError) as e:
+                print(f"Warning: Could not parse verified_by_count for {location_id}: {e}")
                 new_count = 1
                 lr["verified_by_count"] = "1"
 
