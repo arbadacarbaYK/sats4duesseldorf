@@ -48,6 +48,10 @@ const PRIVATE_FIELDS = ['contact_method', 'contact_value'];
 const CHECK_REQUIRED_FIELDS = ['location_id', 'date_time', 'public_post_url'];
 const NEW_LOCATION_REQUIRED_FIELDS = ['name', 'address', 'category'];
 
+// Cache for valid location IDs (refreshed every 5 minutes)
+let locationIdCache = { ids: new Set(), lastFetched: 0 };
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -166,6 +170,20 @@ export default {
           status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
+      }
+
+      // Validate location exists (for check submissions)
+      if (formData.location_id) {
+        const validIds = await fetchValidLocationIds(env);
+        if (validIds.size > 0 && !validIds.has(formData.location_id)) {
+          return new Response(JSON.stringify({
+            error: 'Location not found',
+            message: `Location ${formData.location_id} existiert nicht in der Datenbank.`
+          }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
       }
 
       // Validate date is not in the future
@@ -310,6 +328,55 @@ function extractFormFields(payload) {
   }
 
   return formData;
+}
+
+/**
+ * Fetch valid location IDs from GitHub Pages (with caching)
+ */
+async function fetchValidLocationIds(env) {
+  const now = Date.now();
+
+  // Return cached data if still fresh
+  if (locationIdCache.ids.size > 0 && (now - locationIdCache.lastFetched) < CACHE_TTL_MS) {
+    return locationIdCache.ids;
+  }
+
+  try {
+    // Fetch locations.csv from GitHub Pages
+    const url = `https://${env.GITHUB_OWNER}.github.io/${env.GITHUB_REPO}/locations.csv`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'sats4berlin-worker/1.0' }
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch locations.csv: ${response.status}`);
+      return locationIdCache.ids; // Return stale cache on error
+    }
+
+    const csvText = await response.text();
+    const ids = new Set();
+
+    // Simple CSV parsing - extract location_id from first column
+    const lines = csvText.split('\n');
+    for (let i = 1; i < lines.length; i++) { // Skip header
+      const line = lines[i].trim();
+      if (line) {
+        // location_id is the first column
+        const match = line.match(/^(DE-BE-\d{5})/);
+        if (match) {
+          ids.add(match[1]);
+        }
+      }
+    }
+
+    // Update cache
+    locationIdCache = { ids, lastFetched: now };
+    console.log(`Loaded ${ids.size} valid location IDs`);
+    return ids;
+  } catch (error) {
+    console.error('Error fetching location IDs:', error);
+    return locationIdCache.ids; // Return stale cache on error
+  }
 }
 
 /**

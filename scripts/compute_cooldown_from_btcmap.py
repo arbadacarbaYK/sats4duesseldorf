@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+Compute cooldown eligibility for locations.
+
+Uses the MAXIMUM of:
+- source_last_update (from BTCMap/OSM check_date or survey:date)
+- last_verified_at (from local sats4berlin checks)
+
+This ensures that both BTCMap verifications AND local checks trigger cooldowns.
+"""
 import csv
 import datetime as dt
 from pathlib import Path
@@ -7,6 +16,7 @@ LOC_PATH = Path("data/locations.csv")
 RAW_PATH = Path("data/berlin_raw.csv")
 
 COOLDOWN_DAYS = 90
+
 
 def parse_date(value: str):
     if not value:
@@ -20,8 +30,10 @@ def parse_date(value: str):
     except (ValueError, TypeError):
         return None
 
+
 def add_days(d: dt.date, days: int) -> dt.date:
     return d + dt.timedelta(days=days)
+
 
 def max_date(*ds):
     out = None
@@ -29,6 +41,7 @@ def max_date(*ds):
         if d and (out is None or d > out):
             out = d
     return out
+
 
 def main():
     if not LOC_PATH.exists():
@@ -86,34 +99,62 @@ def main():
     today = dt.date.today()
 
     updated = 0
-    missing = 0
+    missing_upstream = 0
+    used_local_check = 0
 
     for row in loc_rows:
         osm_type = (row.get("osm_type") or "").strip()
         osm_id = (row.get("osm_id") or "").strip()
         k = (osm_type, osm_id)
 
-        best = raw_index.get(k)
-        if not best:
-            # No upstream date -> allow check (useful to set survey/check_date)
+        # Get BTCMap/OSM date
+        btcmap_result = raw_index.get(k)
+        d_btcmap = btcmap_result[0] if btcmap_result else None
+        btcmap_tag = btcmap_result[1] if btcmap_result else ""
+
+        # Get local verification date (from sats4berlin checks)
+        d_local = parse_date(row.get("last_verified_at", ""))
+
+        # Use the MAXIMUM of both dates for cooldown calculation
+        # This ensures both BTCMap and local checks trigger cooldowns
+        d_effective = max_date(d_btcmap, d_local)
+
+        # Determine which source provided the effective date
+        if d_effective:
+            if d_local and d_local == d_effective:
+                source_tag = "local_check"
+                used_local_check += 1
+            else:
+                source_tag = btcmap_tag
+        else:
+            source_tag = ""
+
+        if not d_effective:
+            # No dates at all -> allow check
             row["source_last_update"] = ""
             row["source_last_update_tag"] = ""
             row["cooldown_until"] = ""
             row["cooldown_days_left"] = "0"
             row["eligible_now"] = "yes"
             row["eligible_for_check"] = "yes"
-            missing += 1
+            missing_upstream += 1
             continue
 
-        d_best, tag_used = best
-        cooldown_until = add_days(d_best, COOLDOWN_DAYS)
+        cooldown_until = add_days(d_effective, COOLDOWN_DAYS)
         days_left = (cooldown_until - today).days
         if days_left < 0:
             days_left = 0
         eligible = "yes" if days_left == 0 else "no"
 
-        row["source_last_update"] = d_best.isoformat()
-        row["source_last_update_tag"] = tag_used
+        # Update source_last_update to BTCMap date (for display/tracking)
+        # But use effective date for cooldown calculation
+        if d_btcmap:
+            row["source_last_update"] = d_btcmap.isoformat()
+            row["source_last_update_tag"] = btcmap_tag
+        else:
+            row["source_last_update"] = ""
+            row["source_last_update_tag"] = ""
+
         row["cooldown_until"] = cooldown_until.isoformat()
         row["cooldown_days_left"] = str(days_left)
         row["eligible_now"] = eligible
@@ -127,7 +168,8 @@ def main():
         for row in loc_rows:
             w.writerow(row)
 
-    print(f"OK: updated={updated}, missing_upstream_dates={missing}")
+    print(f"OK: updated={updated}, missing_dates={missing_upstream}, used_local_check={used_local_check}")
+
 
 if __name__ == "__main__":
     main()

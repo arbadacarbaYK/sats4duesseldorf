@@ -248,6 +248,13 @@ def main():
             )
             website = body_field(body, "Website (optional)") or ""
             category_raw = body_field(body, "Kategorie") or ""
+            # Parse notes/observations from new location submissions
+            notes = (
+                body_field(body, "Wie lief die Zahlung") or
+                body_field(body, "Hinweise (kurz)") or
+                body_field(body, "Notizen") or
+                ""
+            )
 
             # Map category to simple form
             category = ""
@@ -401,8 +408,13 @@ def main():
             or body_field(body, "Ort erkennbar")
         )
 
-        submitted_at = body_field(body, "Datum/Uhrzeit des Kaufs") or ""
-        observations = body_field(body, "Beobachtungen (kurz)") or body_field(body, "Hinweise (kurz)") or ""
+        submitted_at = body_field(body, "Datum/Uhrzeit des Kaufs") or body_field(body, "Datum und Uhrzeit des Kaufs") or ""
+        observations = (
+            body_field(body, "Beobachtungen (kurz)") or
+            body_field(body, "Hinweise (kurz)") or
+            body_field(body, "Wie lief die Zahlung") or  # New location form field
+            ""
+        )
 
         # Validate proof URLs
         url_warnings = validate_proof_urls(public_post_url, receipt_proof_url, payment_proof_url, venue_photo_url)

@@ -25,6 +25,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
+
       - name: Install GitHub CLI (gh)
         run: |
           sudo apt-get update

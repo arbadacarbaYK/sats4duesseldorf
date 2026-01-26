@@ -21,6 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -41,6 +45,30 @@ jobs:
           today = datetime.date.today().isoformat()
           now = datetime.datetime.utcnow().isoformat() + "Z"
 
+          def days_ago(days: int) -> str:
+              return (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
+
+          def calculate_activity_factor(submitter_id: str, checks: list) -> tuple[float, int]:
+              """
+              Recalculate activity factor at payout time based on approved checks in last 90 days.
+              """
+              cutoff = days_ago(90)
+              count = 0
+              for chk in checks:
+                  if (chk.get("submitter_id", "") == submitter_id and
+                      chk.get("review_status") == "approved" and
+                      chk.get("reviewed_at", "") >= cutoff):
+                      count += 1
+
+              if count >= 10:
+                  return 2.0, count
+              elif count >= 5:
+                  return 1.5, count
+              elif count >= 2:
+                  return 1.2, count
+              else:
+                  return 1.0, count
+
           rows, fields = [], []
           with CHECKS.open(newline="", encoding="utf-8") as f:
               r = csv.DictReader(f)
@@ -50,6 +78,23 @@ jobs:
           updated = False
           for row in rows:
               if row.get("check_id") == check_id:
+                  # Recalculate activity factor at payout time
+                  submitter_id = row.get("submitter_id", "")
+                  if submitter_id:
+                      new_factor, check_count = calculate_activity_factor(submitter_id, rows)
+                      old_factor = float(row.get("activity_factor", "1.0") or "1.0")
+
+                      # Only update if factor increased (never reduce)
+                      if new_factor > old_factor:
+                          base_bounty = int(row.get("base_bounty_sats", "10000") or "10000")
+                          new_final = int(base_bounty * new_factor)
+                          old_final = int(row.get("final_bounty_sats", "0") or "0")
+
+                          row["activity_factor"] = str(new_factor)
+                          row["final_bounty_sats"] = str(new_final)
+                          print(f"Activity multiplier updated: {old_factor}x -> {new_factor}x ({check_count} checks)")
+                          print(f"Bounty updated: {old_final} -> {new_final} sats")
+
                   row["paid_status"] = "paid"
                   row["paid_at"] = today
                   updated = True

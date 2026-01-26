@@ -22,6 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
