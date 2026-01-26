@@ -1,3 +1,4 @@
 check_id,location_id,submitter_id,submitted_at,check_type,public_post_url,receipt_proof_url,payment_proof_url,venue_photo_url,proof_hash,observations_public,suggested_updates,review_status,reviewed_at,reviewer_id,rejection_reason_public,base_bounty_sats,activity_factor,final_bounty_sats,paid_status,paid_at
-ISSUE-9,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
 ISSUE-10,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
+ISSUE-17,DE-BE-00028,USER-7A6654CDA21C,2026-01-26T22:10,critical_change,,,,,,,,approved,2026-01-26,maintainer,,21000,1.0,21000,pending,
+ISSUE-9,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
