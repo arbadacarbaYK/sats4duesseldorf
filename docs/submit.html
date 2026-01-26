@@ -289,31 +289,119 @@
       cursor: not-allowed;
     }
 
-    /* Status message */
-    .status-message {
-      padding: 16px;
-      border-radius: var(--radius);
-      margin-top: 16px;
+    /* Modal overlay */
+    .modal-overlay {
       display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-content.success {
+      border-color: var(--success-green);
+    }
+
+    .modal-content.error {
+      border-color: var(--error-red);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .modal-content.success .modal-title {
+      color: var(--success-green);
+    }
+
+    .modal-content.error .modal-title {
+      color: var(--error-red);
+    }
+
+    .modal-body {
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .modal-body a {
+      color: var(--btc-orange);
+      word-break: break-all;
+    }
+
+    .modal-gif {
+      width: 150px;
+      height: auto;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+
+    .modal-btn {
+      display: inline-block;
+      background: var(--btc-orange);
+      color: #000;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
       font-size: 14px;
     }
 
-    .status-message.success {
-      display: block;
-      background: var(--success-bg);
-      border: 1px solid var(--success-green);
-      color: var(--success-green);
+    .modal-btn:hover {
+      background: var(--btc-orange-dark);
+      color: #000;
     }
 
-    .status-message.success a {
-      color: var(--success-green);
-    }
-
-    .status-message.error {
-      display: block;
-      background: var(--error-bg);
-      border: 1px solid var(--error-red);
-      color: var(--error-red);
+    /* Legacy status message (hidden, kept for form reset) */
+    .status-message {
+      display: none;
     }
 
     /* Footer */
@@ -731,6 +819,18 @@
   </div>
 </main>
 
+<!-- Result Modal -->
+<div id="result-modal" class="modal-overlay">
+  <div id="modal-content" class="modal-content">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <div id="modal-icon" class="modal-icon"></div>
+    <img id="modal-gif" class="modal-gif" style="display: none;" alt="Celebration">
+    <div id="modal-title" class="modal-title"></div>
+    <div id="modal-body" class="modal-body"></div>
+    <button id="modal-btn" class="modal-btn">Schließen</button>
+  </div>
+</div>
+
 <footer class="footer">
   <a href="./">← Zurück zur Übersicht</a>
 </footer>
@@ -788,61 +888,38 @@
       const result = await response.json();
 
       if (result.success) {
-        statusEl.className = 'status-message success';
-        statusEl.style.display = 'block';
         // Validate issueUrl is a valid GitHub URL to prevent XSS
         const issueUrl = result.issueUrl || '';
         const isValidGitHubUrl = /^https:\/\/github\.com\/[\w-]+\/[\w-]+\/issues\/\d+$/.test(issueUrl);
 
-        // Build content safely without innerHTML
-        statusEl.textContent = '';
-
-        // Add random celebration GIF
+        // Show success modal
         const celebrationGifs = [
-          'https://media.giphy.com/media/lQh95VIYba5yba2H08/giphy.gif', // Bitcoin laser eyes
-          'https://media.giphy.com/media/trN9ht5RlE3Dcwavg2/giphy.gif', // Bitcoin to the moon
-          'https://media.giphy.com/media/YkYt0FzMNPJkFnSCxJ/giphy.gif', // Money rain
-          'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif', // Cheering
-          'https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif', // Thumbs up
-          'https://media.giphy.com/media/3o6fJ1BM7R2EBRDnxK/giphy.gif', // Celebration
+          'https://media.giphy.com/media/lQh95VIYba5yba2H08/giphy.gif',
+          'https://media.giphy.com/media/trN9ht5RlE3Dcwavg2/giphy.gif',
+          'https://media.giphy.com/media/YkYt0FzMNPJkFnSCxJ/giphy.gif',
+          'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif',
+          'https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif',
+          'https://media.giphy.com/media/3o6fJ1BM7R2EBRDnxK/giphy.gif',
         ];
-        const gif = document.createElement('img');
-        gif.src = celebrationGifs[Math.floor(Math.random() * celebrationGifs.length)];
-        gif.alt = 'Celebration';
-        gif.style.cssText = 'width: 120px; height: auto; display: block; margin: 0 auto 12px; border-radius: 8px;';
-        statusEl.appendChild(gif);
 
-        const strong = document.createElement('strong');
-        strong.textContent = '✓ Erfolgreich eingereicht!';
-        statusEl.appendChild(strong);
-        statusEl.appendChild(document.createElement('br'));
-        statusEl.appendChild(document.createElement('br'));
-        statusEl.appendChild(document.createTextNode('Dein Check wurde erstellt: '));
-
+        let bodyHtml = 'Dein Check wurde erstellt.<br><br>';
         if (isValidGitHubUrl) {
-          const link = document.createElement('a');
-          link.href = issueUrl;
-          link.target = '_blank';
-          link.rel = 'noopener';
-          link.textContent = issueUrl;
-          statusEl.appendChild(link);
-        } else {
-          statusEl.appendChild(document.createTextNode('(Link nicht verfügbar)'));
+          bodyHtml += `<a href="${issueUrl}" target="_blank" rel="noopener">${issueUrl}</a><br><br>`;
         }
+        bodyHtml += 'Speichere den Link – dort siehst du den Status deines Checks.';
 
-        statusEl.appendChild(document.createElement('br'));
-        statusEl.appendChild(document.createElement('br'));
-        statusEl.appendChild(document.createTextNode('Speichere den Link – dort siehst du den Status deines Checks.'));
+        showModal({
+          type: 'success',
+          title: 'Erfolgreich eingereicht!',
+          body: bodyHtml,
+          gifUrl: celebrationGifs[Math.floor(Math.random() * celebrationGifs.length)]
+        });
 
         form.reset();
       } else {
         throw new Error(result.error || 'Unbekannter Fehler');
       }
     } catch (error) {
-      statusEl.className = 'status-message error';
-      statusEl.style.display = 'block';
-      statusEl.textContent = '';
-
       // Translate common error messages to German
       let errorMessage = error.message || 'Unbekannter Fehler';
       let helpText = 'Bitte versuche es erneut.';
@@ -867,16 +944,52 @@
         helpText = 'Bitte prüfe, ob alle Links korrekt eingegeben wurden.';
       }
 
-      const strong = document.createElement('strong');
-      strong.textContent = '✗ ' + errorMessage;
-      statusEl.appendChild(strong);
-      statusEl.appendChild(document.createElement('br'));
-      statusEl.appendChild(document.createTextNode(helpText));
+      showModal({
+        type: 'error',
+        title: errorMessage,
+        body: helpText
+      });
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
     }
   }
+
+  // Modal functions
+  function showModal({ type, title, body, gifUrl }) {
+    const modal = document.getElementById('result-modal');
+    const content = document.getElementById('modal-content');
+    const iconEl = document.getElementById('modal-icon');
+    const gifEl = document.getElementById('modal-gif');
+    const titleEl = document.getElementById('modal-title');
+    const bodyEl = document.getElementById('modal-body');
+
+    content.className = 'modal-content ' + type;
+    iconEl.textContent = type === 'success' ? '' : '⚠️';
+    iconEl.style.display = type === 'success' && gifUrl ? 'none' : 'block';
+
+    if (type === 'success' && gifUrl) {
+      gifEl.src = gifUrl;
+      gifEl.style.display = 'block';
+    } else {
+      gifEl.style.display = 'none';
+    }
+
+    titleEl.textContent = title;
+    bodyEl.innerHTML = body;
+
+    modal.classList.add('visible');
+  }
+
+  function hideModal() {
+    document.getElementById('result-modal').classList.remove('visible');
+  }
+
+  document.getElementById('modal-close').addEventListener('click', hideModal);
+  document.getElementById('modal-btn').addEventListener('click', hideModal);
+  document.getElementById('result-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) hideModal();
+  });
 
   document.getElementById('check-form').addEventListener('submit', (e) => {
     e.preventDefault();
