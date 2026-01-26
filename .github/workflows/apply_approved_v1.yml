@@ -72,14 +72,24 @@ jobs:
           LOCATION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Location-ID:\*\*\s*`\K[^`]+' || \
                         echo "$ISSUE_BODY" | grep -oP 'Location-ID\s*\n+\K[A-Z]{2}-[A-Z]{2}-\d+' || echo "")
 
+          # Extract verification details for BTCMap notes
+          CHECK_DATE=$(echo "$ISSUE_BODY" | grep -oP 'Datum und Uhrzeit[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          PUBLIC_POST=$(echo "$ISSUE_BODY" | grep -oP 'Öffentlicher Post[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          RECEIPT_URL=$(echo "$ISSUE_BODY" | grep -oP 'Kaufbeleg[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          PAYMENT_URL=$(echo "$ISSUE_BODY" | grep -oP 'Bitcoin-Zahlung[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          VENUE_URL=$(echo "$ISSUE_BODY" | grep -oP 'Foto vom Ort[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          OBSERVATIONS=$(echo "$ISSUE_BODY" | grep -oP 'Wie lief die Zahlung[^*]*\*\*\s*\K[^\n]+' | head -1 || echo "")
+
           # Look up OSM info from locations.csv
           BTCMAP_LINK=""
           OSM_LINK=""
+          LOCATION_NAME=""
           if [ -n "$LOCATION_ID" ] && [ -f "data/locations.csv" ]; then
             OSM_INFO=$(grep "^$LOCATION_ID," data/locations.csv | head -1)
             if [ -n "$OSM_INFO" ]; then
               OSM_TYPE=$(echo "$OSM_INFO" | cut -d',' -f2)
               OSM_ID=$(echo "$OSM_INFO" | cut -d',' -f3)
+              LOCATION_NAME=$(echo "$OSM_INFO" | cut -d',' -f5)
               if [ -n "$OSM_TYPE" ] && [ -n "$OSM_ID" ]; then
                 BTCMAP_LINK="https://btcmap.org/verify-location?id=${OSM_TYPE}:${OSM_ID}"
                 OSM_LINK="https://www.openstreetmap.org/${OSM_TYPE}/${OSM_ID}"
@@ -91,18 +101,39 @@ jobs:
           BTCMAP_SECTION=""
           if [ -n "$BTCMAP_LINK" ]; then
             ISSUE_URL="https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}"
+            TODAY=$(date +%Y-%m-%d)
+
+            # Build the copy-paste text for BTCMap notes
+            BTCMAP_NOTES="Verified via sats4berlin on ${TODAY}
+
+          Proof:
+          - Social: ${PUBLIC_POST:-n/a}
+          - Receipt: ${RECEIPT_URL:-n/a}
+          - Payment: ${PAYMENT_URL:-n/a}
+          - Venue: ${VENUE_URL:-n/a}
+
+          Full details: ${ISSUE_URL}"
+
             BTCMAP_SECTION="
 
           ---
 
           ### 🗺️ BTCMap aktualisieren
 
-          Bitte aktualisiere BTCMap mit diesem Check:
-          1. **[BTCMap Verification öffnen](${BTCMAP_LINK})**
-          2. Im Feld \"Additional notes\" diesen Issue-Link einfügen: \`${ISSUE_URL}\`
-          3. Formular absenden
+          **[➡️ BTCMap Verification öffnen](${BTCMAP_LINK})**
 
-          [OSM-Eintrag ansehen](${OSM_LINK})"
+          Kopiere diesen Text in das Feld \"Additional notes\":
+
+          \`\`\`
+          ${BTCMAP_NOTES}
+          \`\`\`
+
+          <details>
+          <summary>Links</summary>
+
+          - [OSM-Eintrag](${OSM_LINK})
+          - [GitHub Issue](${ISSUE_URL})
+          </details>"
           fi
 
           if echo "$LABELS" | grep -q "new-location"; then
