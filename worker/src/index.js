@@ -65,7 +65,7 @@ export default {
     }
 
     // Main webhook endpoint - POST only
-    if (url.pathname !== '/webhook/tally') {
+    if (url.pathname !== '/api/submit') {
       return new Response('Not found', { status: 404 });
     }
 
