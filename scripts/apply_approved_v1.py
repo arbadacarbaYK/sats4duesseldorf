@@ -10,6 +10,18 @@ from pathlib import Path
 LOCATIONS = Path("data/locations.csv")
 CHECKS = Path("data/checks_public.csv")
 APPROVED_ISSUES = Path("data/_approved_issues.json")
+VALIDATION_LOG = Path("data/validation_errors.log")
+
+
+def log_validation_error(issue_number: int, errors: list[str]):
+    """Log validation errors to a persistent file for debugging."""
+    if not errors:
+        return
+    timestamp = datetime.datetime.now().isoformat()
+    with VALIDATION_LOG.open("a", encoding="utf-8") as f:
+        f.write(f"\n[{timestamp}] Issue #{issue_number}:\n")
+        for err in errors:
+            f.write(f"  - {err}\n")
 
 def today_iso() -> str:
     return datetime.date.today().isoformat()
@@ -422,6 +434,8 @@ def main():
             print(f"  Warning for issue #{number}: URL validation issues:")
             for w in url_warnings:
                 print(f"    - {w}")
+            # Log to persistent file for debugging
+            log_validation_error(number, url_warnings)
 
         reviewed_at = today_iso()
         reviewer_id = "maintainer"

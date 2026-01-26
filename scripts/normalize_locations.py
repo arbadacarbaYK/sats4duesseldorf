@@ -65,6 +65,29 @@ def normalize_category(row):
     return cat.strip()
 
 
+def validate_coordinates(lat_str, lon_str):
+    """
+    Validate and return coordinates.
+    Returns (lat, lon) as strings if valid, ("", "") if invalid.
+    Berlin bounds: lat ~52.3-52.7, lon ~13.1-13.8
+    """
+    try:
+        if not lat_str or not lon_str:
+            return "", ""
+        lat = float(lat_str)
+        lon = float(lon_str)
+        # Basic global bounds check
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            print(f"Warning: Coordinates out of global bounds: {lat}, {lon}")
+            return "", ""
+        # Berlin-specific bounds check (warn but still accept)
+        if not (52.3 <= lat <= 52.7 and 13.0 <= lon <= 13.8):
+            print(f"Warning: Coordinates outside Berlin area: {lat}, {lon}")
+        return str(lat), str(lon)
+    except (ValueError, TypeError):
+        return "", ""
+
+
 def normalize_url(row, osm_type, osm_id):
     """Get BTCMap URL or construct OSM URL."""
     url = get(row, "btcmap_url", default="").strip()
@@ -167,6 +190,11 @@ def create_new_location_from_btcmap(raw_row, location_id):
     source_date, source_tag = get_source_last_update(raw_row)
     bounty = calculate_bounty(source_date)
 
+    # Validate coordinates
+    lat_raw = str(get(raw_row, "lat", "latitude", default="")).strip()
+    lon_raw = str(get(raw_row, "lon", "longitude", default="")).strip()
+    lat, lon = validate_coordinates(lat_raw, lon_raw)
+
     return {
         "location_id": location_id,
         "osm_type": osm_type,
@@ -178,8 +206,8 @@ def create_new_location_from_btcmap(raw_row, location_id):
         "housenumber": get(raw_row, "housenumber", "addr:housenumber", default="").strip(),
         "postcode": get(raw_row, "postcode", "addr:postcode", default="").strip(),
         "city": get(raw_row, "city", "addr:city", default="Berlin").strip() or "Berlin",
-        "lat": str(get(raw_row, "lat", "latitude", default="")).strip(),
-        "lon": str(get(raw_row, "lon", "longitude", default="")).strip(),
+        "lat": lat,
+        "lon": lon,
         "website": get(raw_row, "website", "contact:website", default="").strip(),
         "opening_hours": get(raw_row, "opening_hours", default="").strip(),
         "last_verified_at": "",
@@ -211,6 +239,11 @@ def update_location_from_btcmap(existing_row, raw_row):
     source_date, source_tag = get_source_last_update(raw_row)
     bounty = calculate_bounty(source_date)
 
+    # Validate coordinates
+    lat_raw = str(get(raw_row, "lat", "latitude", default="")).strip()
+    lon_raw = str(get(raw_row, "lon", "longitude", default="")).strip()
+    lat, lon = validate_coordinates(lat_raw, lon_raw)
+
     # Build updated values for BTCMap fields
     updates = {
         "osm_type": osm_type,
@@ -222,8 +255,8 @@ def update_location_from_btcmap(existing_row, raw_row):
         "housenumber": get(raw_row, "housenumber", "addr:housenumber", default="").strip(),
         "postcode": get(raw_row, "postcode", "addr:postcode", default="").strip(),
         "city": get(raw_row, "city", "addr:city", default="Berlin").strip() or "Berlin",
-        "lat": str(get(raw_row, "lat", "latitude", default="")).strip(),
-        "lon": str(get(raw_row, "lon", "longitude", default="")).strip(),
+        "lat": lat,
+        "lon": lon,
         "website": get(raw_row, "website", "contact:website", default="").strip(),
         "opening_hours": get(raw_row, "opening_hours", default="").strip(),
         "source_last_update": source_date,

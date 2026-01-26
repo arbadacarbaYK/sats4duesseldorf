@@ -682,7 +682,18 @@
     const tbody = document.getElementById("tbody");
 
     if (view.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty">Keine Orte gefunden.</td></tr>';
+      const searchTerm = norm(document.getElementById("q").value);
+      const filterActive = norm(document.getElementById("eligible").value);
+      let helpText = 'Keine Orte gefunden.';
+
+      if (searchTerm) {
+        helpText += ` Versuche einen kürzeren Suchbegriff oder prüfe die Schreibweise.`;
+      }
+      if (filterActive === 'yes') {
+        helpText += ` Oder zeige <a href="#" onclick="document.getElementById('eligible').value='';render();return false;">alle Orte</a> an.`;
+      }
+
+      tbody.innerHTML = `<tr><td colspan="5" class="empty">${helpText}</td></tr>`;
       return;
     }
 

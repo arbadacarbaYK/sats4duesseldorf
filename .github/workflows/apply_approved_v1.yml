@@ -62,6 +62,8 @@ jobs:
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
           git add data/locations.csv data/checks_public.csv
+          # Add validation log if it exists (for debugging)
+          [ -f data/validation_errors.log ] && git add data/validation_errors.log || true
           git diff --cached --quiet || git commit -m "Apply approved issues (v1)"
           git push
 

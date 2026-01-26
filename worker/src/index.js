@@ -246,7 +246,7 @@ export default {
         submitterId = await generateSubmitterId(contactString);
       }
 
-      // Store private data in KV (expires after 90 days)
+      // Store private data in KV (expires after 180 days to allow for delayed payouts)
       if (Object.keys(privateData).length > 0) {
         privateData.submissionId = submissionId;
         privateData.submitterId = submitterId;
@@ -254,7 +254,7 @@ export default {
         await env.PRIVATE_DATA.put(
           `submission:${submissionId}`,
           JSON.stringify(privateData),
-          { expirationTtl: 90 * 24 * 60 * 60 } // 90 days
+          { expirationTtl: 180 * 24 * 60 * 60 } // 180 days
         );
       }
 

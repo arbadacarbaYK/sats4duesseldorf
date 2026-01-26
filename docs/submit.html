@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Check einreichen – Satoshis für Berlin</title>
+
+  <!-- CSV parsing library -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
   <style>
     :root {
       --btc-orange: #F7931A;
@@ -328,6 +332,53 @@
       color: var(--btc-orange);
     }
 
+    /* Pre-filled field highlight */
+    .field-prefilled input {
+      border-color: var(--btc-orange);
+      background: rgba(247, 147, 26, 0.1);
+    }
+
+    .prefill-notice {
+      font-size: 12px;
+      color: var(--btc-orange);
+      margin-top: 4px;
+    }
+
+    /* Location status indicator */
+    .location-status {
+      font-size: 13px;
+      margin-top: 6px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      display: none;
+    }
+
+    .location-status.eligible {
+      display: block;
+      background: var(--success-bg);
+      border: 1px solid var(--success-green);
+      color: var(--success-green);
+    }
+
+    .location-status.cooldown {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error-red);
+      color: var(--error-red);
+    }
+
+    .location-status.loading {
+      display: block;
+      color: var(--text-secondary);
+    }
+
+    .location-status.not-found {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error-red);
+      color: var(--error-red);
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .header-content {
@@ -371,7 +422,8 @@
       <div class="field">
         <label>Location-ID <span class="required">*</span></label>
         <div class="field-hint">Findest du in der <a href="./">Übersicht</a> (z.B. DE-BE-00042)</div>
-        <input type="text" name="location_id" placeholder="DE-BE-00042" required>
+        <input type="text" name="location_id" id="location-id-input" placeholder="DE-BE-00042" required>
+        <div id="location-status" class="location-status"></div>
       </div>
 
       <div class="field">
@@ -702,7 +754,18 @@
   const urlParams = new URLSearchParams(window.location.search);
   const locationId = urlParams.get('location_id');
   if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
-    document.querySelector('#check-form input[name="location_id"]').value = locationId;
+    const input = document.querySelector('#check-form input[name="location_id"]');
+    input.value = locationId;
+
+    // Highlight the pre-filled field
+    const field = input.closest('.field');
+    field.classList.add('field-prefilled');
+
+    // Add notice below the input
+    const notice = document.createElement('div');
+    notice.className = 'prefill-notice';
+    notice.textContent = '✓ Location-ID wurde aus der Übersicht übernommen';
+    input.parentNode.appendChild(notice);
   }
 
   // Contact method hints and placeholders
@@ -766,6 +829,91 @@
   }
 
   setDateTimeConstraints();
+
+  // Location status checker - shows if location is eligible or in cooldown
+  let locationCache = null;
+  let locationCacheTime = 0;
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  function loadLocations() {
+    return new Promise((resolve) => {
+      const now = Date.now();
+      if (locationCache && (now - locationCacheTime) < CACHE_TTL) {
+        resolve(locationCache);
+        return;
+      }
+
+      Papa.parse('data/locations.csv', {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const locations = {};
+          for (const row of results.data) {
+            const id = (row.location_id || '').trim();
+            if (id) {
+              locations[id] = {
+                name: (row.name || '').trim(),
+                eligible: (row.eligible_now || '').toLowerCase() === 'yes',
+                cooldownDays: parseInt(row.cooldown_days_left || '0', 10)
+              };
+            }
+          }
+          locationCache = locations;
+          locationCacheTime = now;
+          resolve(locations);
+        },
+        error: (err) => {
+          console.error('Failed to load locations:', err);
+          resolve({});
+        }
+      });
+    });
+  }
+
+  async function checkLocationStatus(locationId) {
+    const statusEl = document.getElementById('location-status');
+
+    if (!locationId || !/^DE-BE-\d{5}$/.test(locationId)) {
+      statusEl.className = 'location-status';
+      statusEl.textContent = '';
+      return;
+    }
+
+    statusEl.className = 'location-status loading';
+    statusEl.textContent = 'Prüfe Status...';
+
+    const locations = await loadLocations();
+    const loc = locations[locationId];
+
+    if (!loc) {
+      statusEl.className = 'location-status not-found';
+      statusEl.textContent = '⚠ Location-ID nicht gefunden. Bitte prüfe die ID in der Übersicht.';
+      return;
+    }
+
+    if (loc.eligible) {
+      statusEl.className = 'location-status eligible';
+      statusEl.textContent = `✓ ${loc.name || locationId} – Auszahlbar! Du kannst einen Check einreichen.`;
+    } else {
+      statusEl.className = 'location-status cooldown';
+      statusEl.textContent = `⚠ ${loc.name || locationId} – Noch ${loc.cooldownDays} Tage im Cooldown. Ein Check ist derzeit nicht auszahlbar.`;
+    }
+  }
+
+  // Debounce location check
+  let checkTimeout = null;
+  document.getElementById('location-id-input').addEventListener('input', (e) => {
+    clearTimeout(checkTimeout);
+    checkTimeout = setTimeout(() => {
+      checkLocationStatus(e.target.value.trim().toUpperCase());
+    }, 500);
+  });
+
+  // Check on page load if pre-filled
+  if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
+    checkLocationStatus(locationId);
+  }
 </script>
 
 </body>
