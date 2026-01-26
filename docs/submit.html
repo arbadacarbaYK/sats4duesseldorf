@@ -676,10 +676,18 @@
         // Build content safely without innerHTML
         statusEl.textContent = '';
 
-        // Add celebration GIF
+        // Add random celebration GIF
+        const celebrationGifs = [
+          'https://media.giphy.com/media/lQh95VIYba5yba2H08/giphy.gif', // Bitcoin laser eyes
+          'https://media.giphy.com/media/trN9ht5RlE3Dcwavg2/giphy.gif', // Bitcoin to the moon
+          'https://media.giphy.com/media/YkYt0FzMNPJkFnSCxJ/giphy.gif', // Money rain
+          'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif', // Cheering
+          'https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif', // Thumbs up
+          'https://media.giphy.com/media/3o6fJ1BM7R2EBRDnxK/giphy.gif', // Celebration
+        ];
         const gif = document.createElement('img');
-        gif.src = 'https://media.giphy.com/media/lQh95VIYba5yba2H08/giphy.gif';
-        gif.alt = 'Bitcoin celebration';
+        gif.src = celebrationGifs[Math.floor(Math.random() * celebrationGifs.length)];
+        gif.alt = 'Celebration';
         gif.style.cssText = 'width: 120px; height: auto; display: block; margin: 0 auto 12px; border-radius: 8px;';
         statusEl.appendChild(gif);
 
