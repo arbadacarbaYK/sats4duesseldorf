@@ -8,9 +8,10 @@
 
 set -e
 
-# Configuration - update these!
-WORKER_URL="${WORKER_URL:-https://sats4berlin-form-handler.your-subdomain.workers.dev}"
+# Configuration
+WORKER_URL="${WORKER_URL:-https://sats4berlin-form-handler.satoshiinberlin.workers.dev}"
 ADMIN_TOKEN="${ADMIN_TOKEN:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors
 RED='\033[0;31m'
@@ -22,17 +23,20 @@ usage() {
     echo "Usage: $0 <command> [options]"
     echo ""
     echo "Commands:"
+    echo "  calc <issue_number>     Calculate payout amount for an issue"
     echo "  get <submission_id>     Get contact info for a submission"
     echo "  paid <submission_id>    Mark a submission as paid"
     echo "  list-pending            List pending payouts from checks_public.csv"
     echo ""
     echo "Environment variables:"
-    echo "  WORKER_URL    - Cloudflare Worker URL"
-    echo "  ADMIN_TOKEN   - Admin API token"
+    echo "  ADMIN_TOKEN   - Admin API token (required for get/paid)"
     echo ""
-    echo "Example:"
-    echo "  export ADMIN_TOKEN='your_token_here'"
-    echo "  $0 get SUB-XXXXX"
+    echo "Typical workflow:"
+    echo "  1. $0 calc 42              # Calculate payout for issue #42"
+    echo "  2. $0 get SUB-XXXXX        # Get contact info"
+    echo "  3. Send the payment"
+    echo "  4. $0 paid SUB-XXXXX       # Mark as paid"
+    echo "  5. Add 'paid' label and close the issue"
     exit 1
 }
 
@@ -153,8 +157,17 @@ list_pending() {
     echo "  5. Add the 'paid' label to the GitHub issue"
 }
 
+calc_payout() {
+    local issue_number="$1"
+    python3 "$SCRIPT_DIR/calculate_payout.py" "$issue_number"
+}
+
 # Main
 case "${1:-}" in
+    calc)
+        [ -z "${2:-}" ] && usage
+        calc_payout "$2"
+        ;;
     get)
         [ -z "${2:-}" ] && usage
         get_contact "$2"
