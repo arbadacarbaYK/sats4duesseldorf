@@ -2,12 +2,10 @@ name: BTCMap sync (Berlin)
 
 on:
   schedule:
-    # Twice daily: midnight and noon Berlin time
-    # Berlin = UTC+1 (winter) / UTC+2 (summer)
-    # Using UTC times that approximate both seasons
-    - cron: "0 23 * * *"   # ~00:00 Berlin (winter) / ~01:00 Berlin (summer)
-    - cron: "0 11 * * *"   # ~12:00 Berlin (winter) / ~13:00 Berlin (summer)
-  workflow_dispatch: {}
+    # Twice daily: midnight and noon Berlin time (UTC+1 winter / UTC+2 summer)
+    - cron: "0 23 * * *"   # ~00:00 Berlin winter / ~01:00 Berlin summer
+    - cron: "0 11 * * *"   # ~12:00 Berlin winter / ~13:00 Berlin summer
+  workflow_dispatch:
 
 # Prevent concurrent CSV writes - wait for other workflows to finish
 concurrency:
