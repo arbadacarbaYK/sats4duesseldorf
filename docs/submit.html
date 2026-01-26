@@ -584,10 +584,10 @@
         <textarea name="observations" id="observations-input" placeholder="Zahlung per Lightning an der Kasse, hat sofort funktioniert..." required></textarea>
       </div>
 
-      <div class="field">
-        <label>Änderungen am Eintrag nötig?</label>
-        <div class="field-hint">Optional: Falls du Fehler bemerkt hast</div>
-        <textarea name="suggested_updates" placeholder="Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr"></textarea>
+      <div class="field" id="suggested-updates-field">
+        <label id="suggested-updates-label">Änderungen am Eintrag nötig?</label>
+        <div class="field-hint" id="suggested-updates-hint">Optional: Falls du Fehler bemerkt hast</div>
+        <textarea name="suggested_updates" id="suggested-updates-input" placeholder="Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr"></textarea>
       </div>
 
       <div class="privacy-notice">
@@ -1080,6 +1080,9 @@
     const criticalFields = document.getElementById('critical-check-fields');
     const observationsLabel = document.getElementById('observations-label');
     const observationsInput = document.getElementById('observations-input');
+    const suggestedUpdatesLabel = document.getElementById('suggested-updates-label');
+    const suggestedUpdatesHint = document.getElementById('suggested-updates-hint');
+    const suggestedUpdatesInput = document.getElementById('suggested-updates-input');
 
     if (checkTypeSelect && normalFields && criticalFields) {
       checkTypeSelect.addEventListener('change', () => {
@@ -1103,6 +1106,11 @@
           // Update observations label and placeholder
           if (observationsLabel) observationsLabel.innerHTML = 'Was ist passiert? <span class="required">*</span>';
           if (observationsInput) observationsInput.placeholder = 'Wollte mit Bitcoin zahlen, aber Mitarbeiter sagte, sie akzeptieren das nicht mehr...';
+
+          // Update suggested updates for critical (moved location scenario)
+          if (suggestedUpdatesLabel) suggestedUpdatesLabel.textContent = 'Neue Adresse (falls umgezogen)';
+          if (suggestedUpdatesHint) suggestedUpdatesHint.textContent = 'Optional: Falls der Ort an eine neue Adresse umgezogen ist';
+          if (suggestedUpdatesInput) suggestedUpdatesInput.placeholder = 'Neue Adresse: Musterstraße 123, 10115 Berlin';
         } else {
           // Show normal fields, hide critical fields
           normalFields.style.display = 'block';
@@ -1120,6 +1128,11 @@
           // Restore observations label and placeholder
           if (observationsLabel) observationsLabel.innerHTML = 'Wie lief die Zahlung? <span class="required">*</span>';
           if (observationsInput) observationsInput.placeholder = 'Zahlung per Lightning an der Kasse, hat sofort funktioniert...';
+
+          // Restore suggested updates for normal checks
+          if (suggestedUpdatesLabel) suggestedUpdatesLabel.textContent = 'Änderungen am Eintrag nötig?';
+          if (suggestedUpdatesHint) suggestedUpdatesHint.textContent = 'Optional: Falls du Fehler bemerkt hast';
+          if (suggestedUpdatesInput) suggestedUpdatesInput.placeholder = 'Öffnungszeiten stimmen nicht: Laut Aushang Mo-Fr 10-19 Uhr';
         }
       });
     }
