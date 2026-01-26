@@ -591,6 +591,7 @@
         <div class="location-header-id" id="location-id-display"></div>
         <div id="location-status" class="location-status"></div>
         <input type="hidden" name="location_id" id="location-id-input">
+        <input type="hidden" name="location_name" id="location-name-input">
       </div>
 
       <!-- No location selected message - shown when no location_id in URL -->
@@ -1010,6 +1011,7 @@
   const noLocationMessage = document.getElementById('no-location-message');
   const checkFormFields = document.getElementById('check-form-fields');
   const locationIdInput = document.getElementById('location-id-input');
+  const locationNameInput = document.getElementById('location-name-input');
   const locationNameDisplay = document.getElementById('location-name-display');
   const locationIdDisplay = document.getElementById('location-id-display');
 
@@ -1031,16 +1033,20 @@
           const loc = results.data.find(r => (r.location_id || '').trim() === locationId);
           if (loc && loc.name) {
             locationNameDisplay.textContent = loc.name;
+            locationNameInput.value = loc.name;
           } else {
             locationNameDisplay.textContent = locationId;
+            locationNameInput.value = '';
           }
         },
         error: () => {
           locationNameDisplay.textContent = locationId;
+          locationNameInput.value = '';
         }
       });
     } else {
       locationNameDisplay.textContent = locationId;
+      locationNameInput.value = '';
     }
   } else {
     // No valid location_id - show message to select from table

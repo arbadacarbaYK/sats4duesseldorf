@@ -21,6 +21,7 @@ const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 submissions per hour per IP
 const FIELD_MAPPING = {
   // Check submission fields
   'location_id': 'location_id',
+  'location_name': 'location_name',
   'date_time': 'date_time',
   'check_type': 'check_type',
   'public_post_url': 'public_post_url',
@@ -437,10 +438,12 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
   } else {
     // Check submission
     const locationId = publicData.location_id || 'UNKNOWN';
+    const locationName = publicData.location_name || '';
     const isCritical = publicData.check_type === 'critical';
+    const locationDisplay = locationName ? `${locationName} (${locationId})` : locationId;
     title = isCritical
-      ? `⚠️ Kritische Änderung: ${locationId} – ${today}`
-      : `Check: ${locationId} – ${today}`;
+      ? `⚠️ Kritische Änderung: ${locationDisplay} – ${today}`
+      : `Check: ${locationDisplay} – ${today}`;
     labels = isCritical
       ? ['pending', 'check', 'critical']
       : ['pending', 'check'];
