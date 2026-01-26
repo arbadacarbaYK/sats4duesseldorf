@@ -284,6 +284,22 @@
       font-weight: 500;
     }
 
+    .location-name a {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .location-name a:hover {
+      color: var(--btc-orange);
+      text-decoration: underline;
+    }
+
+    .location-name a::after {
+      content: " ↗";
+      font-size: 10px;
+      opacity: 0.5;
+    }
+
     .location-category {
       font-size: 12px;
       color: var(--text-secondary);
@@ -680,11 +696,15 @@
       const cooldownDays = toInt(r.cooldown_days_left);
       const osmType = norm(r.osm_type);
       const osmId = norm(r.osm_id);
+      const website = norm(r.website);
 
       // Validate OSM values to prevent injection
       const safeOsmType = /^(node|way|relation)$/.test(osmType) ? osmType : "";
       const safeOsmId = /^\d+$/.test(osmId) ? osmId : "";
       const osmUrl = safeOsmType && safeOsmId ? `https://www.openstreetmap.org/${safeOsmType}/${safeOsmId}` : "";
+
+      // Validate website URL (must start with http:// or https://)
+      const safeWebsite = /^https?:\/\/.+/.test(website) ? website : "";
 
       // Validate location ID format
       const safeLid = /^DE-BE-\d{5}$/.test(lid) ? lid : "";
@@ -700,9 +720,14 @@
         ? `<a href="${osmUrl}" target="_blank" rel="noopener" title="Auf OpenStreetMap ansehen">${address}</a>`
         : address;
 
+      // Link name to merchant website if available
+      const nameHtml = safeWebsite
+        ? `<a href="${safeWebsite}" target="_blank" rel="noopener" title="Website besuchen">${name}</a>`
+        : name;
+
       return `<tr>
         <td>
-          <div class="location-name">${name}</div>
+          <div class="location-name">${nameHtml}</div>
           ${category ? `<div class="location-category">${category}</div>` : ""}
         </td>
         <td class="location-address">${addressHtml}</td>
