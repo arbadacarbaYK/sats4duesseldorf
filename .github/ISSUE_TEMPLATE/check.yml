@@ -58,7 +58,10 @@ body:
 
         ### Nachweise hochladen
 
-        Lade deine Nachweise bei einem Bilderhoster hoch (z.B. [Imgur](https://imgur.com), [Imgbb](https://imgbb.com), oder ähnlich) und füge die Links unten ein.
+        Lade deine Nachweise bei einem Bilderhoster hoch und füge die Links unten ein:
+        - [Catbox](https://catbox.moe/) – einfach, kein Account nötig
+        - [Lutim](https://pic.infini.fr/) – Open Source
+        - [Imgbb](https://imgbb.com/) – einfach, kein Account nötig
 
         **Wichtig:** Schwärze persönliche Daten (Name, Adresse, etc.) auf allen Bildern!
 
@@ -76,7 +79,7 @@ body:
     attributes:
       label: "2. Kaufbeleg (Bon/Rechnung)"
       description: "Foto vom Kassenbon oder der Rechnung. Persönliche Daten schwärzen!"
-      placeholder: "https://imgur.com/..."
+      placeholder: "https://files.catbox.moe/..."
     validations:
       required: true
 
@@ -85,7 +88,7 @@ body:
     attributes:
       label: "3. Bitcoin-Zahlung"
       description: 'Screenshot der Wallet mit Bestätigung "bezahlt" – Betrag und Datum müssen sichtbar sein.'
-      placeholder: "https://imgur.com/..."
+      placeholder: "https://files.catbox.moe/..."
     validations:
       required: true
 
@@ -94,7 +97,7 @@ body:
     attributes:
       label: "4. Foto vom Ort"
       description: "Foto von Schild, Eingang oder Kasse – damit der Ort eindeutig erkennbar ist."
-      placeholder: "https://imgur.com/..."
+      placeholder: "https://files.catbox.moe/..."
     validations:
       required: true
 
