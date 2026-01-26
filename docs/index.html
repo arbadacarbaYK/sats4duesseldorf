@@ -294,6 +294,16 @@
       font-size: 13px;
     }
 
+    .location-address a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .location-address a:hover {
+      color: var(--btc-orange);
+      text-decoration: underline;
+    }
+
     /* Bounty badge */
     .bounty {
       font-weight: 600;
@@ -465,7 +475,7 @@
           Satoshis für Berlin
         </h1>
         <p class="header-subtitle">Die Millionenchallenge – 1.000.000 sats Gesamtbounty</p>
-        <p class="header-description">Bezahle vor Ort mit Bitcoin, belege es mit Foto und Post – und verdiene Sats für jeden verifizierten Ort.</p>
+        <p class="header-description">Verifiziere Bitcoin-Akzeptanzstellen aus <a href="https://btcmap.org" target="_blank">BTCMap</a> durch echte Käufe vor Ort – und verdiene Sats.</p>
       </div>
       <div class="header-actions">
         <a class="btn btn-primary" id="btnSubmit" href="submit.html">Check einreichen</a>
@@ -481,7 +491,7 @@
       </div>
       <div class="stat">
         <div class="stat-value" id="statAvailable">–</div>
-        <div class="stat-label">Verfügbar (sats)</div>
+        <div class="stat-label">Auszahlbar (sats)</div>
       </div>
       <div class="stat">
         <div class="stat-value" id="statLocations">–</div>
@@ -500,7 +510,7 @@
     <input type="text" id="q" placeholder="Suchen (Name, Adresse, Kategorie)..." />
     <select id="eligible">
       <option value="">Alle Status</option>
-      <option value="yes">Verfügbar</option>
+      <option value="yes">Auszahlbar</option>
       <option value="no">Im Cooldown</option>
     </select>
   </div>
@@ -647,21 +657,28 @@
       const bounty = toInt(r.bounty_base_sats);
       const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
       const cooldownDays = toInt(r.cooldown_days_left);
+      const osmType = norm(r.osm_type);
+      const osmId = norm(r.osm_id);
 
       const claimUrl = createClaimUrl(lid, name);
+      const osmUrl = osmType && osmId ? `https://www.openstreetmap.org/${osmType}/${osmId}` : "";
 
       const statusClass = isEligible ? "status-available" : "status-cooldown";
-      const statusText = isEligible ? "Verfügbar" : `${cooldownDays}d Cooldown`;
+      const statusText = isEligible ? "Auszahlbar" : `${cooldownDays}d Cooldown`;
 
       const claimBtnClass = isEligible ? "available" : "cooldown";
       const claimBtnText = isEligible ? "Claim Bounty" : "Im Cooldown";
+
+      const addressHtml = osmUrl
+        ? `<a href="${osmUrl}" target="_blank" rel="noopener" title="Auf OpenStreetMap ansehen">${address}</a>`
+        : address;
 
       return `<tr>
         <td>
           <div class="location-name">${name}</div>
           ${category ? `<div class="location-category">${category}</div>` : ""}
         </td>
-        <td class="location-address">${address}</td>
+        <td class="location-address">${addressHtml}</td>
         <td class="bounty">${bounty.toLocaleString("de-DE")} sats</td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>
