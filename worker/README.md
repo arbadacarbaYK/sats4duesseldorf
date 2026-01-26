@@ -65,7 +65,7 @@ The worker will be available at: `https://sats4berlin-form-handler.<your-subdoma
 
 ## Self-Hosted Form
 
-The submission form is hosted on GitHub Pages at `docs/submit.html`. It posts directly to the worker's webhook endpoint.
+The submission form is hosted on GitHub Pages at `docs/submit.html`. It posts directly to the worker's `/api/submit` endpoint.
 
 ### Form Fields
 
@@ -143,9 +143,21 @@ Each submission includes a `USER-XXXX` identifier derived from a hash of the con
 ## Security Notes
 
 - Private contact data is stored with 90-day TTL
-- Admin API requires Bearer token authentication
+- Admin API requires Bearer token authentication (minimum 16 characters)
+- Admin API validates Origin header and logs all access for audit trail
+- Form submissions are protected by Origin validation (CSRF protection)
+- Rate limiting: 10 submissions per hour per IP (sliding window)
 - GitHub token should have minimal required scopes (repo only)
 - Submitter ID is a truncated SHA-256 hash (not reversible)
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | Yes | GitHub PAT with repo scope |
+| `ADMIN_API_TOKEN` | Yes | Admin API token (min 16 chars) |
+| `ALLOWED_ORIGINS_DEV` | No | Comma-separated dev origins for testing |
+| `ADMIN_ALLOWED_ORIGINS_DEV` | No | Comma-separated dev origins for admin API |
 
 ## Development
 
