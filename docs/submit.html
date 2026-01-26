@@ -379,6 +379,80 @@
       color: var(--error-red);
     }
 
+    /* Location header for check form */
+    .location-header {
+      background: linear-gradient(135deg, rgba(247, 147, 26, 0.15), rgba(247, 147, 26, 0.05));
+      border: 1px solid rgba(247, 147, 26, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .location-header-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .location-header-name {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--btc-orange);
+      margin-bottom: 4px;
+    }
+
+    .location-header-id {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .location-header .location-status {
+      margin-top: 12px;
+    }
+
+    /* No location selected message */
+    .no-location-message {
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .no-location-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .no-location-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .no-location-text {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--btc-orange);
+      color: #000;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--btc-orange-dark);
+      color: #000;
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .header-content {
@@ -392,6 +466,10 @@
 
       .form-tabs {
         flex-direction: column;
+      }
+
+      .location-header-name {
+        font-size: 20px;
       }
     }
   </style>
@@ -417,14 +495,28 @@
 
     <!-- CHECK FORM -->
     <form id="check-form" class="form-section active">
-      <div class="section-title">Ort & Zeitpunkt</div>
-
-      <div class="field">
-        <label>Location-ID <span class="required">*</span></label>
-        <div class="field-hint">Findest du in der <a href="./">Übersicht</a> (z.B. DE-BE-00042)</div>
-        <input type="text" name="location_id" id="location-id-input" placeholder="DE-BE-00042" required>
+      <!-- Location header - shown when location_id is provided via URL -->
+      <div id="location-header" class="location-header" style="display: none;">
+        <div class="location-header-label">Check einreichen für:</div>
+        <div class="location-header-name" id="location-name-display">Wird geladen...</div>
+        <div class="location-header-id" id="location-id-display"></div>
         <div id="location-status" class="location-status"></div>
+        <input type="hidden" name="location_id" id="location-id-input">
       </div>
+
+      <!-- No location selected message - shown when no location_id in URL -->
+      <div id="no-location-message" class="no-location-message">
+        <div class="no-location-icon">📍</div>
+        <div class="no-location-title">Kein Ort ausgewählt</div>
+        <div class="no-location-text">
+          Bitte wähle zuerst einen Ort aus der Übersicht, für den du einen Check einreichen möchtest.
+        </div>
+        <a href="./" class="btn btn-primary">→ Zur Übersicht</a>
+      </div>
+
+      <!-- Rest of form - hidden until location is selected -->
+      <div id="check-form-fields" style="display: none;">
+      <div class="section-title">Zeitpunkt</div>
 
       <div class="field">
         <label>Datum und Uhrzeit des Kaufs <span class="required">*</span></label>
@@ -525,6 +617,7 @@
       <button type="submit">Check einreichen</button>
 
       <div id="check-status" class="status-message"></div>
+      </div><!-- /check-form-fields -->
     </form>
 
     <!-- NEW LOCATION FORM -->
@@ -786,22 +879,51 @@
     submitForm(e.target, document.getElementById('new-location-status'));
   });
 
-  // Pre-fill location_id from URL parameter (validate format to prevent injection)
+  // Handle location_id from URL parameter
   const urlParams = new URLSearchParams(window.location.search);
   const locationId = urlParams.get('location_id');
+
+  const locationHeader = document.getElementById('location-header');
+  const noLocationMessage = document.getElementById('no-location-message');
+  const checkFormFields = document.getElementById('check-form-fields');
+  const locationIdInput = document.getElementById('location-id-input');
+  const locationNameDisplay = document.getElementById('location-name-display');
+  const locationIdDisplay = document.getElementById('location-id-display');
+
   if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
-    const input = document.querySelector('#check-form input[name="location_id"]');
-    input.value = locationId;
+    // Valid location_id provided - show form
+    locationIdInput.value = locationId;
+    locationIdDisplay.textContent = locationId;
+    locationHeader.style.display = 'block';
+    noLocationMessage.style.display = 'none';
+    checkFormFields.style.display = 'block';
 
-    // Highlight the pre-filled field
-    const field = input.closest('.field');
-    field.classList.add('field-prefilled');
-
-    // Add notice below the input
-    const notice = document.createElement('div');
-    notice.className = 'prefill-notice';
-    notice.textContent = '✓ Location-ID wurde aus der Übersicht übernommen';
-    input.parentNode.appendChild(notice);
+    // Load location name from CSV
+    if (typeof Papa !== 'undefined') {
+      Papa.parse('data/locations.csv', {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const loc = results.data.find(r => (r.location_id || '').trim() === locationId);
+          if (loc && loc.name) {
+            locationNameDisplay.textContent = loc.name;
+          } else {
+            locationNameDisplay.textContent = locationId;
+          }
+        },
+        error: () => {
+          locationNameDisplay.textContent = locationId;
+        }
+      });
+    } else {
+      locationNameDisplay.textContent = locationId;
+    }
+  } else {
+    // No valid location_id - show message to select from table
+    locationHeader.style.display = 'none';
+    noLocationMessage.style.display = 'block';
+    checkFormFields.style.display = 'none';
   }
 
   // Contact method hints and placeholders
@@ -934,26 +1056,14 @@
 
         if (loc.eligible) {
           statusEl.className = 'location-status eligible';
-          statusEl.textContent = `✓ ${loc.name || locId} – Auszahlbar! Du kannst einen Check einreichen.`;
+          statusEl.textContent = '✓ Auszahlbar! Du kannst einen Check einreichen.';
         } else {
           statusEl.className = 'location-status cooldown';
-          statusEl.textContent = `⚠ ${loc.name || locId} – Noch ${loc.cooldownDays} Tage im Cooldown. Ein Check ist derzeit nicht auszahlbar.`;
+          statusEl.textContent = `⚠ Noch ${loc.cooldownDays} Tage im Cooldown. Ein Check ist derzeit nicht auszahlbar.`;
         }
       }
 
-      // Debounce location check
-      let checkTimeout = null;
-      const locInput = document.getElementById('location-id-input');
-      if (locInput) {
-        locInput.addEventListener('input', (e) => {
-          clearTimeout(checkTimeout);
-          checkTimeout = setTimeout(() => {
-            checkLocationStatus(e.target.value.trim().toUpperCase());
-          }, 500);
-        });
-      }
-
-      // Check on page load if pre-filled
+      // Check location status on page load
       if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
         checkLocationStatus(locationId);
       }
