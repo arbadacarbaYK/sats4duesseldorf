@@ -104,9 +104,18 @@ export default {
         }
       }
 
+      // Generate submitter_id from contact info (for activity multiplier tracking)
+      // This creates a consistent but pseudonymous identifier
+      let submitterId = null;
+      if (privateData.contact_method && privateData.contact_value) {
+        const contactString = `${privateData.contact_method}:${privateData.contact_value}`.toLowerCase().trim();
+        submitterId = await generateSubmitterId(contactString);
+      }
+
       // Store private data in KV (expires after 90 days)
       if (Object.keys(privateData).length > 0) {
         privateData.submissionId = submissionId;
+        privateData.submitterId = submitterId;
         privateData.submittedAt = new Date().toISOString();
         await env.PRIVATE_DATA.put(
           `submission:${submissionId}`,
@@ -115,8 +124,8 @@ export default {
         );
       }
 
-      // Create GitHub issue
-      const issueResult = await createGitHubIssue(env, publicData, submissionId, isNewLocation);
+      // Create GitHub issue (include submitterId for activity tracking)
+      const issueResult = await createGitHubIssue(env, publicData, submissionId, submitterId, isNewLocation);
 
       if (!issueResult.success) {
         return new Response(JSON.stringify({ error: 'Failed to create GitHub issue', details: issueResult.error }), {
@@ -196,9 +205,22 @@ function generateSubmissionId() {
 }
 
 /**
+ * Generate a consistent submitter ID from contact info
+ * Uses SHA-256 hash truncated to 12 chars for privacy
+ */
+async function generateSubmitterId(contactString) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(contactString);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return `USER-${hashHex.substring(0, 12).toUpperCase()}`;
+}
+
+/**
  * Create a GitHub issue with the public form data
  */
-async function createGitHubIssue(env, publicData, submissionId, isNewLocation) {
+async function createGitHubIssue(env, publicData, submissionId, submitterId, isNewLocation) {
   const today = new Date().toISOString().slice(0, 10);
 
   let title, body, labels;
@@ -208,13 +230,13 @@ async function createGitHubIssue(env, publicData, submissionId, isNewLocation) {
     const name = publicData.name || 'Unbekannt';
     title = `Neuer Ort: ${name} – ${today}`;
     labels = ['pending', 'new-location'];
-    body = formatNewLocationBody(publicData, submissionId);
+    body = formatNewLocationBody(publicData, submissionId, submitterId);
   } else {
     // Check submission
     const locationId = publicData.location_id || 'UNKNOWN';
     title = `Check: ${locationId} – ${today}`;
     labels = ['pending', 'check'];
-    body = formatCheckBody(publicData, submissionId);
+    body = formatCheckBody(publicData, submissionId, submitterId);
   }
 
   const response = await fetch(`https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/issues`, {
@@ -249,7 +271,7 @@ async function createGitHubIssue(env, publicData, submissionId, isNewLocation) {
 /**
  * Format the issue body for a check submission
  */
-function formatCheckBody(data, submissionId) {
+function formatCheckBody(data, submissionId, submitterId) {
   const checkTypeText = data.check_type === 'critical' || data.check_type?.includes('Kritisch')
     ? 'Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen'
     : 'Normaler Check – Ort akzeptiert weiterhin Bitcoin';
@@ -257,6 +279,7 @@ function formatCheckBody(data, submissionId) {
   return `## Satoshis für Berlin – Check
 
 **Submission ID:** \`${submissionId}\`
+**Submitter ID:** \`${submitterId || 'unknown'}\`
 
 ---
 
@@ -311,10 +334,11 @@ _Eingereicht via Tally-Formular. Kontaktdaten wurden separat gespeichert._
 /**
  * Format the issue body for a new location submission
  */
-function formatNewLocationBody(data, submissionId) {
+function formatNewLocationBody(data, submissionId, submitterId) {
   return `## Satoshis für Berlin – Neuer Ort
 
 **Submission ID:** \`${submissionId}\`
+**Submitter ID:** \`${submitterId || 'unknown'}\`
 
 ---
 

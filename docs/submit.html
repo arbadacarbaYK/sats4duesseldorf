@@ -329,23 +329,26 @@
 
         <div class="privacy-notice">
           <strong>🔒 Auszahlung (privat)</strong><br>
-          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet. Sie dienen nur zur Auszahlung deines Bounties.
+          Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet. Sie dienen nur zur Auszahlung deines Bounties.<br><br>
+          <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom <a href="https://github.com/satoshiinberlin/sats4berlin/blob/main/RULES.md#aktivit%C3%A4tsfaktor" target="_blank" style="color: var(--btc-orange);">Aktivitätsfaktor</a> (bis zu 2× Bounty) zu profitieren!
         </div>
 
         <div class="field">
           <label>Auszahlungsmethode <span class="required">*</span></label>
-          <select name="contact_method" required>
+          <select name="contact_method" id="check-contact-method" required>
             <option value="">– Bitte wählen –</option>
-            <option value="lightning">Lightning-Adresse (z.B. name@getalby.com)</option>
-            <option value="cashu">Cashu / eCash Token</option>
-            <option value="nostr">Nostr DM (npub eingeben)</option>
+            <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+            <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
+            <option value="email">E-Mail (Cashu-Token per Mail)</option>
+            <option value="telegram">Telegram (Cashu-Token per DM)</option>
+            <option value="simplex">SimpleX Chat (Cashu-Token)</option>
           </select>
         </div>
 
         <div class="field">
-          <label>Deine Auszahlungsadresse <span class="required">*</span></label>
-          <div class="field-hint">Lightning-Adresse, eCash-Adresse oder Nostr npub</div>
-          <input type="text" name="contact_value" placeholder="satoshi@getalby.com" required>
+          <label>Deine Kontaktadresse <span class="required">*</span></label>
+          <div class="field-hint" id="check-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
+          <input type="text" name="contact_value" id="check-contact-value" placeholder="name@getalby.com" required>
         </div>
 
         <button type="submit">Check einreichen</button>
@@ -435,22 +438,26 @@
         <div class="privacy-notice">
           <strong>🔒 Auszahlung (privat)</strong><br>
           Die folgenden Angaben werden <strong>NICHT</strong> öffentlich gepostet.<br><br>
-          <strong>Hinweis:</strong> Bei Neueinträgen erfolgt die Auszahlung erst nach Bestätigung durch 2 weitere Bitcoiner (insgesamt 3 Checks).
+          <strong>Hinweis:</strong> Bei Neueinträgen erfolgt die Auszahlung erst nach Bestätigung durch 2 weitere Bitcoiner (insgesamt 3 Checks).<br><br>
+          <strong>Tipp:</strong> Verwende bei jedem Check dieselbe Kontaktadresse, um vom Aktivitätsfaktor (bis zu 2× Bounty) zu profitieren!
         </div>
 
         <div class="field">
           <label>Auszahlungsmethode <span class="required">*</span></label>
-          <select name="contact_method" required>
+          <select name="contact_method" id="newloc-contact-method" required>
             <option value="">– Bitte wählen –</option>
-            <option value="lightning">Lightning-Adresse (z.B. name@getalby.com)</option>
-            <option value="cashu">Cashu / eCash Token</option>
-            <option value="nostr">Nostr DM (npub eingeben)</option>
+            <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+            <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
+            <option value="email">E-Mail (Cashu-Token per Mail)</option>
+            <option value="telegram">Telegram (Cashu-Token per DM)</option>
+            <option value="simplex">SimpleX Chat (Cashu-Token)</option>
           </select>
         </div>
 
         <div class="field">
-          <label>Deine Auszahlungsadresse <span class="required">*</span></label>
-          <input type="text" name="contact_value" placeholder="satoshi@getalby.com" required>
+          <label>Deine Kontaktadresse <span class="required">*</span></label>
+          <div class="field-hint" id="newloc-contact-hint">Gib deine Adresse für die gewählte Methode ein</div>
+          <input type="text" name="contact_value" id="newloc-contact-value" placeholder="name@getalby.com" required>
         </div>
 
         <button type="submit">Neuen Ort melden</button>
@@ -541,6 +548,50 @@
     if (locationId) {
       document.querySelector('#check-form input[name="location_id"]').value = locationId;
     }
+
+    // Contact method hints and placeholders
+    const contactConfig = {
+      lightning: {
+        hint: 'Deine Lightning-Adresse für direkten Empfang',
+        placeholder: 'satoshi@getalby.com'
+      },
+      nostr: {
+        hint: 'Dein Nostr Public Key (npub) für verschlüsselte DM',
+        placeholder: 'npub1...'
+      },
+      email: {
+        hint: 'Deine E-Mail-Adresse für Cashu-Token',
+        placeholder: 'satoshi@example.com'
+      },
+      telegram: {
+        hint: 'Dein Telegram-Username (mit @)',
+        placeholder: '@satoshi'
+      },
+      simplex: {
+        hint: 'Dein SimpleX-Einladungslink oder Kontaktadresse',
+        placeholder: 'https://simplex.chat/contact#...'
+      }
+    };
+
+    function updateContactFields(selectId, hintId, inputId) {
+      const select = document.getElementById(selectId);
+      const hint = document.getElementById(hintId);
+      const input = document.getElementById(inputId);
+
+      select.addEventListener('change', () => {
+        const method = select.value;
+        if (method && contactConfig[method]) {
+          hint.textContent = contactConfig[method].hint;
+          input.placeholder = contactConfig[method].placeholder;
+        } else {
+          hint.textContent = 'Gib deine Adresse für die gewählte Methode ein';
+          input.placeholder = '';
+        }
+      });
+    }
+
+    updateContactFields('check-contact-method', 'check-contact-hint', 'check-contact-value');
+    updateContactFields('newloc-contact-method', 'newloc-contact-hint', 'newloc-contact-value');
   </script>
 </body>
 </html>
