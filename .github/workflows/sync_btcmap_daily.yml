@@ -14,7 +14,6 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sync:
@@ -37,15 +36,10 @@ jobs:
       - name: Compute cooldowns from BTCMap data
         run: python scripts/compute_cooldown_from_btcmap.py
 
-      - name: Create Pull Request if changed
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "sync: update Berlin locations from BTCMap"
-          title: "BTCMap sync (Berlin)"
-          body: |
-            Automatischer Abgleich mit BTCMap/OSM-Daten (2x täglich).
-            - Aktualisiert data/berlin_raw.csv von BTCMap API
-            - Normalisiert data/locations.csv
-            - Berechnet Cooldown-Felder neu
-          branch: bot/btcmap-sync
-          delete-branch: true
+      - name: Commit and push if changed
+        run: |
+          git config user.name "btcmap-sync-bot"
+          git config user.email "btcmap-sync-bot@users.noreply.github.com"
+          git add data/berlin_raw.csv data/locations.csv
+          git diff --cached --quiet || git commit -m "sync: update Berlin locations from BTCMap"
+          git push
