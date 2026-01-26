@@ -54,7 +54,7 @@ Für wichtige Änderungen (nimmt kein Bitcoin mehr, geschlossen, umgezogen):
 
 ## Aktivitätsfaktor (bis 2,0×)
 
-Die Auszahlung wird mit einem Aktivitätsfaktor multipliziert:
+Die Auszahlung wird mit einem Aktivitätsfaktor multipliziert (berechnet zum Zeitpunkt der Auszahlung):
 
 | Checks in 90 Tagen | Faktor |
 |--------------------|--------|
@@ -64,6 +64,8 @@ Die Auszahlung wird mit einem Aktivitätsfaktor multipliziert:
 | ≥10 | 2,0× |
 
 **Auszahlung = Bounty × Aktivitätsfaktor**
+
+> **Tipp:** Wenn du mehrere Checks einreichst bevor die Auszahlung erfolgt, profitierst du vom höheren Faktor für alle offenen Bounties.
 
 ## Cooldown
 

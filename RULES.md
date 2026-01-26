@@ -28,7 +28,7 @@ Ein Bounty wird nur ausgezahlt, wenn ein nachweisbarer Kauf vor Ort in Bitcoin s
 4) **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Berlin“** und **„Bitcoin“** (Link wird eingereicht)
 
 ## Cooldown
-Ein Ort kann frühestens 90 Tage nach dem letzten gültigen Check erneut mit einem Bounty geprüft werden.
+Ein Ort kann frühestens 90 Tage nach dem letzten gültigen Check erneut mit einem Bounty geprüft werden. Der Cooldown berücksichtigt sowohl BTCMap-Verifikationen als auch lokale Checks aus dieser Challenge.
 
 ## Was wird aktualisiert?
 Nach einem gültigen Check wird der Eintrag bei Bedarf angepasst, z. B.:
@@ -64,7 +64,8 @@ Für Änderungen, die für Nutzer entscheidend sind (z. B. nimmt kein Bitcoin me
 - Erst wenn 3 gültige Checks vorliegen (Einreicher + 2 Bestätiger), wird das Neueintrag-Bounty freigegeben
 
 # Aktivitätsfaktor (bis 2,0×)
-Die Auszahlung wird zusätzlich mit einem Aktivitätsfaktor multipliziert. Grundlage sind gültige Checks in den letzten 90 Tagen:
+Die Auszahlung wird zusätzlich mit einem Aktivitätsfaktor multipliziert. Grundlage sind gültige Checks in den letzten 90 Tagen. Der Faktor wird zum Zeitpunkt der Auszahlung berechnet – wer also weitere Checks einreicht, bevor die Auszahlung erfolgt, profitiert vom höheren Faktor für alle offenen Bounties.
+
 - **0–1 Checks:** **1,0×**
 - **2–4 Checks:** **1,2×**
 - **5–9 Checks:** **1,5×**

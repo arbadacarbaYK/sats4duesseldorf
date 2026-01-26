@@ -23,3 +23,16 @@ Ein Issue kann nur **approved** werden, wenn ein Kauf vor Ort **in Bitcoin** pla
 
 ## Auszahlung
 Auszahlungsziel niemals öffentlich im Issue. Nach approved wird das Ziel privat angefordert.
+
+## Automatisierung
+Nach dem Setzen des `approved`-Labels passiert automatisch:
+1. Check wird in `checks_public.csv` eingetragen
+2. Cooldown wird für den Ort gesetzt (90 Tage)
+3. Bot kommentiert mit BTCMap-Verifikationslink (zum Kopieren)
+4. Bei Web-Formular-Einreichungen: Kontaktdaten wurden bereits privat gespeichert
+
+Bei `paid`-Label:
+1. Status wird auf "paid" gesetzt
+2. Aktivitätsfaktor wird neu berechnet (falls höher)
+3. Budget wird aktualisiert
+4. Issue wird automatisch geschlossen
