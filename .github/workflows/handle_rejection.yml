@@ -4,9 +4,9 @@ on:
   issues:
     types: [labeled]
 
-# Prevent concurrent CSV writes - wait for other workflows to finish
+# Per-issue concurrency to prevent cancellation when multiple issues are labeled
 concurrency:
-  group: csv-write
+  group: rejection-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 permissions:
