@@ -464,6 +464,9 @@ async function generatePseudonym(submitterId) {
 async function createGitHubIssue(env, publicData, submissionId, submitterId, isNewLocation) {
   const today = new Date().toISOString().slice(0, 10);
 
+  // Generate pseudonym for public display in issue
+  const pseudonym = submitterId ? await generatePseudonym(submitterId) : 'Anonymous';
+
   let title, body, labels;
 
   if (isNewLocation) {
@@ -471,7 +474,7 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
     const name = publicData.name || 'Unbekannt';
     title = `Neuer Ort: ${name} – ${today}`;
     labels = ['pending', 'new-location'];
-    body = formatNewLocationBody(publicData, submissionId, submitterId);
+    body = formatNewLocationBody(publicData, submissionId, pseudonym);
   } else {
     // Check submission
     const locationId = publicData.location_id || 'UNKNOWN';
@@ -484,7 +487,7 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
     labels = isCritical
       ? ['pending', 'check', 'critical']
       : ['pending', 'check'];
-    body = formatCheckBody(publicData, submissionId, submitterId);
+    body = formatCheckBody(publicData, submissionId, pseudonym);
   }
 
   const response = await fetch(`https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/issues`, {
@@ -519,7 +522,7 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
 /**
  * Format the issue body for a check submission
  */
-function formatCheckBody(data, submissionId, submitterId) {
+function formatCheckBody(data, submissionId, pseudonym) {
   const isCritical = data.check_type === 'critical' || data.check_type?.includes('Kritisch');
   const checkTypeText = isCritical
     ? '⚠️ Kritische Änderung – Ort nimmt kein Bitcoin mehr / geschlossen / umgezogen'
@@ -562,7 +565,7 @@ ${data.venue_photo_url || '_nicht angegeben_'}`;
   return `## Satoshis für Berlin – Check
 
 **Submission ID:** \`${submissionId}\`
-**Submitter ID:** \`${submitterId || 'unknown'}\`
+**Submitter:** ${pseudonym || 'Anonymous'}
 
 ---
 
@@ -601,11 +604,11 @@ _Eingereicht via Webformular. Kontaktdaten wurden separat gespeichert._
 /**
  * Format the issue body for a new location submission
  */
-function formatNewLocationBody(data, submissionId, submitterId) {
+function formatNewLocationBody(data, submissionId, pseudonym) {
   return `## Satoshis für Berlin – Neuer Ort
 
 **Submission ID:** \`${submissionId}\`
-**Submitter ID:** \`${submitterId || 'unknown'}\`
+**Submitter:** ${pseudonym || 'Anonymous'}
 
 ---
 
