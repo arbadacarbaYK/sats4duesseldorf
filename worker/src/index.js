@@ -282,12 +282,16 @@ export default {
         });
       }
 
+      // Generate pseudonym for display
+      const pseudonym = submitterId ? generatePseudonym(submitterId) : null;
+
       // Return success
       return new Response(JSON.stringify({
         success: true,
         submissionId: submissionId,
         issueNumber: issueResult.issueNumber,
-        issueUrl: issueResult.issueUrl
+        issueUrl: issueResult.issueUrl,
+        pseudonym: pseudonym
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -413,6 +417,46 @@ async function generateSubmitterId(contactString) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return `USER-${hashHex.substring(0, 12).toUpperCase()}`;
+}
+
+// Adjectives (smart/clever variations) for pseudonym generation
+const PSEUDONYM_ADJECTIVES = [
+  "Clever", "Bright", "Brilliant", "Sharp", "Wise", "Savvy", "Astute", "Shrewd",
+  "Keen", "Quick", "Witty", "Brainy", "Gifted", "Ingenious", "Nimble", "Insightful"
+];
+
+// Important figures from Bitcoin, cryptography, and mathematics
+const PSEUDONYM_FIGURES = [
+  // Bitcoin pioneers
+  "Satoshi", "Finney", "Szabo", "Back", "Nakamoto", "Andresen", "Maxwell", "Wuille", "Todd",
+  // Cryptography pioneers
+  "Diffie", "Hellman", "Rivest", "Shamir", "Merkle", "Chaum", "Schneier", "Bernstein",
+  // Mathematics/CS pioneers
+  "Euler", "Gauss", "Turing", "Shannon", "Fermat", "Lovelace", "Noether", "Ramanujan", "Galois"
+];
+
+/**
+ * Generate a pseudonym from submitter ID for public display
+ * Same input always produces the same output
+ */
+function generatePseudonym(submitterId) {
+  if (!submitterId || submitterId === 'unknown') {
+    return 'Anonymous';
+  }
+
+  // Use simple hash of the submitterId string to get consistent indices
+  let hash = 0;
+  for (let i = 0; i < submitterId.length; i++) {
+    const char = submitterId.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  hash = Math.abs(hash);
+
+  const adjIndex = hash % PSEUDONYM_ADJECTIVES.length;
+  const figIndex = Math.floor(hash / PSEUDONYM_ADJECTIVES.length) % PSEUDONYM_FIGURES.length;
+
+  return `${PSEUDONYM_ADJECTIVES[adjIndex]} ${PSEUDONYM_FIGURES[figIndex]}`;
 }
 
 /**

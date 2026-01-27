@@ -893,6 +893,7 @@
         // Validate issueUrl is a valid GitHub URL to prevent XSS
         const issueUrl = result.issueUrl || '';
         const isValidGitHubUrl = /^https:\/\/github\.com\/[\w-]+\/[\w-]+\/issues\/\d+$/.test(issueUrl);
+        const pseudonym = result.pseudonym || null;
 
         // Show success modal
         const celebrationGifs = [
@@ -904,7 +905,11 @@
           'https://media.giphy.com/media/3o6fJ1BM7R2EBRDnxK/giphy.gif',
         ];
 
-        let bodyHtml = 'Dein Check wurde erstellt.<br><br>';
+        let bodyHtml = '';
+        if (pseudonym) {
+          bodyHtml += `Dein Pseudonym: <strong>${pseudonym}</strong><br><br>`;
+        }
+        bodyHtml += 'Dein Check wurde erstellt.<br><br>';
         if (isValidGitHubUrl) {
           bodyHtml += `<a href="${issueUrl}" target="_blank" rel="noopener">${issueUrl}</a><br><br>`;
         }
