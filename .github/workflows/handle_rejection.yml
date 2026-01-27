@@ -4,9 +4,9 @@ on:
   issues:
     types: [labeled]
 
-# Per-issue concurrency to prevent cancellation when multiple issues are labeled
+# Prevent concurrent CSV writes - wait for other workflows to finish
 concurrency:
-  group: rejection-${{ github.event.issue.number }}
+  group: csv-write
   cancel-in-progress: false
 
 permissions:
@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
 
       - name: Determine rejection reason
         id: reason
