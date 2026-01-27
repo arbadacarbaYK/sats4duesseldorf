@@ -537,14 +537,47 @@ def main():
                 else:
                     lr["verification_confidence"] = "medium"
 
-    # Release held bounties for newly confirmed locations
+    # Release held bounties for:
+    # 1. Newly confirmed locations (3+ checks)
+    # 2. Locations with 2+ checks (lower threshold to avoid stuck bounties)
+    # 3. Bounties held for more than 180 days (timeout)
     confirmed_locations = {r["location_id"] for r in loc_rows if r.get("new_location_status") == "confirmed"}
+
+    # Also release for locations with 2+ verified checks (relaxed threshold)
+    partially_confirmed = set()
+    for r in loc_rows:
+        try:
+            count = int(r.get("verified_by_count", "0") or "0")
+            if count >= 2 and r.get("new_location_status") == "pending":
+                partially_confirmed.add(r["location_id"])
+                # Upgrade status to confirmed if 2+ checks
+                r["new_location_status"] = "confirmed"
+                r["verification_confidence"] = "medium"
+                print(f"Location {r['location_id']} confirmed with {count} checks (relaxed threshold)")
+        except ValueError:
+            pass
+
     bounties_released = 0
+    cutoff_date = days_ago(180)  # Release bounties held for more than 180 days
+
     for chk in chk_rows:
-        if (chk.get("location_id") in confirmed_locations and
-            chk.get("paid_status") == "awaiting_confirmation"):
+        if chk.get("paid_status") != "awaiting_confirmation":
+            continue
+
+        location_id = chk.get("location_id", "")
+        reviewed_at = chk.get("reviewed_at", "")
+
+        # Release if location is confirmed
+        if location_id in confirmed_locations or location_id in partially_confirmed:
             chk["paid_status"] = "pending"
             bounties_released += 1
+            continue
+
+        # Release if bounty has been held for more than 180 days
+        if reviewed_at and reviewed_at < cutoff_date:
+            chk["paid_status"] = "pending"
+            bounties_released += 1
+            print(f"Released timed-out bounty for {chk.get('check_id')} (held since {reviewed_at})")
 
     if appended == 0 and new_locations_added == 0:
         print("No new approved issues to apply.")

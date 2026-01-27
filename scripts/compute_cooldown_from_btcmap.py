@@ -101,8 +101,23 @@ def main():
     updated = 0
     missing_upstream = 0
     used_local_check = 0
+    skipped_inactive = 0
+
+    # Status values that indicate inactive locations (should not be eligible)
+    INACTIVE_STATUSES = {"deleted", "closed", "moved"}
 
     for row in loc_rows:
+        # Skip inactive locations - they should remain ineligible
+        location_status = (row.get("location_status") or "").strip().lower()
+        if location_status in INACTIVE_STATUSES:
+            # Ensure these locations stay ineligible
+            row["eligible_now"] = "no"
+            row["eligible_for_check"] = "no"
+            row["cooldown_until"] = ""
+            row["cooldown_days_left"] = ""
+            skipped_inactive += 1
+            continue
+
         osm_type = (row.get("osm_type") or "").strip()
         osm_id = (row.get("osm_id") or "").strip()
         k = (osm_type, osm_id)
@@ -168,7 +183,7 @@ def main():
         for row in loc_rows:
             w.writerow(row)
 
-    print(f"OK: updated={updated}, missing_dates={missing_upstream}, used_local_check={used_local_check}")
+    print(f"OK: updated={updated}, missing_dates={missing_upstream}, used_local_check={used_local_check}, skipped_inactive={skipped_inactive}")
 
 
 if __name__ == "__main__":

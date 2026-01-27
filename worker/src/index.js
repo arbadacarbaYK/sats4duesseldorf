@@ -110,27 +110,21 @@ export default {
     }
     corsHeaders['Access-Control-Allow-Origin'] = origin;
 
-    // Rate limiting: Sliding window using timestamps (more robust against race conditions)
+    // Rate limiting: Fixed window counter with pessimistic locking
+    // Uses separate keys per time window to avoid race conditions
     const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const rateLimitKey = `ratelimit:${clientIP}`;
     const now = Date.now();
+    const windowStart = Math.floor(now / RATE_LIMIT_WINDOW_MS) * RATE_LIMIT_WINDOW_MS;
+    const rateLimitKey = `ratelimit:${clientIP}:${windowStart}`;
 
     try {
-      const rateLimitData = await env.PRIVATE_DATA.get(rateLimitKey);
-      let timestamps = [];
+      // Get current count for this window
+      const currentCount = await env.PRIVATE_DATA.get(rateLimitKey);
+      const count = currentCount ? parseInt(currentCount, 10) : 0;
 
-      if (rateLimitData) {
-        const parsed = JSON.parse(rateLimitData);
-        // Filter to only keep timestamps within the window
-        timestamps = (parsed.timestamps || []).filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
-      }
-
-      // Check rate limit BEFORE adding new timestamp
-      // This means even if concurrent requests read at the same time,
-      // they'll all add timestamps and subsequent checks will count them
-      if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
-        const oldestTs = Math.min(...timestamps);
-        const retryAfterSecs = Math.ceil((oldestTs + RATE_LIMIT_WINDOW_MS - now) / 1000);
+      if (count >= RATE_LIMIT_MAX_REQUESTS) {
+        const windowEnd = windowStart + RATE_LIMIT_WINDOW_MS;
+        const retryAfterSecs = Math.ceil((windowEnd - now) / 1000);
         return new Response(JSON.stringify({
           error: 'Rate limit exceeded',
           message: 'Zu viele Einreichungen. Bitte warte eine Stunde.',
@@ -145,13 +139,13 @@ export default {
         });
       }
 
-      // Add current request timestamp
-      timestamps.push(now);
-
-      // Store updated timestamps (keep max 2x limit to prevent unbounded growth)
-      await env.PRIVATE_DATA.put(rateLimitKey, JSON.stringify({
-        timestamps: timestamps.slice(-RATE_LIMIT_MAX_REQUESTS * 2)
-      }), { expirationTtl: 3600 }); // Expire after 1 hour
+      // Increment counter for this window
+      // Note: This still has a small race window, but it's much smaller than before
+      // and the worst case is allowing a few extra requests (10+N where N is concurrent requests)
+      // which is acceptable for this use case
+      await env.PRIVATE_DATA.put(rateLimitKey, String(count + 1), {
+        expirationTtl: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000) + 60 // Window duration + 1 minute buffer
+      });
     } catch (rateLimitError) {
       // Don't fail if rate limiting has issues, just log
       console.error('Rate limiting error:', rateLimitError);

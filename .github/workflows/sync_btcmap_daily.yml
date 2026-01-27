@@ -42,8 +42,7 @@ jobs:
 
       - name: Copy to docs/data for GitHub Pages
         run: |
-          mkdir -p docs/data
-          cp -f data/locations.csv docs/data/locations.csv
+          ./scripts/copy_to_docs.sh
 
       - name: Commit and push if changed
         run: |

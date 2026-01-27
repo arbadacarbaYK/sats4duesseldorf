@@ -59,9 +59,7 @@ jobs:
 
       - name: Copy to docs/data for GitHub Pages
         run: |
-          mkdir -p docs/data
-          cp -f data/locations.csv docs/data/locations.csv
-          cp -f data/checks_public.csv docs/data/checks_public.csv
+          ./scripts/copy_to_docs.sh
 
       - name: Commit and push
         run: |
@@ -384,7 +382,14 @@ jobs:
                       # Decrement verified count
                       try:
                           count = int(row.get("verified_by_count", "0") or "0")
-                          row["verified_by_count"] = str(max(0, count - 1))
+                          new_count = max(0, count - 1)
+                          row["verified_by_count"] = str(new_count)
+
+                          # If count drops below 2, revert new_location_status to pending
+                          if row.get("new_location_status") == "confirmed" and new_count < 2:
+                              row["new_location_status"] = "pending"
+                              row["verification_confidence"] = "low"
+                              print(f"Reverted {location_id} to pending status (only {new_count} checks remaining)")
                       except ValueError:
                           pass
                       print(f"Reset cooldown for {location_id}")
@@ -412,9 +417,7 @@ jobs:
 
       - name: Copy to docs/data for GitHub Pages
         run: |
-          mkdir -p docs/data
-          cp -f data/locations.csv docs/data/locations.csv
-          cp -f data/checks_public.csv docs/data/checks_public.csv
+          ./scripts/copy_to_docs.sh
 
       - name: Commit and push
         run: |

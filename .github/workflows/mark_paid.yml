@@ -136,9 +136,7 @@ jobs:
 
       - name: Copy to docs/data for GitHub Pages
         run: |
-          mkdir -p docs/data
-          cp -f data/checks_public.csv docs/data/checks_public.csv
-          cp -f data/budget.json docs/data/budget.json
+          ./scripts/copy_to_docs.sh
 
       - name: Commit and push
         run: |
@@ -252,9 +250,7 @@ jobs:
 
       - name: Copy to docs/data for GitHub Pages
         run: |
-          mkdir -p docs/data
-          cp -f data/checks_public.csv docs/data/checks_public.csv
-          cp -f data/budget.json docs/data/budget.json
+          ./scripts/copy_to_docs.sh
 
       - name: Commit and push
         run: |

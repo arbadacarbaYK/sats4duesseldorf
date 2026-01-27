@@ -82,15 +82,6 @@ export async function handleAdminRequest(request, env) {
     });
   }
 
-  // Validate that ADMIN_API_TOKEN is configured (not empty)
-  if (!env.ADMIN_API_TOKEN || env.ADMIN_API_TOKEN.length < 16) {
-    console.error('ADMIN_API_TOKEN is not configured or too short');
-    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
   // Verify admin authentication
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -102,11 +93,20 @@ export async function handleAdminRequest(request, env) {
   }
 
   const token = authHeader.substring(7);
-  // Use timing-safe comparison to prevent timing attacks
-  if (!timingSafeEqual(token, env.ADMIN_API_TOKEN)) {
+
+  // Validate token - use same error response for all failure modes to prevent information leakage
+  // This includes: missing config, short config, wrong token
+  const isConfigValid = env.ADMIN_API_TOKEN && env.ADMIN_API_TOKEN.length >= 16;
+  const isTokenValid = isConfigValid && timingSafeEqual(token, env.ADMIN_API_TOKEN);
+
+  if (!isTokenValid) {
+    // Log internally but don't reveal which check failed
+    if (!isConfigValid) {
+      console.error('ADMIN_API_TOKEN is not configured or too short');
+    }
     await logAdminAction(env, 'AUTH_FAILED', { path: url.pathname }, clientIP);
-    return new Response(JSON.stringify({ error: 'Invalid token' }), {
-      status: 403,
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
       headers: { 'Content-Type': 'application/json' }
     });
   }

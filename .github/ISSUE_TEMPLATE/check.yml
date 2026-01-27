@@ -136,11 +136,36 @@ body:
 
         ### Auszahlung
 
-        Nach erfolgreicher Prüfung (Label **approved**) erhältst du eine Nachricht mit Anweisungen zur Auszahlung.
+        Nach erfolgreicher Prüfung (Label **approved**) erfolgt die Auszahlung.
 
-        **Bitte poste deine Lightning-Adresse NICHT öffentlich in diesem Issue!**
+        **Wichtig:** Gib unten deine bevorzugte Auszahlungsmethode an. Alternativ kannst du nach der Genehmigung eine E-Mail an satoshiinberlin@proton.me senden.
 
-        Die Auszahlung erfolgt anonym per Lightning oder eCash.
+  - type: dropdown
+    id: contact_method
+    attributes:
+      label: "Auszahlungsmethode (optional)"
+      description: "Wie möchtest du den Bounty erhalten? Du kannst dies auch später per E-Mail mitteilen."
+      options:
+        - "Lightning-Adresse"
+        - "LNURL"
+        - "Cashu (eCash)"
+        - "Per E-Mail mitteilen"
+    validations:
+      required: false
+
+  - type: input
+    id: contact_value
+    attributes:
+      label: "Lightning-Adresse / LNURL (optional)"
+      description: "Deine Lightning-Adresse (z.B. name@wallet.com) oder LNURL. Lass dieses Feld leer, wenn du per E-Mail Kontakt aufnehmen möchtest."
+      placeholder: "satoshi@getalby.com"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ **Hinweis:** Lightning-Adressen in diesem Issue sind öffentlich sichtbar. Wenn du das nicht möchtest, wähle \"Per E-Mail mitteilen\" und sende deine Adresse an satoshiinberlin@proton.me
 
         ---
 
