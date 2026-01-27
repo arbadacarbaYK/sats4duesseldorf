@@ -134,11 +134,17 @@ jobs:
               print(f"Check {check_id} not found in CSV")
           EOF
 
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/checks_public.csv docs/data/checks_public.csv
+          cp -f data/budget.json docs/data/budget.json
+
       - name: Commit and push
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/checks_public.csv data/budget.json
+          git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
           git diff --cached --quiet || git commit -m "Mark ISSUE-${{ github.event.issue.number }} as paid"
           git push
 
