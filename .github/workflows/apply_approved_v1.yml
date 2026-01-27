@@ -100,21 +100,56 @@ jobs:
           CRITICAL_REASON=$(echo "$ISSUE_BODY" | grep -oP 'Was ist passiert\?\s*\n+\K[^\n]+' | head -1 || \
                            echo "$ISSUE_BODY" | grep -oP '### Was ist passiert\?\s*\n+\K[^\n]+' | head -1 || echo "")
 
-          # Extract verification details for BTCMap notes
-          # Support both formats: "### Label\n\nvalue" and "**Label:** value"
-          CHECK_DATE=$(echo "$ISSUE_BODY" | grep -oP '### Datum und Uhrzeit[^\n]*\n+\K[^\n]+' | head -1 || \
-                       echo "$ISSUE_BODY" | grep -oP 'Datum und Uhrzeit[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          PUBLIC_POST=$(echo "$ISSUE_BODY" | grep -oP '### 1\. Öffentlicher Post[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
-                        echo "$ISSUE_BODY" | grep -oP 'Öffentlicher Post[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          RECEIPT_URL=$(echo "$ISSUE_BODY" | grep -oP '### 2\. Kaufbeleg[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
-                        echo "$ISSUE_BODY" | grep -oP '### 2\. Kaufnachweis[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
-                        echo "$ISSUE_BODY" | grep -oP 'Kaufbeleg[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          PAYMENT_URL=$(echo "$ISSUE_BODY" | grep -oP '### 3\. Bitcoin-Zahlung[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
-                        echo "$ISSUE_BODY" | grep -oP 'Bitcoin-Zahlung[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          VENUE_URL=$(echo "$ISSUE_BODY" | grep -oP '### 4\. Foto vom Ort[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
-                      echo "$ISSUE_BODY" | grep -oP 'Foto vom Ort[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          OBSERVATIONS=$(echo "$ISSUE_BODY" | grep -oP '### Wie lief die Zahlung[^\n]*\n+\K[^\n]+' | head -1 || \
-                         echo "$ISSUE_BODY" | grep -oP 'Wie lief die Zahlung[^*]*\*\*\s*\K[^\n]+' | head -1 || echo "")
+          # Extract verification details for BTCMap notes using Python (more reliable than grep)
+          EXTRACTED=$(python3 << EOF
+          import re
+          import json
+
+          body = '''$ISSUE_BODY'''
+
+          def extract(pattern, text):
+              match = re.search(pattern, text, re.IGNORECASE)
+              return match.group(1).strip() if match else ''
+
+          # Support both "### Label\n\nvalue" and "**Label:** value" formats
+          check_date = extract(r'### Datum und Uhrzeit[^\n]*\n\n([^\n]+)', body) or \
+                       extract(r'\*\*Datum und Uhrzeit[^*]*\*\*\s*\`?([^\`\n]+)', body)
+
+          # PUBLIC_POST can be https://, nostr:, or any content
+          public_post = extract(r'### 1\. Öffentlicher Post[^\n]*\n\n([^\n]+)', body) or \
+                        extract(r'\*\*Öffentlicher Post[^*]*\*\*\s*\`?([^\`\n]+)', body)
+
+          receipt = extract(r'### 2\. Kaufbeleg[^\n]*\n\n(https?://[^\n]+)', body) or \
+                    extract(r'### 2\. Kaufnachweis[^\n]*\n\n(https?://[^\n]+)', body) or \
+                    extract(r'\*\*Kaufbeleg[^*]*\*\*\s*\`?([^\`\n]+)', body)
+
+          payment = extract(r'### 3\. Bitcoin-Zahlung[^\n]*\n\n(https?://[^\n]+)', body) or \
+                    extract(r'\*\*Bitcoin-Zahlung[^*]*\*\*\s*\`?([^\`\n]+)', body)
+
+          venue = extract(r'### 4\. Foto vom Ort[^\n]*\n\n(https?://[^\n]+)', body) or \
+                  extract(r'\*\*Foto vom Ort[^*]*\*\*\s*\`?([^\`\n]+)', body)
+
+          observations = extract(r'### Wie lief die Zahlung[^\n]*\n\n([^\n]+)', body) or \
+                         extract(r'\*\*Wie lief die Zahlung[^*]*\*\*\s*([^\n]+)', body)
+
+          # Output as JSON for safe parsing
+          print(json.dumps({
+              'check_date': check_date,
+              'public_post': public_post,
+              'receipt': receipt,
+              'payment': payment,
+              'venue': venue,
+              'observations': observations
+          }))
+          EOF
+          )
+
+          CHECK_DATE=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('check_date',''))")
+          PUBLIC_POST=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('public_post',''))")
+          RECEIPT_URL=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('receipt',''))")
+          PAYMENT_URL=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('payment',''))")
+          VENUE_URL=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('venue',''))")
+          OBSERVATIONS=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('observations',''))")
 
           # Look up OSM info from locations.csv using Python for proper CSV parsing
           BTCMAP_LINK=""
