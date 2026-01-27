@@ -134,6 +134,10 @@ jobs:
               print(f"Check {check_id} not found in CSV")
           EOF
 
+      - name: Generate leaderboard
+        run: |
+          python scripts/generate_leaderboard.py
+
       - name: Copy to docs/data for GitHub Pages
         run: |
           ./scripts/copy_to_docs.sh
@@ -142,7 +146,7 @@ jobs:
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
+          git add data/checks_public.csv data/budget.json data/leaderboard.json docs/data/checks_public.csv docs/data/budget.json docs/data/leaderboard.json
           git diff --cached --quiet || git commit -m "Mark ISSUE-${{ github.event.issue.number }} as paid"
           # Retry push with rebase if another workflow pushed first
           git push || (git pull --rebase origin main && git push)
@@ -249,6 +253,10 @@ jobs:
               print(f"Check {check_id} not found in CSV or no update needed")
           EOF
 
+      - name: Generate leaderboard
+        run: |
+          python scripts/generate_leaderboard.py
+
       - name: Copy to docs/data for GitHub Pages
         run: |
           ./scripts/copy_to_docs.sh
@@ -257,7 +265,7 @@ jobs:
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
+          git add data/checks_public.csv data/budget.json data/leaderboard.json docs/data/checks_public.csv docs/data/budget.json docs/data/leaderboard.json
           git diff --cached --quiet || git commit -m "Revert paid status for ISSUE-${{ github.event.issue.number }}"
           # Retry push with rebase if another workflow pushed first
           git push || (git pull --rebase origin main && git push)

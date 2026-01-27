@@ -431,6 +431,149 @@
       color: var(--text-secondary);
     }
 
+    /* Leaderboard */
+    .leaderboard-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    .leaderboard-header:hover {
+      background: rgba(247, 147, 26, 0.05);
+    }
+
+    .leaderboard-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .leaderboard-title .trophy {
+      font-size: 18px;
+    }
+
+    .leaderboard-toggle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: transform 0.2s ease;
+    }
+
+    .leaderboard-section.expanded .leaderboard-toggle {
+      transform: rotate(180deg);
+    }
+
+    .leaderboard-content {
+      display: none;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .leaderboard-section.expanded .leaderboard-content {
+      display: block;
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+    }
+
+    .leaderboard-item:last-child {
+      border-bottom: none;
+    }
+
+    .leaderboard-rank {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .leaderboard-rank.gold {
+      background: linear-gradient(135deg, #ffd700, #ffb700);
+      color: #000;
+    }
+
+    .leaderboard-rank.silver {
+      background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+      color: #000;
+    }
+
+    .leaderboard-rank.bronze {
+      background: linear-gradient(135deg, #cd7f32, #b87333);
+      color: #000;
+    }
+
+    .leaderboard-rank.default {
+      background: var(--bg-dark);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .leaderboard-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .leaderboard-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .leaderboard-checks {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .leaderboard-sats {
+      font-weight: 600;
+      color: var(--btc-orange);
+      white-space: nowrap;
+    }
+
+    .leaderboard-empty {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .leaderboard-footer {
+      padding: 10px 16px;
+      background: var(--bg-dark);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
     /* Empty state */
     .empty {
       text-align: center;
@@ -536,6 +679,23 @@
 </header>
 
 <main class="main">
+  <section class="leaderboard-section" id="leaderboardSection">
+    <div class="leaderboard-header" onclick="toggleLeaderboard()">
+      <div class="leaderboard-title">
+        <span class="trophy">&#127942;</span>
+        <span>Leaderboard</span>
+        <span id="leaderboardCount" style="color: var(--text-secondary); font-weight: 400;"></span>
+      </div>
+      <span class="leaderboard-toggle">&#9660;</span>
+    </div>
+    <div class="leaderboard-content">
+      <ul class="leaderboard-list" id="leaderboardList">
+        <li class="leaderboard-empty">Lade Leaderboard...</li>
+      </ul>
+      <div class="leaderboard-footer" id="leaderboardFooter"></div>
+    </div>
+  </section>
+
   <div class="filters">
     <input type="text" id="q" placeholder="Suchen (Name, Adresse, Kategorie)..." />
     <select id="eligible">
@@ -839,8 +999,83 @@
     }
   }, 15000); // 15 second timeout
 
+  // Leaderboard functions
+  function toggleLeaderboard() {
+    const section = document.getElementById("leaderboardSection");
+    section.classList.toggle("expanded");
+    // Save preference
+    localStorage.setItem("leaderboardExpanded", section.classList.contains("expanded"));
+  }
+
+  function getRankClass(rank) {
+    if (rank === 1) return "gold";
+    if (rank === 2) return "silver";
+    if (rank === 3) return "bronze";
+    return "default";
+  }
+
+  async function loadLeaderboard() {
+    try {
+      const resp = await fetch("data/leaderboard.json");
+      if (!resp.ok) {
+        document.getElementById("leaderboardList").innerHTML =
+          '<li class="leaderboard-empty">Noch keine Eintr\u00e4ge. Sei der Erste!</li>';
+        document.getElementById("leaderboardFooter").style.display = "none";
+        return;
+      }
+
+      const data = await resp.json();
+
+      if (!data.leaderboard || data.leaderboard.length === 0) {
+        document.getElementById("leaderboardList").innerHTML =
+          '<li class="leaderboard-empty">Noch keine Eintr\u00e4ge. Sei der Erste!</li>';
+        document.getElementById("leaderboardFooter").style.display = "none";
+        return;
+      }
+
+      // Update count in header
+      document.getElementById("leaderboardCount").textContent =
+        `(${data.total_participants} Teilnehmer)`;
+
+      // Render leaderboard items
+      const listHtml = data.leaderboard.map(entry => {
+        const rankClass = getRankClass(entry.rank);
+        const checksText = entry.checks_count === 1 ? "1 Check" : `${entry.checks_count} Checks`;
+
+        return `<li class="leaderboard-item">
+          <div class="leaderboard-rank ${rankClass}">${entry.rank}</div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">${escapeHtml(entry.pseudonym)}</div>
+            <div class="leaderboard-checks">${checksText}</div>
+          </div>
+          <div class="leaderboard-sats">${entry.total_sats.toLocaleString("de-DE")} sats</div>
+        </li>`;
+      }).join("");
+
+      document.getElementById("leaderboardList").innerHTML = listHtml;
+
+      // Update footer
+      document.getElementById("leaderboardFooter").textContent =
+        `Gesamt: ${data.total_sats_paid.toLocaleString("de-DE")} sats an ${data.total_participants} Teilnehmer ausgezahlt`;
+
+      // Restore expanded state from localStorage
+      if (localStorage.getItem("leaderboardExpanded") === "true") {
+        document.getElementById("leaderboardSection").classList.add("expanded");
+      }
+
+    } catch (e) {
+      console.error("Failed to load leaderboard:", e);
+      document.getElementById("leaderboardList").innerHTML =
+        '<li class="leaderboard-empty">Leaderboard konnte nicht geladen werden.</li>';
+      document.getElementById("leaderboardFooter").style.display = "none";
+    }
+  }
+
   // Load budget data
   loadBudget();
+
+  // Load leaderboard
+  loadLeaderboard();
 
   Papa.parse("data/locations.csv", {
     download: true,

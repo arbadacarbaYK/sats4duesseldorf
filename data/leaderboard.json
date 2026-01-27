@@ -1,0 +1,15 @@
+{
+  "last_updated": "2026-01-27T16:33:18.151961Z",
+  "total_participants": 1,
+  "total_checks_paid": 1,
+  "total_sats_paid": 10000,
+  "leaderboard": [
+    {
+      "pseudonym": "Brilliant Diffie",
+      "checks_count": 1,
+      "total_sats": 10000,
+      "last_check_at": "2026-01-27",
+      "rank": 1
+    }
+  ]
+}

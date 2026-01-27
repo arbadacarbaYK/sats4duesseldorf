@@ -26,4 +26,10 @@ if [ -f "data/budget.json" ]; then
   echo "Copied budget.json"
 fi
 
+# Copy leaderboard if exists
+if [ -f "data/leaderboard.json" ]; then
+  cp -f data/leaderboard.json docs/data/leaderboard.json
+  echo "Copied leaderboard.json"
+fi
+
 echo "Data files copied to docs/data/"
