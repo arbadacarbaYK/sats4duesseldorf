@@ -102,12 +102,20 @@ jobs:
                            echo "$ISSUE_BODY" | grep -oP '### Was ist passiert\?\s*\n+\K[^\n]+' | head -1 || echo "")
 
           # Extract verification details for BTCMap notes
-          CHECK_DATE=$(echo "$ISSUE_BODY" | grep -oP 'Datum und Uhrzeit[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          PUBLIC_POST=$(echo "$ISSUE_BODY" | grep -oP 'Öffentlicher Post[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          RECEIPT_URL=$(echo "$ISSUE_BODY" | grep -oP 'Kaufbeleg[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          PAYMENT_URL=$(echo "$ISSUE_BODY" | grep -oP 'Bitcoin-Zahlung[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          VENUE_URL=$(echo "$ISSUE_BODY" | grep -oP 'Foto vom Ort[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
-          OBSERVATIONS=$(echo "$ISSUE_BODY" | grep -oP 'Wie lief die Zahlung[^*]*\*\*\s*\K[^\n]+' | head -1 || echo "")
+          # Support both formats: "### Label\n\nvalue" and "**Label:** value"
+          CHECK_DATE=$(echo "$ISSUE_BODY" | grep -oP '### Datum und Uhrzeit[^\n]*\n+\K[^\n]+' | head -1 || \
+                       echo "$ISSUE_BODY" | grep -oP 'Datum und Uhrzeit[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          PUBLIC_POST=$(echo "$ISSUE_BODY" | grep -oP '### 1\. Öffentlicher Post[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
+                        echo "$ISSUE_BODY" | grep -oP 'Öffentlicher Post[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          RECEIPT_URL=$(echo "$ISSUE_BODY" | grep -oP '### 2\. Kaufbeleg[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
+                        echo "$ISSUE_BODY" | grep -oP '### 2\. Kaufnachweis[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
+                        echo "$ISSUE_BODY" | grep -oP 'Kaufbeleg[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          PAYMENT_URL=$(echo "$ISSUE_BODY" | grep -oP '### 3\. Bitcoin-Zahlung[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
+                        echo "$ISSUE_BODY" | grep -oP 'Bitcoin-Zahlung[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          VENUE_URL=$(echo "$ISSUE_BODY" | grep -oP '### 4\. Foto vom Ort[^\n]*\n+\Khttps?://[^\n]+' | head -1 || \
+                      echo "$ISSUE_BODY" | grep -oP 'Foto vom Ort[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
+          OBSERVATIONS=$(echo "$ISSUE_BODY" | grep -oP '### Wie lief die Zahlung[^\n]*\n+\K[^\n]+' | head -1 || \
+                         echo "$ISSUE_BODY" | grep -oP 'Wie lief die Zahlung[^*]*\*\*\s*\K[^\n]+' | head -1 || echo "")
 
           # Look up OSM info from locations.csv using Python for proper CSV parsing
           BTCMAP_LINK=""
