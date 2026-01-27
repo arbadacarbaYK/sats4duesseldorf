@@ -131,6 +131,40 @@
       margin-top: 2px;
     }
 
+    .stat-progress {
+      min-width: 180px;
+      flex: 1;
+      max-width: 280px;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--btc-orange), var(--btc-orange-dark));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      min-width: 0;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .progress-text span {
+      color: var(--btc-orange);
+      font-weight: 600;
+    }
+
     /* Buttons */
     .btn {
       display: inline-flex;
@@ -662,9 +696,13 @@
         <div class="stat-value">1.000.000</div>
         <div class="stat-label">Gesamtbounty (sats)</div>
       </div>
-      <div class="stat">
-        <div class="stat-value" id="statRemaining">–</div>
-        <div class="stat-label">Verbleibendes Budget</div>
+      <div class="stat stat-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressPaid">–</span> / 1.000.000 sats
+        </div>
       </div>
       <div class="stat">
         <div class="stat-value" id="statLocations">–</div>
@@ -788,19 +826,24 @@
     document.getElementById("statEligible").textContent = eligible.length.toLocaleString("de-DE");
   }
 
-  // Load budget data and update remaining budget display
+  // Load budget data and update progress bar
   async function loadBudget() {
     try {
       const resp = await fetch("data/budget.json");
       if (resp.ok) {
         const budget = await resp.json();
-        document.getElementById("statRemaining").textContent =
-          budget.remaining_sats.toLocaleString("de-DE");
+        const paid = budget.total_paid_sats || 0;
+        const total = budget.total_budget_sats || 1000000;
+        const percentage = Math.min((paid / total) * 100, 100);
+
+        document.getElementById("progressPaid").textContent =
+          paid.toLocaleString("de-DE");
+        document.getElementById("progressFill").style.width = percentage + "%";
       }
     } catch (e) {
       console.error("Failed to load budget:", e);
-      // Fallback: show total budget if budget.json not available
-      document.getElementById("statRemaining").textContent = "1.000.000";
+      document.getElementById("progressPaid").textContent = "0";
+      document.getElementById("progressFill").style.width = "0%";
     }
   }
 

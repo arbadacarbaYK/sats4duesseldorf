@@ -520,6 +520,54 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
 }
 
 /**
+ * Check if a URL is likely an image that can be previewed
+ */
+function isImageUrl(url) {
+  if (!url || url === '_nicht angegeben_') return false;
+
+  const lowerUrl = url.toLowerCase();
+
+  // Check file extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  if (imageExtensions.some(ext => lowerUrl.includes(ext))) {
+    return true;
+  }
+
+  // Check known image hosts
+  const imageHosts = [
+    'files.catbox.moe',
+    'i.imgbb.com',
+    'i.ibb.co',
+    'pic.infini.fr',
+    'imgur.com/a/', // Album links won't work, but direct links do
+    'i.imgur.com'
+  ];
+  if (imageHosts.some(host => lowerUrl.includes(host))) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Format a proof URL with optional image preview
+ * Uses HTML img tag with width constraint for reasonable size
+ */
+function formatProofUrl(url, label) {
+  if (!url || url === '_nicht angegeben_') {
+    return '_nicht angegeben_';
+  }
+
+  if (isImageUrl(url)) {
+    // Use HTML img tag with width limit (GitHub renders this)
+    return `<img src="${url}" width="400" alt="${label}">\n\n${url}`;
+  }
+
+  // Non-image URLs (social media, etc.) - just show the link
+  return url;
+}
+
+/**
  * Format the issue body for a check submission
  */
 function formatCheckBody(data, submissionId, pseudonym) {
@@ -535,7 +583,7 @@ function formatCheckBody(data, submissionId, pseudonym) {
 
 ### Beweis-Foto
 
-${data.critical_evidence_url || '_nicht angegeben_'}
+${formatProofUrl(data.critical_evidence_url, 'Beweis-Foto')}
 
 ### Öffentlicher Post (optional)
 
@@ -549,15 +597,15 @@ ${data.public_post_url || '_nicht angegeben_'}
 
 ### 2. Kaufbeleg (Bon/Rechnung)
 
-${data.receipt_proof_url || '_nicht angegeben_'}
+${formatProofUrl(data.receipt_proof_url, 'Kaufbeleg')}
 
 ### 3. Bitcoin-Zahlung
 
-${data.payment_proof_url || '_nicht angegeben_'}
+${formatProofUrl(data.payment_proof_url, 'Bitcoin-Zahlung')}
 
 ### 4. Foto vom Ort
 
-${data.venue_photo_url || '_nicht angegeben_'}`;
+${formatProofUrl(data.venue_photo_url, 'Foto vom Ort')}`;
   }
 
   const observationsLabel = isCritical ? 'Was ist passiert?' : 'Wie lief die Zahlung?';
@@ -650,15 +698,15 @@ ${data.public_post_url || '_nicht angegeben_'}
 
 ### 2. Kaufbeleg (Bon/Rechnung)
 
-${data.receipt_proof_url || '_nicht angegeben_'}
+${formatProofUrl(data.receipt_proof_url, 'Kaufbeleg')}
 
 ### 3. Bitcoin-Zahlung
 
-${data.payment_proof_url || '_nicht angegeben_'}
+${formatProofUrl(data.payment_proof_url, 'Bitcoin-Zahlung')}
 
 ### 4. Foto vom Ort
 
-${data.venue_photo_url || '_nicht angegeben_'}
+${formatProofUrl(data.venue_photo_url, 'Foto vom Ort')}
 
 ---
 
