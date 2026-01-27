@@ -3,7 +3,7 @@ name: Apply approved issues to CSV (v1)
 on:
   workflow_dispatch:
   issues:
-    types: [labeled]
+    types: [labeled, unlabeled]
 
 # Prevent concurrent CSV writes - wait for other workflows to finish
 concurrency:
@@ -20,7 +20,7 @@ jobs:
     # Run on manual trigger OR when "approved" label is added
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && github.event.label.name == 'approved')
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'approved')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -297,3 +297,148 @@ jobs:
           ---
           *Automatische Nachricht von sats4berlin-bot*"
           fi
+
+  unapprove:
+    runs-on: ubuntu-latest
+    # Run when "approved" label is removed
+    if: github.event_name == 'issues' && github.event.action == 'unlabeled' && github.event.label.name == 'approved'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Revert approval in CSV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 << 'EOF'
+          import csv
+          import json
+          from pathlib import Path
+          import datetime
+
+          LOCATIONS = Path("data/locations.csv")
+          CHECKS = Path("data/checks_public.csv")
+          issue_number = "${{ github.event.issue.number }}"
+          check_id = f"ISSUE-{issue_number}"
+
+          # Read checks
+          chk_rows, chk_fields = [], []
+          with CHECKS.open(newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              chk_fields = list(r.fieldnames)
+              chk_rows = list(r)
+
+          # Find the check entry
+          check_entry = None
+          check_idx = None
+          for i, row in enumerate(chk_rows):
+              if row.get("check_id") == check_id:
+                  check_entry = row
+                  check_idx = i
+                  break
+
+          if not check_entry:
+              print(f"Check {check_id} not found in CSV, nothing to revert")
+              exit(0)
+
+          location_id = check_entry.get("location_id", "")
+          check_type = check_entry.get("check_type", "")
+          was_critical = check_type == "critical_change"
+
+          print(f"Reverting {check_id} for location {location_id}")
+          print(f"Check type: {check_type}, Critical: {was_critical}")
+
+          # Read locations
+          loc_rows, loc_fields = [], []
+          with LOCATIONS.open(newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              loc_fields = list(r.fieldnames)
+              loc_rows = list(r)
+
+          # Find and update the location
+          location_updated = False
+          for row in loc_rows:
+              if row.get("location_id") == location_id:
+                  if was_critical:
+                      # Revert critical change: restore location to active
+                      row["location_status"] = "active"
+                      row["eligible_now"] = "yes"
+                      row["eligible_for_check"] = "yes"
+                      print(f"Restored {location_id} to active status")
+                  else:
+                      # Revert normal check: reset cooldown
+                      row["cooldown_until"] = ""
+                      row["cooldown_days_left"] = "0"
+                      row["eligible_now"] = "yes"
+                      row["eligible_for_check"] = "yes"
+                      row["last_check_id"] = ""
+                      # Decrement verified count
+                      try:
+                          count = int(row.get("verified_by_count", "0") or "0")
+                          row["verified_by_count"] = str(max(0, count - 1))
+                      except ValueError:
+                          pass
+                      print(f"Reset cooldown for {location_id}")
+                  location_updated = True
+                  break
+
+          # Mark check as reverted
+          check_entry["review_status"] = "reverted"
+
+          # Write back
+          with CHECKS.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=chk_fields)
+              w.writeheader()
+              for row in chk_rows:
+                  w.writerow(row)
+
+          with LOCATIONS.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=loc_fields)
+              w.writeheader()
+              for row in loc_rows:
+                  w.writerow(row)
+
+          print(f"Successfully reverted approval for {check_id}")
+          EOF
+
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/locations.csv docs/data/locations.csv
+          cp -f data/checks_public.csv docs/data/checks_public.csv
+
+      - name: Commit and push
+        run: |
+          git config user.name "sfb-bot"
+          git config user.email "sfb-bot@users.noreply.github.com"
+          git add data/locations.csv data/checks_public.csv docs/data/locations.csv docs/data/checks_public.csv
+          git diff --cached --quiet || git commit -m "Revert approval for ISSUE-${{ github.event.issue.number }}"
+          git push
+
+      - name: Comment on issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "## ↩️ Genehmigung zurückgenommen
+
+          Das \"approved\" Label wurde entfernt. Die Änderungen wurden rückgängig gemacht:
+          - Check-Status auf **reverted** gesetzt
+          - Location wieder als **verfügbar** markiert
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+
+      - name: Reopen issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue reopen ${{ github.event.issue.number }} || true
