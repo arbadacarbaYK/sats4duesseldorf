@@ -283,7 +283,7 @@ export default {
       }
 
       // Generate pseudonym for display
-      const pseudonym = submitterId ? generatePseudonym(submitterId) : null;
+      const pseudonym = submitterId ? await generatePseudonym(submitterId) : null;
 
       // Return success
       return new Response(JSON.stringify({
@@ -437,24 +437,23 @@ const PSEUDONYM_FIGURES = [
 
 /**
  * Generate a pseudonym from submitter ID for public display
+ * Uses SHA-256 hash to match the Python anonymize_csv.py implementation
  * Same input always produces the same output
  */
-function generatePseudonym(submitterId) {
+async function generatePseudonym(submitterId) {
   if (!submitterId || submitterId === 'unknown') {
     return 'Anonymous';
   }
 
-  // Use simple hash of the submitterId string to get consistent indices
-  let hash = 0;
-  for (let i = 0; i < submitterId.length; i++) {
-    const char = submitterId.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  hash = Math.abs(hash);
+  // Use SHA-256 hash to get consistent indices (matches Python implementation)
+  const encoder = new TextEncoder();
+  const data = encoder.encode(submitterId);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = new Uint8Array(hashBuffer);
 
-  const adjIndex = hash % PSEUDONYM_ADJECTIVES.length;
-  const figIndex = Math.floor(hash / PSEUDONYM_ADJECTIVES.length) % PSEUDONYM_FIGURES.length;
+  // Use first two bytes for indices (same as Python)
+  const adjIndex = hashArray[0] % PSEUDONYM_ADJECTIVES.length;
+  const figIndex = hashArray[1] % PSEUDONYM_FIGURES.length;
 
   return `${PSEUDONYM_ADJECTIVES[adjIndex]} ${PSEUDONYM_FIGURES[figIndex]}`;
 }
