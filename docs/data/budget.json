@@ -1,7 +1,7 @@
 {
   "total_budget_sats": 1000000,
-  "total_paid_sats": 0,
-  "remaining_sats": 1000000,
-  "paid_count": 0,
-  "last_updated": "2026-01-26T00:00:00Z"
+  "total_paid_sats": 21000,
+  "remaining_sats": 979000,
+  "paid_count": 1,
+  "last_updated": "2026-01-27T08:16:37.591480Z"
 }
