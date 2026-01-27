@@ -4,7 +4,7 @@ ISSUE-11,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werde
 ISSUE-12,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
 ISSUE-17,DE-BE-00028,USER-7A6654CDA21C,2026-01-26T22:10,critical_change,,,,,,,,approved,2026-01-26,maintainer,,21000,1.0,21000,pending,
 ISSUE-9,,,,,,,,,,,,rejected,2026-01-26,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
-ISSUE-13,DE-BE-00033,USER-E5C9440A67F5,2026-01-21T19:05,base,,,,,,,,reverted,2026-01-27,maintainer,,10000,1.0,10000,pending,
+ISSUE-13,DE-BE-00033,USER-E5C9440A67F5,2026-01-21T19:05,base,,,,,,,,rejected,2026-01-27,maintainer,**Nachweise nicht akzeptiert.** Die eingereichten Belege konnten nicht verifiziert werden.,10000,1.0,10000,pending,
 ISSUE-14,,,,,,,,,,,,rejected,2026-01-27,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
 ISSUE-15,,,,,,,,,,,,rejected,2026-01-27,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
 ISSUE-16,,,,,,,,,,,,rejected,2026-01-27,,Der Check konnte nicht akzeptiert werden. Bei Fragen wende dich bitte an die Maintainer.,,,,,
