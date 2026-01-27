@@ -219,6 +219,14 @@ def main():
         for r in loc_rows:
             r["new_location_status"] = r.get("new_location_status", "")
 
+    # Ensure location_status field exists (for tracking deleted/closed locations)
+    if "location_status" not in loc_fields:
+        # Insert after new_location_status
+        idx = loc_fields.index("new_location_status") + 1 if "new_location_status" in loc_fields else len(loc_fields)
+        loc_fields.insert(idx, "location_status")
+        for r in loc_rows:
+            r["location_status"] = r.get("location_status", "active")
+
     loc_by_id = {r["location_id"]: r for r in loc_rows}
     existing = {r["check_id"] for r in chk_rows if r.get("check_id")}
 
@@ -334,6 +342,7 @@ def main():
                 "bounty_critical_sats": "21000",
                 "bounty_new_entry_sats": "21000",
                 "new_location_status": "pending",  # Needs 2 more confirmations
+                "location_status": "active",
                 "eligible_now": "yes",
                 "last_check_id": "",
                 "last_updated_at": today_iso(),
@@ -479,30 +488,54 @@ def main():
         lr = loc_by_id.get(location_id)
         if lr:
             lr["last_verified_at"] = reviewed_at
-            lr["cooldown_until"] = add_days(reviewed_at, 90)
-            lr["eligible_now"] = "no"
             lr["last_check_id"] = check_id
-            try:
-                new_count = int(lr.get("verified_by_count", "0") or "0") + 1
-                lr["verified_by_count"] = str(new_count)
-            except (ValueError, TypeError) as e:
-                print(f"Warning: Could not parse verified_by_count for {location_id}: {e}")
-                new_count = 1
-                lr["verified_by_count"] = "1"
-
-            # Handle new location confirmation tracking
-            if lr.get("new_location_status") == "pending":
-                if new_count >= 3:
-                    lr["new_location_status"] = "confirmed"
-                    lr["verification_confidence"] = "high"
-                    print(f"New location {location_id} confirmed with {new_count} checks!")
-                else:
-                    lr["verification_confidence"] = "low"
-                    print(f"New location {location_id} has {new_count}/3 confirmations")
-            else:
-                lr["verification_confidence"] = "medium"
-
             lr["last_updated_at"] = reviewed_at
+
+            # Handle critical changes (location no longer accepts Bitcoin)
+            if check_type == "critical_change":
+                # Extract what kind of critical change
+                critical_reason = (
+                    body_field(body, "Was ist passiert") or
+                    body_field(body, "Beobachtungen") or
+                    ""
+                ).lower()
+
+                if "geschlossen" in critical_reason or "closed" in critical_reason:
+                    lr["location_status"] = "closed"
+                elif "umgezogen" in critical_reason or "moved" in critical_reason:
+                    lr["location_status"] = "moved"
+                else:
+                    lr["location_status"] = "deleted"  # No longer accepts Bitcoin
+
+                lr["eligible_now"] = "no"
+                lr["eligible_for_check"] = "no"
+                lr["cooldown_until"] = ""  # No cooldown needed - location is inactive
+                lr["cooldown_days_left"] = ""
+                print(f"Critical change: {location_id} marked as {lr['location_status']}")
+            else:
+                # Normal check - set cooldown
+                lr["cooldown_until"] = add_days(reviewed_at, 90)
+                lr["eligible_now"] = "no"
+
+                try:
+                    new_count = int(lr.get("verified_by_count", "0") or "0") + 1
+                    lr["verified_by_count"] = str(new_count)
+                except (ValueError, TypeError) as e:
+                    print(f"Warning: Could not parse verified_by_count for {location_id}: {e}")
+                    new_count = 1
+                    lr["verified_by_count"] = "1"
+
+                # Handle new location confirmation tracking
+                if lr.get("new_location_status") == "pending":
+                    if new_count >= 3:
+                        lr["new_location_status"] = "confirmed"
+                        lr["verification_confidence"] = "high"
+                        print(f"New location {location_id} confirmed with {new_count} checks!")
+                    else:
+                        lr["verification_confidence"] = "low"
+                        print(f"New location {location_id} has {new_count}/3 confirmations")
+                else:
+                    lr["verification_confidence"] = "medium"
 
     # Release held bounties for newly confirmed locations
     confirmed_locations = {r["location_id"] for r in loc_rows if r.get("new_location_status") == "confirmed"}

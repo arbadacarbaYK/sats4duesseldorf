@@ -85,9 +85,21 @@ jobs:
           # Check if submission came via web form (has Submission ID)
           SUBMISSION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submission ID:\*\*\s*`\K[^`]+' || echo "")
 
-          # Extract Location-ID from issue body
+          # Extract Location-ID from issue body (multiple formats)
           LOCATION_ID=$(echo "$ISSUE_BODY" | grep -oP 'Location-ID:\*\*\s*`\K[^`]+' || \
-                        echo "$ISSUE_BODY" | grep -oP 'Location-ID\s*\n+\K[A-Z]{2}-[A-Z]{2}-\d+' || echo "")
+                        echo "$ISSUE_BODY" | grep -oP '### Location-ID\s*\n+\K[A-Z]{2}-[A-Z]{2}-\d+' || \
+                        echo "$ISSUE_BODY" | grep -oP 'Location-ID\s*\n+\K[A-Z]{2}-[A-Z]{2}-\d+' || \
+                        echo "$ISSUE_BODY" | grep -oP 'DE-BE-\d{5}' | head -1 || echo "")
+
+          # Check if this is a critical change
+          IS_CRITICAL=""
+          if echo "$LABELS" | grep -q "critical"; then
+            IS_CRITICAL="true"
+          fi
+
+          # Extract critical change reason
+          CRITICAL_REASON=$(echo "$ISSUE_BODY" | grep -oP 'Was ist passiert\?\s*\n+\K[^\n]+' | head -1 || \
+                           echo "$ISSUE_BODY" | grep -oP '### Was ist passiert\?\s*\n+\K[^\n]+' | head -1 || echo "")
 
           # Extract verification details for BTCMap notes
           CHECK_DATE=$(echo "$ISSUE_BODY" | grep -oP 'Datum und Uhrzeit[^*]*\*\*\s*`?\K[^`\n]+' | head -1 || echo "")
@@ -132,8 +144,42 @@ jobs:
             ISSUE_URL="https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}"
             TODAY=$(date +%Y-%m-%d)
 
-            # Build the copy-paste text for BTCMap notes
-            BTCMAP_NOTES="Verified via sats4berlin on ${TODAY}
+            if [ -n "$IS_CRITICAL" ]; then
+              # Critical change - location no longer accepts Bitcoin
+              BTCMAP_NOTES="CRITICAL: Location no longer accepts Bitcoin (reported ${TODAY})
+
+          Reason: ${CRITICAL_REASON:-Location reported as not accepting Bitcoin anymore}
+
+          Evidence: ${ISSUE_URL}"
+
+              BTCMAP_SECTION="
+
+          ---
+
+          ### ⚠️ BTCMap aktualisieren (KRITISCH)
+
+          **Dieser Ort akzeptiert kein Bitcoin mehr!**
+
+          **[➡️ BTCMap öffnen](${BTCMAP_LINK})**
+
+          Bitte melde die Änderung an BTCMap:
+          1. Klicke auf den Link oben
+          2. Wähle \"Report outdated info\" oder \"No longer accepts Bitcoin\"
+          3. Kopiere diesen Text als Begründung:
+
+          \`\`\`
+          ${BTCMAP_NOTES}
+          \`\`\`
+
+          <details>
+          <summary>Links</summary>
+
+          - [OSM-Eintrag](${OSM_LINK})
+          - [GitHub Issue](${ISSUE_URL})
+          </details>"
+            else
+              # Normal verification
+              BTCMAP_NOTES="Verified via sats4berlin on ${TODAY}
 
           Proof:
           - Social: ${PUBLIC_POST:-n/a}
@@ -143,7 +189,7 @@ jobs:
 
           Full details: ${ISSUE_URL}"
 
-            BTCMAP_SECTION="
+              BTCMAP_SECTION="
 
           ---
 
@@ -163,9 +209,43 @@ jobs:
           - [OSM-Eintrag](${OSM_LINK})
           - [GitHub Issue](${ISSUE_URL})
           </details>"
+            fi
           fi
 
-          if echo "$LABELS" | grep -q "new-location"; then
+          if [ -n "$IS_CRITICAL" ]; then
+            # Critical change - location no longer accepts Bitcoin
+            if [ -n "$SUBMISSION_ID" ]; then
+              gh issue comment ${{ github.event.issue.number }} --body "## ⚠️ Kritische Änderung bestätigt!
+
+          Deine Meldung wurde geprüft und **bestätigt**. Vielen Dank für die wichtige Info!
+
+          **${LOCATION_NAME:-Der Ort}** wurde als \"akzeptiert kein Bitcoin mehr\" markiert.
+
+          Die Auszahlung des Bounties erfolgt in Kürze an die von dir im Formular angegebene Adresse.
+          ${BTCMAP_SECTION}
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+            else
+              gh issue comment ${{ github.event.issue.number }} --body "## ⚠️ Kritische Änderung bestätigt!
+
+          Deine Meldung wurde geprüft und **bestätigt**. Vielen Dank für die wichtige Info!
+
+          **${LOCATION_NAME:-Der Ort}** wurde als \"akzeptiert kein Bitcoin mehr\" markiert.
+
+          ### Nächster Schritt: Auszahlungsziel mitteilen
+
+          Bitte sende uns dein Auszahlungsziel **privat** per E-Mail oder Direktnachricht:
+          - **Lightning-Adresse** (z.B. name@wallet.com)
+          - oder **Cashu-Token-Anfrage**
+
+          Kontakt für Auszahlung: satoshiinberlin@proton.me
+          ${BTCMAP_SECTION}
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+            fi
+          elif echo "$LABELS" | grep -q "new-location"; then
             # New location - payout held until confirmed
             gh issue comment ${{ github.event.issue.number }} --body "## ✅ Check approved!
 

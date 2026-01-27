@@ -351,6 +351,20 @@
       border: 1px solid rgba(249, 115, 22, 0.3);
     }
 
+    .status-deleted {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    tr.deleted {
+      opacity: 0.5;
+    }
+
+    tr.deleted .location-name {
+      text-decoration: line-through;
+    }
+
     /* Claim button */
     .btn-claim {
       padding: 6px 12px;
@@ -525,9 +539,10 @@
   <div class="filters">
     <input type="text" id="q" placeholder="Suchen (Name, Adresse, Kategorie)..." />
     <select id="eligible">
-      <option value="">Alle Status</option>
+      <option value="">Alle aktiven</option>
       <option value="yes">Auszahlbar</option>
       <option value="no">Im Cooldown</option>
+      <option value="inactive">Inkl. Inaktive</option>
     </select>
   </div>
 
@@ -602,9 +617,14 @@
   }
 
   function updateStats() {
-    const eligible = rows.filter(r => norm(r.eligible_now).toLowerCase() === "yes");
+    // Exclude deleted/closed/moved locations from counts
+    const activeRows = rows.filter(r => {
+      const status = norm(r.location_status).toLowerCase();
+      return !["deleted", "closed", "moved"].includes(status);
+    });
+    const eligible = activeRows.filter(r => norm(r.eligible_now).toLowerCase() === "yes");
 
-    document.getElementById("statLocations").textContent = rows.length.toLocaleString("de-DE");
+    document.getElementById("statLocations").textContent = activeRows.length.toLocaleString("de-DE");
     document.getElementById("statEligible").textContent = eligible.length.toLocaleString("de-DE");
   }
 
@@ -647,8 +667,24 @@
         r.name, r.category, r.street, r.housenumber, r.postcode, r.city
       ].map(x => norm(x).toLowerCase()).join(" ");
       if (q && !hay.includes(q)) return false;
-      if (el && norm(r.eligible_now).toLowerCase() !== el) return false;
-      return true;
+
+      // Handle location_status filtering
+      const locationStatus = norm(r.location_status).toLowerCase();
+      const isDeleted = ["deleted", "closed", "moved"].includes(locationStatus);
+
+      if (el === "inactive") {
+        // Show all including inactive
+        return true;
+      } else if (el === "yes") {
+        // Only eligible (and not deleted)
+        return !isDeleted && norm(r.eligible_now).toLowerCase() === "yes";
+      } else if (el === "no") {
+        // Only cooldown (and not deleted)
+        return !isDeleted && norm(r.eligible_now).toLowerCase() === "no";
+      } else {
+        // Default: show all active (hide deleted)
+        return !isDeleted;
+      }
     });
 
     // Sort
@@ -709,6 +745,10 @@
       const osmType = norm(r.osm_type);
       const osmId = norm(r.osm_id);
       const website = norm(r.website);
+      const locationStatus = norm(r.location_status).toLowerCase();
+
+      // Check if location is deleted/closed/moved
+      const isDeleted = ["deleted", "closed", "moved"].includes(locationStatus);
 
       // Validate OSM values to prevent injection
       const safeOsmType = /^(node|way|relation)$/.test(osmType) ? osmType : "";
@@ -722,11 +762,25 @@
       const safeLid = /^DE-BE-\d{5}$/.test(lid) ? lid : "";
       const claimUrl = safeLid ? createClaimUrl(safeLid, name) : "#";
 
-      const statusClass = isEligible ? "status-available" : "status-cooldown";
-      const statusText = isEligible ? "Auszahlbar" : `${cooldownDays}d Cooldown`;
-
-      const claimBtnClass = isEligible ? "available" : "cooldown";
-      const claimBtnText = isEligible ? "Claim Bounty" : "Im Cooldown";
+      // Determine status display
+      let statusClass, statusText, claimBtnClass, claimBtnText;
+      if (isDeleted) {
+        statusClass = "status-deleted";
+        statusText = locationStatus === "closed" ? "Geschlossen" :
+                     locationStatus === "moved" ? "Umgezogen" : "Kein BTC mehr";
+        claimBtnClass = "cooldown";
+        claimBtnText = "Inaktiv";
+      } else if (isEligible) {
+        statusClass = "status-available";
+        statusText = "Auszahlbar";
+        claimBtnClass = "available";
+        claimBtnText = "Claim Bounty";
+      } else {
+        statusClass = "status-cooldown";
+        statusText = `${cooldownDays}d Cooldown`;
+        claimBtnClass = "cooldown";
+        claimBtnText = "Im Cooldown";
+      }
 
       const addressHtml = osmUrl
         ? `<a href="${osmUrl}" target="_blank" rel="noopener" title="Auf OpenStreetMap ansehen">${address}</a>`
@@ -737,7 +791,9 @@
         ? `<a href="${safeWebsite}" target="_blank" rel="noopener" title="Website besuchen">${name}</a>`
         : name;
 
-      return `<tr>
+      const rowClass = isDeleted ? "deleted" : "";
+
+      return `<tr class="${rowClass}">
         <td>
           <div class="location-name">${nameHtml}</div>
           ${category ? `<div class="location-category">${category}</div>` : ""}
@@ -746,7 +802,7 @@
         <td class="bounty">${bounty.toLocaleString("de-DE")} sats</td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>
-          ${isEligible && safeLid
+          ${isEligible && safeLid && !isDeleted
             ? `<a class="btn btn-claim ${claimBtnClass}" href="${claimUrl}">${claimBtnText}</a>`
             : `<span class="btn btn-claim ${claimBtnClass}">${claimBtnText}</span>`
           }
