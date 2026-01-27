@@ -2,7 +2,7 @@ name: Mark check as paid
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, unlabeled]
 
 # Prevent concurrent CSV writes - wait for other workflows to finish
 concurrency:
@@ -16,7 +16,7 @@ permissions:
 jobs:
   mark-paid:
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'paid'
+    if: github.event.action == 'labeled' && github.event.label.name == 'paid'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -166,3 +166,117 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue close ${{ github.event.issue.number }}
+
+  unmark-paid:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'unlabeled' && github.event.label.name == 'paid'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull latest changes (prevent race conditions)
+        run: |
+          git pull --rebase origin main || git pull origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Revert paid status in CSV
+        run: |
+          python3 << 'EOF'
+          import csv
+          import json
+          from pathlib import Path
+          import datetime
+
+          CHECKS = Path("data/checks_public.csv")
+          BUDGET = Path("data/budget.json")
+          issue_number = "${{ github.event.issue.number }}"
+          check_id = f"ISSUE-{issue_number}"
+          now = datetime.datetime.utcnow().isoformat() + "Z"
+
+          rows, fields = [], []
+          with CHECKS.open(newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              fields = r.fieldnames
+              rows = list(r)
+
+          updated = False
+          reverted_amount = 0
+          for row in rows:
+              if row.get("check_id") == check_id:
+                  if row.get("paid_status") == "paid":
+                      reverted_amount = int(row.get("final_bounty_sats", 0) or 0)
+                      row["paid_status"] = "pending"
+                      row["paid_at"] = ""
+                      updated = True
+                      print(f"Reverted {check_id} to pending (was {reverted_amount} sats)")
+                  else:
+                      print(f"{check_id} was not marked as paid, no change needed")
+                  break
+
+          if updated:
+              with CHECKS.open("w", newline="", encoding="utf-8") as f:
+                  w = csv.DictWriter(f, fieldnames=fields)
+                  w.writeheader()
+                  for row in rows:
+                      w.writerow(row)
+
+              # Recalculate budget from all paid checks
+              total_paid = 0
+              paid_count = 0
+              for row in rows:
+                  if row.get("paid_status") == "paid":
+                      try:
+                          total_paid += int(row.get("final_bounty_sats", 0) or 0)
+                          paid_count += 1
+                      except ValueError:
+                          pass
+
+              total_budget = 1000000
+              budget_data = {
+                  "total_budget_sats": total_budget,
+                  "total_paid_sats": total_paid,
+                  "remaining_sats": total_budget - total_paid,
+                  "paid_count": paid_count,
+                  "last_updated": now
+              }
+              with BUDGET.open("w", encoding="utf-8") as f:
+                  json.dump(budget_data, f, indent=2)
+              print(f"Budget updated: {total_paid} paid, {total_budget - total_paid} remaining")
+          else:
+              print(f"Check {check_id} not found in CSV or no update needed")
+          EOF
+
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/checks_public.csv docs/data/checks_public.csv
+          cp -f data/budget.json docs/data/budget.json
+
+      - name: Commit and push
+        run: |
+          git config user.name "sfb-bot"
+          git config user.email "sfb-bot@users.noreply.github.com"
+          git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
+          git diff --cached --quiet || git commit -m "Revert paid status for ISSUE-${{ github.event.issue.number }}"
+          git push
+
+      - name: Comment on issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "## ↩️ Zahlung zurückgesetzt
+
+          Das \"paid\" Label wurde entfernt. Der Zahlungsstatus wurde auf **pending** zurückgesetzt und das Budget wurde korrigiert.
+
+          ---
+          *Automatische Nachricht von sats4berlin-bot*"
+
+      - name: Reopen issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue reopen ${{ github.event.issue.number }}
