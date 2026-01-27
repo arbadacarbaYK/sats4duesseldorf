@@ -89,99 +89,83 @@
       margin-top: 4px;
     }
 
-    .header-description {
-      color: var(--text-secondary);
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 14px;
-      margin-top: 12px;
-      max-width: 500px;
-      line-height: 1.5;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    .header-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
     }
 
-    /* Stats bar */
-    .stats {
-      display: flex;
-      gap: 16px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .stat {
-      background: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      min-width: 120px;
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
+    .header-links a:hover {
       color: var(--btc-orange);
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
+    .link-separator {
+      color: var(--text-muted);
     }
 
-    .stat-progress {
-      min-width: 200px;
-      flex: 2;
-      max-width: 320px;
+    /* Progress section */
+    .progress-section {
+      margin-top: 20px;
     }
 
-    .progress-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .progress-bar {
-      height: 24px;
+    .progress-bar-large {
+      height: 28px;
       background: var(--bg-dark);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
-      position: relative;
     }
 
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--btc-orange), var(--btc-orange-dark));
-      border-radius: 12px;
+      border-radius: 14px;
       transition: width 0.5s ease;
       min-width: 0;
     }
 
-    .progress-percent {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 11px;
-      font-weight: 600;
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .progress-amount {
       color: var(--text-secondary);
     }
 
-    .progress-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-    }
-
-    .progress-text span {
+    .progress-amount span {
       color: var(--btc-orange);
       font-weight: 600;
+    }
+
+    .progress-percent {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Header stats line */
+    .header-stats {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .header-stats span:not(.link-separator) {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .header-stats a {
+      color: var(--btc-orange);
     }
 
     /* Buttons */
@@ -677,15 +661,17 @@
       .header-top {
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px;
       }
 
-      .header-actions {
-        width: 100%;
+      .header-links {
+        align-self: flex-start;
       }
 
-      .header-actions .btn {
-        flex: 1;
-        justify-content: center;
+      .progress-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
       }
     }
   </style>
@@ -700,35 +686,29 @@
           <span class="btc-icon">₿</span>
           Satoshis für Berlin
         </h1>
-        <p class="header-subtitle">Die Millionenchallenge – 1.000.000 sats Gesamtbounty</p>
-        <p class="header-description">Verifiziere Bitcoin-Akzeptanzstellen aus <a href="https://btcmap.org/map#11/52.52/13.405" target="_blank">BTCMap</a> durch echte Käufe vor Ort – und verdiene Sats.</p>
+        <p class="header-subtitle">Die Millionenchallenge</p>
       </div>
-      <div class="header-actions">
-        <a class="btn btn-primary" id="btnSubmit" href="submit.html">Check einreichen</a>
-        <a class="btn" id="btnNewLocation" href="submit.html?form=new-location">Neuen Ort melden</a>
-        <a class="btn" id="btnRules" href="#">Regeln</a>
+      <div class="header-links">
+        <a href="submit.html?form=new-location" id="btnNewLocation">Neuen Ort melden</a>
+        <span class="link-separator">·</span>
+        <a href="#" id="btnRules">Regeln</a>
       </div>
     </div>
 
-    <div class="stats">
-      <div class="stat stat-progress">
-        <div class="progress-label">Ausgezahlt</div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-          <div class="progress-percent" id="progressPercent">0%</div>
-        </div>
-        <div class="progress-text">
-          <span id="progressPaid">–</span> / 1.000.000 sats
-        </div>
+    <div class="progress-section">
+      <div class="progress-bar-large">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
-      <div class="stat">
-        <div class="stat-value" id="statLocations">–</div>
-        <div class="stat-label">Orte</div>
+      <div class="progress-info">
+        <span class="progress-amount"><span id="progressPaid">–</span> / 1.000.000 sats ausgezahlt</span>
+        <span class="progress-percent" id="progressPercent">0%</span>
       </div>
-      <div class="stat">
-        <div class="stat-value" id="statEligible">–</div>
-        <div class="stat-label">Prüfbar</div>
-      </div>
+    </div>
+
+    <div class="header-stats">
+      <span id="statLocations">–</span> Orte aus <a href="https://btcmap.org/map#11/52.52/13.405" target="_blank">BTCMap</a>
+      <span class="link-separator">·</span>
+      <span id="statEligible">–</span> jetzt prüfbar
     </div>
   </div>
 </header>
@@ -795,8 +775,6 @@
   const REPO_URL = "https://github.com/satoshiinberlin/sats4berlin";
   const SUBMIT_FORM_URL = "submit.html";
 
-  document.getElementById("btnSubmit").href = SUBMIT_FORM_URL;
-  document.getElementById("btnNewLocation").href = `${SUBMIT_FORM_URL}?form=new-location`;
   document.getElementById("btnRules").href = `${REPO_URL}/blob/main/RULES.md`;
   document.getElementById("btnRules").target = "_blank";
 
