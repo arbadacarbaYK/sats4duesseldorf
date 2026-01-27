@@ -151,6 +151,9 @@ jobs:
           VENUE_URL=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('venue',''))")
           OBSERVATIONS=$(echo "$EXTRACTED" | python3 -c "import sys,json; print(json.load(sys.stdin).get('observations',''))")
 
+          # Extract pseudonym from issue body
+          PSEUDONYM=$(echo "$ISSUE_BODY" | grep -oP '\*\*Submitter:\*\*\s*\K[^\n]+' | head -1 || echo "anonymous user")
+
           # Look up OSM info from locations.csv using Python for proper CSV parsing
           BTCMAP_LINK=""
           OSM_LINK=""
@@ -220,16 +223,8 @@ jobs:
           - [GitHub Issue](${ISSUE_URL})
           </details>"
             else
-              # Normal verification
-              BTCMAP_NOTES="Verified via sats4berlin on ${TODAY}
-
-          Proof:
-          - Social: ${PUBLIC_POST:-n/a}
-          - Receipt: ${RECEIPT_URL:-n/a}
-          - Payment: ${PAYMENT_URL:-n/a}
-          - Venue: ${VENUE_URL:-n/a}
-
-          Full details: ${ISSUE_URL}"
+              # Normal verification - simple format for BTCMap bot
+              BTCMAP_VERIFICATION="Visit by user \"${PSEUDONYM}\" who paid with BTC via Lightning at the location during the \"Satoshis for Berlin\" challenge. For details, see ${ISSUE_URL}"
 
               BTCMAP_SECTION="
 
@@ -239,17 +234,18 @@ jobs:
 
           **[➡️ BTCMap Verification öffnen](${BTCMAP_LINK})**
 
-          Kopiere diesen Text in das Feld \"Additional notes\":
+          Kopiere diesen Text in das Feld **\"How did you verify this?\"**:
 
           \`\`\`
-          ${BTCMAP_NOTES}
+          ${BTCMAP_VERIFICATION}
           \`\`\`
 
           <details>
-          <summary>Links</summary>
+          <summary>Weitere Links</summary>
 
           - [OSM-Eintrag](${OSM_LINK})
           - [GitHub Issue](${ISSUE_URL})
+          - Social: ${PUBLIC_POST:-n/a}
           </details>"
             fi
           fi
