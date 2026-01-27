@@ -84,25 +84,22 @@
     }
 
     .header-subtitle {
-      color: var(--text-secondary);
+      color: var(--btc-orange);
       font-size: 14px;
+      font-weight: 600;
       margin-top: 4px;
     }
 
-    .header-links {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-    }
-
-    .header-links a {
+    .header-description {
       color: var(--text-secondary);
-      text-decoration: none;
+      font-size: 14px;
+      margin-top: 8px;
+      max-width: 400px;
     }
 
-    .header-links a:hover {
-      color: var(--btc-orange);
+    .header-actions {
+      display: flex;
+      gap: 8px;
     }
 
     .link-separator {
@@ -661,11 +658,16 @@
       .header-top {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 16px;
       }
 
-      .header-links {
-        align-self: flex-start;
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions .btn {
+        flex: 1;
+        justify-content: center;
       }
 
       .progress-info {
@@ -687,11 +689,11 @@
           Satoshis für Berlin
         </h1>
         <p class="header-subtitle">Die Millionenchallenge</p>
+        <p class="header-description">Kaufe bei Bitcoin-Akzeptanzstellen in Berlin, teile deinen Besuch und verdiene Sats.</p>
       </div>
-      <div class="header-links">
-        <a href="submit.html?form=new-location" id="btnNewLocation">Neuen Ort melden</a>
-        <span class="link-separator">·</span>
-        <a href="#" id="btnRules">Regeln</a>
+      <div class="header-actions">
+        <a class="btn" href="submit.html?form=new-location" id="btnNewLocation">+ Neuen Ort</a>
+        <a class="btn" href="#" id="btnRules">Regeln</a>
       </div>
     </div>
 
