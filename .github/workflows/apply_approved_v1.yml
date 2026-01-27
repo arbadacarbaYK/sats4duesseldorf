@@ -373,12 +373,13 @@ jobs:
                       row["eligible_for_check"] = "yes"
                       print(f"Restored {location_id} to active status")
                   else:
-                      # Revert normal check: reset cooldown
+                      # Revert normal check: reset cooldown and last_verified_at
                       row["cooldown_until"] = ""
                       row["cooldown_days_left"] = "0"
                       row["eligible_now"] = "yes"
                       row["eligible_for_check"] = "yes"
                       row["last_check_id"] = ""
+                      row["last_verified_at"] = ""  # Reset so cooldown uses BTCMap date
                       # Decrement verified count
                       try:
                           count = int(row.get("verified_by_count", "0") or "0")
