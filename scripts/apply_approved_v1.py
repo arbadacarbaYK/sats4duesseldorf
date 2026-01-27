@@ -367,15 +367,21 @@ def main():
 
         # Get submitter ID - prefer form-generated ID, fall back to GitHub username
         submitter_id = ""
-        # Try to extract Submitter ID from form submission (USER-XXXX format)
-        submitter_match = re.search(r"\*\*Submitter ID:\*\*\s*`(USER-[A-F0-9]+)`", body or "")
+        # Try to extract Submitter Ref from form submission (USER-XXXX format)
+        # Note: Issues show pseudonym as "Submitter" but keep the ref for internal tracking
+        submitter_match = re.search(r"\*\*Submitter Ref:\*\*\s*`(USER-[A-F0-9]+)`", body or "")
         if submitter_match:
             submitter_id = submitter_match.group(1)
         else:
-            # Fall back to GitHub username for direct GitHub submissions
-            user_obj = it.get("user")
-            if isinstance(user_obj, dict):
-                submitter_id = user_obj.get("login", "")
+            # Fall back to old format (Submitter ID) for backwards compatibility
+            submitter_match = re.search(r"\*\*Submitter ID:\*\*\s*`(USER-[A-F0-9]+)`", body or "")
+            if submitter_match:
+                submitter_id = submitter_match.group(1)
+            else:
+                # Fall back to GitHub username for direct GitHub submissions
+                user_obj = it.get("user")
+                if isinstance(user_obj, dict):
+                    submitter_id = user_obj.get("login", "")
 
         # Determine check type (handle both old and new format)
         check_type_raw = (

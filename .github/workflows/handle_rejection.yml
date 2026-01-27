@@ -42,8 +42,9 @@ jobs:
                         echo "$ISSUE_BODY" | grep -oP 'DE-BE-\d{5}' | head -1 || echo "")
           echo "location_id=$LOCATION_ID" >> $GITHUB_OUTPUT
 
-          # Extract submitter_id from issue body
-          SUBMITTER_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submitter ID:\*\*\s*`\K[^`]+' || echo "")
+          # Extract submitter_id from issue body (try new format "Submitter Ref" first, then old "Submitter ID")
+          SUBMITTER_ID=$(echo "$ISSUE_BODY" | grep -oP 'Submitter Ref:\*\*\s*`\K[^`]+' || \
+                         echo "$ISSUE_BODY" | grep -oP 'Submitter ID:\*\*\s*`\K[^`]+' || echo "")
           echo "submitter_id=$SUBMITTER_ID" >> $GITHUB_OUTPUT
 
           # Extract submitted_at date

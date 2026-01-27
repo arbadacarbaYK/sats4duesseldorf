@@ -47,14 +47,18 @@ echo -e "${CYAN}Title:${NC} $TITLE"
 echo -e "${CYAN}Labels:${NC} $LABELS"
 echo ""
 
-# Extract submission ID
+# Extract submission ID and submitter info
 SUBMISSION_ID=$(echo "$BODY" | grep -oP 'Submission ID:\*\*\s*`\K[^`]+' || echo "")
-SUBMITTER_ID=$(echo "$BODY" | grep -oP 'Submitter ID:\*\*\s*`\K[^`]+' || echo "")
+# Try new format "Submitter Ref" first, then fall back to old "Submitter ID"
+SUBMITTER_ID=$(echo "$BODY" | grep -oP 'Submitter Ref:\*\*\s*`\K[^`]+' || \
+               echo "$BODY" | grep -oP 'Submitter ID:\*\*\s*`\K[^`]+' || echo "")
+PSEUDONYM=$(echo "$BODY" | grep -oP 'Submitter:\*\*\s*\K[^\n]+' || echo "")
 LOCATION_ID=$(echo "$BODY" | grep -oP '### Location-ID\s+\K[A-Z]{2}-[A-Z]{2}-\d+' || \
               echo "$BODY" | grep -oP 'DE-BE-\d{5}' | head -1 || echo "")
 
 echo -e "${CYAN}Submission ID:${NC} ${SUBMISSION_ID:-Not found (GitHub submission)}"
-echo -e "${CYAN}Submitter ID:${NC}  ${SUBMITTER_ID:-Not found}"
+echo -e "${CYAN}Submitter:${NC}     ${PSEUDONYM:-Anonymous}"
+echo -e "${CYAN}Submitter Ref:${NC} ${SUBMITTER_ID:-Not found}"
 echo -e "${CYAN}Location ID:${NC}   ${LOCATION_ID:-Not found}"
 echo ""
 

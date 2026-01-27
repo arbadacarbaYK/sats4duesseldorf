@@ -48,9 +48,22 @@ def extract_location_id(body: str) -> str | None:
 
 def extract_submitter_id(body: str) -> str | None:
     """Extract Submitter ID from issue body."""
+    # Try new format "Submitter Ref" first (issues now show pseudonym as "Submitter")
+    match = re.search(r"\*\*Submitter Ref:\*\*\s*`(USER-[A-F0-9]+)`", body)
+    if match:
+        return match.group(1)
+    # Fall back to old format for backwards compatibility
     match = re.search(r"\*\*Submitter ID:\*\*\s*`(USER-[A-F0-9]+)`", body)
     if match:
         return match.group(1)
+    return None
+
+
+def extract_pseudonym(body: str) -> str | None:
+    """Extract submitter pseudonym from issue body."""
+    match = re.search(r"\*\*Submitter:\*\*\s*([^\n]+)", body)
+    if match:
+        return match.group(1).strip()
     return None
 
 
@@ -157,11 +170,13 @@ def main():
     # Extract data
     location_id = extract_location_id(body)
     submitter_id = extract_submitter_id(body)
+    pseudonym = extract_pseudonym(body)
     check_type = extract_check_type(body)
     new_location = is_new_location(labels)
 
     print(f"Location ID:   {location_id or 'Not found'}")
-    print(f"Submitter ID:  {submitter_id or 'Not found (GitHub submission)'}")
+    print(f"Submitter:     {pseudonym or 'Anonymous'}")
+    print(f"Submitter Ref: {submitter_id or 'Not found (GitHub submission)'}")
     print(f"Check Type:    {check_type}")
     print(f"New Location:  {'Yes' if new_location else 'No'}")
     print()
@@ -199,7 +214,7 @@ def main():
         print("\n⚠️  NOTE: New location - payout held until 2 more confirmations")
 
     if not submitter_id:
-        print("\n⚠️  NOTE: No Submitter ID found - this was likely submitted via")
+        print("\n⚠️  NOTE: No Submitter Ref found - this was likely submitted via")
         print("   GitHub directly. Contact info must be requested manually.")
 
     print()

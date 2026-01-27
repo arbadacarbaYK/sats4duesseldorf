@@ -474,7 +474,7 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
     const name = publicData.name || 'Unbekannt';
     title = `Neuer Ort: ${name} – ${today}`;
     labels = ['pending', 'new-location'];
-    body = formatNewLocationBody(publicData, submissionId, pseudonym);
+    body = formatNewLocationBody({ ...publicData, _submitterId: submitterId }, submissionId, pseudonym);
   } else {
     // Check submission
     const locationId = publicData.location_id || 'UNKNOWN';
@@ -487,7 +487,7 @@ async function createGitHubIssue(env, publicData, submissionId, submitterId, isN
     labels = isCritical
       ? ['pending', 'check', 'critical']
       : ['pending', 'check'];
-    body = formatCheckBody(publicData, submissionId, pseudonym);
+    body = formatCheckBody({ ...publicData, _submitterId: submitterId }, submissionId, pseudonym);
   }
 
   const response = await fetch(`https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/issues`, {
@@ -566,6 +566,7 @@ ${data.venue_photo_url || '_nicht angegeben_'}`;
 
 **Submission ID:** \`${submissionId}\`
 **Submitter:** ${pseudonym || 'Anonymous'}
+**Submitter Ref:** \`${data._submitterId || 'unknown'}\`
 
 ---
 
@@ -609,6 +610,7 @@ function formatNewLocationBody(data, submissionId, pseudonym) {
 
 **Submission ID:** \`${submissionId}\`
 **Submitter:** ${pseudonym || 'Anonymous'}
+**Submitter Ref:** \`${data._submitterId || 'unknown'}\`
 
 ---
 

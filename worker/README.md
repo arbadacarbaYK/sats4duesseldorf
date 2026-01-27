@@ -134,11 +134,16 @@ curl -X POST \
 
 Use [cashu.me](https://cashu.me) or a mobile wallet like Minibits to mint tokens.
 
-## Submitter ID
+## Submitter Identity
 
-Each submission includes a `USER-XXXX` identifier derived from a hash of the contact info. This enables:
+Each submission includes:
+- **Pseudonym**: A human-readable name shown publicly (e.g., "Savvy Schneier")
+- **Submitter Ref**: A `USER-XXXX` identifier stored internally for tracking
+
+The pseudonym is derived deterministically from the submitter ref using SHA-256, so the same person always gets the same pseudonym. This enables:
 - Activity multiplier tracking (same person = same ID)
 - Pseudonymous identity (contact details not exposed)
+- Human-readable attribution in GitHub issues
 
 ## Security Notes
 
@@ -148,7 +153,7 @@ Each submission includes a `USER-XXXX` identifier derived from a hash of the con
 - Form submissions are protected by Origin validation (CSRF protection)
 - Rate limiting: 10 submissions per hour per IP (sliding window)
 - GitHub token should have minimal required scopes (repo only)
-- Submitter ID is a truncated SHA-256 hash (not reversible)
+- Submitter Ref (USER-XXXX) is a truncated SHA-256 hash (not reversible)
 
 ### Environment Variables
 
