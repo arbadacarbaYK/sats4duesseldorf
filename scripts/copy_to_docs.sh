@@ -4,6 +4,8 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 mkdir -p docs/data
 
 # Copy locations if exists
@@ -12,10 +14,10 @@ if [ -f "data/locations.csv" ]; then
   echo "Copied locations.csv"
 fi
 
-# Copy checks if exists
+# Copy and anonymize checks_public.csv (replace submitter_id with pseudonyms)
 if [ -f "data/checks_public.csv" ]; then
-  cp -f data/checks_public.csv docs/data/checks_public.csv
-  echo "Copied checks_public.csv"
+  python3 "$SCRIPT_DIR/anonymize_csv.py" data/checks_public.csv docs/data/checks_public.csv
+  echo "Copied and anonymized checks_public.csv"
 fi
 
 # Copy budget if exists
