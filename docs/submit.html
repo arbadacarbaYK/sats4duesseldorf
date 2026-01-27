@@ -44,7 +44,7 @@
     .header {
       background: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
-      padding: 20px;
+      padding: 24px 20px;
     }
 
     .header-content {
@@ -76,6 +76,13 @@
       font-weight: bold;
       font-size: 18px;
       color: #000;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--btc-orange);
+      font-weight: 500;
+      margin-top: 2px;
     }
 
     .btn {
@@ -485,6 +492,8 @@
       padding: 24px 20px;
       color: var(--text-muted);
       font-size: 13px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
     }
 
     .footer a {
@@ -493,6 +502,11 @@
 
     .footer a:hover {
       color: var(--btc-orange);
+    }
+
+    .footer-sep {
+      margin: 0 8px;
+      color: var(--text-muted);
     }
 
     /* Pre-filled field highlight */
@@ -641,10 +655,13 @@
 
 <header class="header">
   <div class="header-content">
-    <h1>
-      <span class="btc-icon">₿</span>
-      Satoshis für Berlin
-    </h1>
+    <div>
+      <h1>
+        <span class="btc-icon">₿</span>
+        Satoshis für Berlin
+      </h1>
+      <p class="header-subtitle">Die Millionenchallenge</p>
+    </div>
     <a href="./" class="btn">← Zur Übersicht</a>
   </div>
 </header>
@@ -940,7 +957,9 @@
 </div>
 
 <footer class="footer">
-  <a href="./">← Zurück zur Übersicht</a>
+  <a href="./">← Zur Übersicht</a>
+  <span class="footer-sep">·</span>
+  <a href="https://github.com/satoshiinberlin/sats4berlin" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 <script>
