@@ -57,11 +57,17 @@ jobs:
           python scripts/apply_approved_v1.py
           rm -f data/_approved_issues.json
 
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/locations.csv docs/data/locations.csv
+          cp -f data/checks_public.csv docs/data/checks_public.csv
+
       - name: Commit and push
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/locations.csv data/checks_public.csv
+          git add data/locations.csv data/checks_public.csv docs/data/locations.csv docs/data/checks_public.csv
           # Add validation log if it exists (for debugging)
           [ -f data/validation_errors.log ] && git add data/validation_errors.log || true
           git diff --cached --quiet || git commit -m "Apply approved issues (v1)"

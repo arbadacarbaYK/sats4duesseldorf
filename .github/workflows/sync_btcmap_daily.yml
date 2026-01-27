@@ -40,10 +40,15 @@ jobs:
       - name: Compute cooldowns from BTCMap data
         run: python scripts/compute_cooldown_from_btcmap.py
 
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/locations.csv docs/data/locations.csv
+
       - name: Commit and push if changed
         run: |
           git config user.name "btcmap-sync-bot"
           git config user.email "btcmap-sync-bot@users.noreply.github.com"
-          git add data/berlin_raw.csv data/locations.csv
+          git add data/berlin_raw.csv data/locations.csv docs/data/locations.csv
           git diff --cached --quiet || git commit -m "sync: update Berlin locations from BTCMap"
           git push

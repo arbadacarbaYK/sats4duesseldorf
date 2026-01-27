@@ -103,11 +103,16 @@ jobs:
                       w.writerow(row)
           EOF
 
+      - name: Copy to docs/data for GitHub Pages
+        run: |
+          mkdir -p docs/data
+          cp -f data/checks_public.csv docs/data/checks_public.csv
+
       - name: Commit and push
         run: |
           git config user.name "sfb-bot"
           git config user.email "sfb-bot@users.noreply.github.com"
-          git add data/checks_public.csv
+          git add data/checks_public.csv docs/data/checks_public.csv
           git diff --cached --quiet || git commit -m "Record rejection for ISSUE-${{ github.event.issue.number }}"
           git push
 
