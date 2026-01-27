@@ -4,9 +4,9 @@ on:
   issues:
     types: [labeled, unlabeled]
 
-# Prevent concurrent CSV writes - wait for other workflows to finish
+# Prevent concurrent processing of the same issue, but allow different issues in parallel
 concurrency:
-  group: csv-write
+  group: issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 permissions:
@@ -144,7 +144,8 @@ jobs:
           git config user.email "sfb-bot@users.noreply.github.com"
           git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
           git diff --cached --quiet || git commit -m "Mark ISSUE-${{ github.event.issue.number }} as paid"
-          git push
+          # Retry push with rebase if another workflow pushed first
+          git push || (git pull --rebase origin main && git push)
 
       - name: Comment on issue
         env:
@@ -258,7 +259,8 @@ jobs:
           git config user.email "sfb-bot@users.noreply.github.com"
           git add data/checks_public.csv data/budget.json docs/data/checks_public.csv docs/data/budget.json
           git diff --cached --quiet || git commit -m "Revert paid status for ISSUE-${{ github.event.issue.number }}"
-          git push
+          # Retry push with rebase if another workflow pushed first
+          git push || (git pull --rebase origin main && git push)
 
       - name: Comment on issue
         env:

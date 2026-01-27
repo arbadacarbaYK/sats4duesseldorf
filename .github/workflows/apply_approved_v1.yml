@@ -5,9 +5,9 @@ on:
   issues:
     types: [labeled, unlabeled]
 
-# Prevent concurrent CSV writes - wait for other workflows to finish
+# Prevent concurrent processing of the same issue, but allow different issues in parallel
 concurrency:
-  group: csv-write
+  group: issue-${{ github.event.issue.number || 'manual' }}
   cancel-in-progress: false
 
 permissions:
@@ -69,7 +69,8 @@ jobs:
           # Add validation log if it exists (for debugging)
           [ -f data/validation_errors.log ] && git add data/validation_errors.log || true
           git diff --cached --quiet || git commit -m "Apply approved issues (v1)"
-          git push
+          # Retry push with rebase if another workflow pushed first
+          git push || (git pull --rebase origin main && git push)
 
       - name: Comment on approved issue
         if: github.event_name == 'issues' && github.event.label.name == 'approved'
@@ -426,7 +427,8 @@ jobs:
           git config user.email "sfb-bot@users.noreply.github.com"
           git add data/locations.csv data/checks_public.csv docs/data/locations.csv docs/data/checks_public.csv
           git diff --cached --quiet || git commit -m "Revert approval for ISSUE-${{ github.event.issue.number }}"
-          git push
+          # Retry push with rebase if another workflow pushed first
+          git push || (git pull --rebase origin main && git push)
 
       - name: Comment on issue
         env:
