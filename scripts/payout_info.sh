@@ -32,6 +32,11 @@ echo -e "${BOLD}  PAYOUT INFO FOR ISSUE #${ISSUE_NUMBER}${NC}"
 echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
 echo ""
 
+# Pull latest data from remote
+echo -e "${YELLOW}Syncing latest data...${NC}"
+git pull --quiet 2>/dev/null || echo -e "${YELLOW}Note: Could not pull latest changes${NC}"
+echo ""
+
 # Fetch issue details
 echo -e "${YELLOW}Fetching issue details...${NC}"
 TITLE=$(gh issue view "$ISSUE_NUMBER" --json title -q '.title' 2>/dev/null)
