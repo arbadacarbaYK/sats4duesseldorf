@@ -1,8 +1,8 @@
 {
-  "last_updated": "2026-01-27T16:33:18.151961Z",
-  "total_participants": 1,
-  "total_checks_paid": 1,
-  "total_sats_paid": 10000,
+  "last_updated": "2026-01-28T10:00:46.989670Z",
+  "total_participants": 2,
+  "total_checks_paid": 2,
+  "total_sats_paid": 20000,
   "leaderboard": [
     {
       "pseudonym": "Brilliant Diffie",
@@ -10,6 +10,13 @@
       "total_sats": 10000,
       "last_check_at": "2026-01-27",
       "rank": 1
+    },
+    {
+      "pseudonym": "Clever Rivest",
+      "checks_count": 1,
+      "total_sats": 10000,
+      "last_check_at": "2026-01-28",
+      "rank": 2
     }
   ]
 }
