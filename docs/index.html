@@ -188,6 +188,20 @@
       color: var(--text-primary);
     }
 
+    .btn-donate {
+      background: linear-gradient(135deg, var(--btc-orange), var(--btc-orange-dark));
+      color: #000;
+      border-color: var(--btc-orange);
+      font-weight: 600;
+    }
+
+    .btn-donate:hover {
+      background: linear-gradient(135deg, var(--btc-orange-dark), var(--btc-orange));
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(247, 147, 26, 0.3);
+    }
+
     .btn-primary {
       background: var(--btc-orange);
       border-color: var(--btc-orange);
@@ -698,6 +712,7 @@
         <p class="header-description">Kaufe bei Bitcoin-Akzeptanzstellen in Düsseldorf, teile deinen Besuch und verdiene Sats.</p>
       </div>
       <div class="header-actions">
+        <a class="btn btn-donate" href="https://bitcoindelta.club/lnurlp/link/VHxYRy" target="_blank" rel="noopener" title="Spende Sats für den Bounty-Topf">⚡ Spenden</a>
         <a class="btn" href="submit.html?form=new-location" id="btnNewLocation">+ Neuer Ort</a>
         <a class="btn" href="#" id="btnRules">Regeln</a>
       </div>
