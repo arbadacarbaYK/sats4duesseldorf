@@ -25,6 +25,7 @@ OUT_FIELDS = [
     "last_verified_at", "verified_by_count",
     "verification_confidence", "bounty_base_sats", "bounty_critical_sats", "bounty_new_entry_sats",
     "new_location_status",  # empty=existing, pending=needs confirmations, confirmed=3+ checks
+    "location_status",      # active/deleted/closed/moved - tracks if location still accepts Bitcoin
     "eligible_now", "last_check_id", "last_updated_at",
     "source_last_update", "source_last_update_tag", "cooldown_until", "cooldown_days_left", "eligible_for_check"
 ]
@@ -36,6 +37,7 @@ PRESERVE_FIELDS = {
     "verified_by_count",     # Manual verification tracking
     "verification_confidence",  # Manual verification tracking
     "new_location_status",   # Pending/confirmed status for new locations
+    "location_status",       # active/deleted/closed/moved - never overwrite manually set status
     "last_check_id",         # Reference to last check issue
     "eligible_now",          # Computed by cooldown script
     "eligible_for_check",    # Computed by cooldown script
