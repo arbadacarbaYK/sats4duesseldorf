@@ -5,8 +5,9 @@ on:
     types: [labeled, unlabeled]
 
 # Prevent concurrent processing of the same issue, but allow different issues in parallel
+# Use workflow-specific group to avoid cross-workflow cancellation
 concurrency:
-  group: issue-${{ github.event.issue.number }}
+  group: ${{ github.workflow }}-issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 permissions:
