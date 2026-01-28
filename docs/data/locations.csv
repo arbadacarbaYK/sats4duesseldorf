@@ -1,9 +1,10 @@
 location_id,osm_type,osm_id,btcmap_url,name,category,street,housenumber,postcode,city,lat,lon,website,opening_hours,last_verified_at,verified_by_count,verification_confidence,bounty_base_sats,bounty_critical_sats,bounty_new_entry_sats,new_location_status,location_status,eligible_now,last_check_id,last_updated_at,source_last_update,source_last_update_tag,cooldown_until,cooldown_days_left,eligible_for_check
 DE-DUS-00001,,,,Pizzaria Kleinhaus,,Gladbacher Str.,5,40219,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00002,,,,Café TOMO,,Klosterstraße,67,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00003,,,,Metzgerei Ludwig,,Bilker Allee,32,40219,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00004,,,,Pizzeria Casanova,,Am Wehrhahn,45,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00005,,,,Pizzaria Bella Mia,,Kölner Str. 43,a,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00006,,,,Wehrhahn Shop,,Am Wehrhahn,52,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00007,,,,Plätz (Flingern),,Dorotheenstraße,73,40235,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
-DE-DUS-00008,,,,Friseur Heaven7,,Grafenberger Alle,145,40235,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,yes,,2026-01-28,,,,0,yes
+DE-DUS-00002,,,,Café TOMO,,Klosterstraße,67,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00003,,,,Metzgerei Ludwig,,Bilker Allee,32,40219,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00004,,,,Pizzeria Casanova,,Am Wehrhahn,45,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00005,,,,Pizzaria Bella Mia,,Kölner Str. 43,a,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00006,,,,Wehrhahn Shop,,Am Wehrhahn,52,40211,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00007,,,,Plätz (Flingern),,Dorotheenstraße,73,40235,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00008,,,,Friseur Heaven7,,Grafenberger Alle,145,40235,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
+DE-DUS-00009,,,,Oma Erika Café,,Hermannstraße,34b,40233,Düsseldorf,,,,,,0,low,10000,21000,21000,pending,active,no,,2026-01-28,,,,0,no
