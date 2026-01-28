@@ -379,6 +379,12 @@
       border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
+    .status-prospect {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
     .status-cooldown {
       background: var(--warning-bg);
       color: var(--warning-orange);
@@ -950,6 +956,7 @@
       const osmId = norm(r.osm_id);
       const website = norm(r.website);
       const locationStatus = norm(r.location_status).toLowerCase();
+      const isProspect = locationStatus === "prospect";
 
       // Check if location is deleted/closed/moved
       const isDeleted = ["deleted", "closed", "moved"].includes(locationStatus);
@@ -974,6 +981,12 @@
                      locationStatus === "moved" ? "Umgezogen" : "Kein BTC mehr";
         claimBtnClass = "cooldown";
         claimBtnText = "Inaktiv";
+      } else if (isProspect) {
+        // Prospect: interessiert, noch kein bestätigter BTC-Check, aber Bounty möglich
+        statusClass = "status-prospect";
+        statusText = "Interessiert (BTC noch nicht bestätigt)";
+        claimBtnClass = "available";
+        claimBtnText = "Claim bounty";
       } else if (isEligible) {
         statusClass = "status-available";
         statusText = "Auszahlbar";
