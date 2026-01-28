@@ -949,14 +949,15 @@
       const name = escapeHtml(norm(r.name) || "–");
       const category = escapeHtml(norm(r.category));
       const address = escapeHtml(addr(r) || "–");
-      const bounty = toInt(r.bounty_base_sats);
+      const locationStatus = norm(r.location_status).toLowerCase();
+      const isProspect = locationStatus === "prospect";
+      // Prospect locations and new entries get the higher bounty (21k)
+      const bounty = isProspect ? toInt(r.bounty_new_entry_sats) : toInt(r.bounty_base_sats);
       const isEligible = norm(r.eligible_now).toLowerCase() === "yes";
       const cooldownDays = toInt(r.cooldown_days_left);
       const osmType = norm(r.osm_type);
       const osmId = norm(r.osm_id);
       const website = norm(r.website);
-      const locationStatus = norm(r.location_status).toLowerCase();
-      const isProspect = locationStatus === "prospect";
 
       // Check if location is deleted/closed/moved
       const isDeleted = ["deleted", "closed", "moved"].includes(locationStatus);
