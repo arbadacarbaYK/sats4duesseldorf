@@ -19,7 +19,7 @@ BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll.
 3. **Vor Ort kaufen:** Bezahle in Bitcoin (Lightning oder On-Chain)
 4. **Nachweise sammeln:** Bon, Zahlungsbestätigung, Foto vom Ort, öffentlicher Post
 5. **Check einreichen:** [Formular ausfüllen](https://arbadacarbaYK.github.io/sats4duesseldorf/submit.html)
-6. **Sats kassieren:** Nach Prüfung wird der Bounty ausgezahlt
+6. **Sats kassieren:** Nach Prüfung wird das Bounty ausgezahlt
 
 ## Wer kann mitmachen?
 
