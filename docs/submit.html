@@ -1149,7 +1149,7 @@
   const locationNameDisplay = document.getElementById('location-name-display');
   const locationIdDisplay = document.getElementById('location-id-display');
 
-  if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
+  if (locationId && /^DE-(BE|DUS)-\d{5}$/.test(locationId)) {
     // Valid location_id provided - show form
     locationIdInput.value = locationId;
     locationIdDisplay.textContent = locationId;
@@ -1157,7 +1157,7 @@
     noLocationMessage.style.display = 'none';
     checkFormFields.style.display = 'block';
 
-    // Load location name from CSV
+    // Load location data from CSV and prefill form
     if (typeof Papa !== 'undefined') {
       Papa.parse('data/locations.csv', {
         download: true,
@@ -1165,9 +1165,97 @@
         skipEmptyLines: true,
         complete: (results) => {
           const loc = results.data.find(r => (r.location_id || '').trim() === locationId);
-          if (loc && loc.name) {
-            locationNameDisplay.textContent = loc.name;
-            locationNameInput.value = loc.name;
+          if (loc) {
+            const locStatus = ((loc.location_status || '').trim().toLowerCase());
+            const isProspect = locStatus === 'prospect';
+            
+            // Set location name
+            const locName = (loc.name || '').trim();
+            locationNameDisplay.textContent = locName || locationId;
+            locationNameInput.value = locName;
+            
+            // Build full address
+            const street = (loc.street || '').trim();
+            const housenumber = (loc.housenumber || '').trim();
+            const postcode = (loc.postcode || '').trim();
+            const city = (loc.city || '').trim();
+            const addressParts = [];
+            if (street && housenumber) {
+              addressParts.push(`${street} ${housenumber}`);
+            } else if (street) {
+              addressParts.push(street);
+            } else if (housenumber) {
+              addressParts.push(housenumber);
+            }
+            const cityParts = [];
+            if (postcode) cityParts.push(postcode);
+            if (city) cityParts.push(city);
+            if (cityParts.length > 0) {
+              addressParts.push(cityParts.join(' '));
+            }
+            const fullAddress = addressParts.join(', ');
+            
+            // If prospect location, switch to "Neuen Ort melden" tab and prefill it
+            if (isProspect) {
+              // Switch to new-location tab
+              document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+              document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+              document.querySelector('.form-tab[data-form="new-location"]').classList.add('active');
+              document.getElementById('new-location-form').classList.add('active');
+              
+              // Hide check form location header, show new location form
+              locationHeader.style.display = 'none';
+              checkFormFields.style.display = 'none';
+              
+              // Prefill new-location form
+              const newLocForm = document.getElementById('new-location-form');
+              if (locName) {
+                const nameInput = newLocForm.querySelector('input[name="name"]');
+                if (nameInput) nameInput.value = locName;
+              }
+              if (fullAddress) {
+                const addressInput = newLocForm.querySelector('input[name="address"]');
+                if (addressInput) addressInput.value = fullAddress;
+              }
+              const category = (loc.category || '').trim();
+              if (category) {
+                const categorySelect = newLocForm.querySelector('select[name="category"]');
+                if (categorySelect) {
+                  // Try to match category value
+                  const categoryLower = category.toLowerCase();
+                  let matchedValue = '';
+                  if (categoryLower.includes('restaurant') || categoryLower.includes('café') || categoryLower.includes('bar')) {
+                    matchedValue = 'restaurant';
+                  } else if (categoryLower.includes('shop') || categoryLower.includes('einzelhandel')) {
+                    matchedValue = 'shop';
+                  } else if (categoryLower.includes('dienstleistung') || categoryLower.includes('service')) {
+                    matchedValue = 'service';
+                  } else if (categoryLower.includes('hotel') || categoryLower.includes('unterkunft')) {
+                    matchedValue = 'hotel';
+                  }
+                  if (matchedValue && categorySelect.querySelector(`option[value="${matchedValue}"]`)) {
+                    categorySelect.value = matchedValue;
+                  }
+                }
+              }
+              const website = (loc.website || '').trim();
+              if (website) {
+                const websiteInput = newLocForm.querySelector('input[name="website"]');
+                if (websiteInput) websiteInput.value = website;
+              }
+              const osmType = (loc.osm_type || '').trim();
+              const osmId = (loc.osm_id || '').trim();
+              if (osmType && osmId) {
+                const osmUrl = `https://www.openstreetmap.org/${osmType}/${osmId}`;
+                const osmInput = newLocForm.querySelector('input[name="osm_url"]');
+                if (osmInput) osmInput.value = osmUrl;
+              }
+            } else {
+              // Regular location - keep check form, store address for potential use
+              if (fullAddress) {
+                document.getElementById('check-form-fields').dataset.prefilledAddress = fullAddress;
+              }
+            }
           } else {
             locationNameDisplay.textContent = locationId;
             locationNameInput.value = '';
@@ -1307,7 +1395,7 @@
         const statusEl = document.getElementById('location-status');
         if (!statusEl) return;
 
-        if (!locId || !/^DE-BE-\d{5}$/.test(locId)) {
+        if (!locId || !/^DE-(BE|DUS)-\d{5}$/.test(locId)) {
           statusEl.className = 'location-status';
           statusEl.textContent = '';
           return;
@@ -1335,7 +1423,7 @@
       }
 
       // Check location status on page load
-      if (locationId && /^DE-BE-\d{5}$/.test(locationId)) {
+      if (locationId && /^DE-(BE|DUS)-\d{5}$/.test(locationId)) {
         checkLocationStatus(locationId);
       }
     }
