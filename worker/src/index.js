@@ -11,6 +11,7 @@ import { handleAdminRequest } from './admin.js';
 // Note: Add localhost origins via ALLOWED_ORIGINS_DEV env var for local testing
 const ALLOWED_ORIGINS = [
   'https://satoshiinberlin.github.io',
+  'https://arbadacarbaYK.github.io',
 ];
 
 // Rate limiting configuration
@@ -610,7 +611,7 @@ ${formatProofUrl(data.venue_photo_url, 'Foto vom Ort')}`;
 
   const observationsLabel = isCritical ? 'Was ist passiert?' : 'Wie lief die Zahlung?';
 
-  return `## Satoshis für Berlin – Check
+  return `## Satoshis für Düsseldorf – Check
 
 **Submission ID:** \`${submissionId}\`
 **Submitter:** ${pseudonym || 'Anonymous'}
@@ -654,7 +655,7 @@ _Eingereicht via Webformular. Kontaktdaten wurden separat gespeichert._
  * Format the issue body for a new location submission
  */
 function formatNewLocationBody(data, submissionId, pseudonym) {
-  return `## Satoshis für Berlin – Neuer Ort
+  return `## Satoshis für Düsseldorf – Neuer Ort
 
 **Submission ID:** \`${submissionId}\`
 **Submitter:** ${pseudonym || 'Anonymous'}

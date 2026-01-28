@@ -1,0 +1,1 @@
+name,category_key,category,address,addr:street,addr:housenumber,addr:postcode,addr:city,addr:suburb,lat,lon,xbt,btc,onchain,lightning,payment:lightning_contactless,opening_hours,website,phone,survey:date,check_date,osm_type,osm_id,osm_url

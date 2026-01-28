@@ -330,7 +330,7 @@ def main():
                 "street": street,
                 "housenumber": housenumber,
                 "postcode": postcode,
-                "city": "Berlin",
+                "city": "Düsseldorf",
                 "lat": lat,
                 "lon": lon,
                 "website": website,
@@ -419,7 +419,7 @@ def main():
 
         # Extract URLs
         public_post_url = (
-            body_field(body, 'Öffentlicher Beweis-Post (muss "Berlin" und "Bitcoin" enthalten)')
+            body_field(body, 'Öffentlicher Beweis-Post (muss "Düsseldorf" (oder "Duesseldorf") und "Bitcoin" enthalten)')
             or body_field(body, "Öffentlicher Beweis-Post")
         )
         receipt_proof_url = (

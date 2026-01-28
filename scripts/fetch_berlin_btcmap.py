@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fetch Bitcoin-accepting locations in Berlin from OpenStreetMap via Overpass API.
+Fetch Bitcoin-accepting locations in Düsseldorf from OpenStreetMap via Overpass API.
 
 Queries OSM directly for the most up-to-date check_date and survey:date values.
 """
@@ -13,18 +13,18 @@ import urllib.error
 from pathlib import Path
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
-OUTPUT_PATH = Path("data/berlin_raw.csv")
+OUTPUT_PATH = Path("data/duesseldorf_raw.csv")
 
-# Overpass query for Bitcoin-accepting places within Berlin's administrative boundary
-# Uses area query with Berlin's OSM relation ID (62422) + 3600000000
+# Overpass query for Bitcoin-accepting places within Düsseldorf's administrative boundary
+# Uses area query with Düsseldorf's OSM relation ID (62539) + 3600000000
 OVERPASS_QUERY = """
 [out:json][timeout:120];
-area["name"="Berlin"]["boundary"="administrative"]["admin_level"="4"]->.berlin;
+area["name"="Düsseldorf"]["boundary"="administrative"]["admin_level"="4"]->.duesseldorf;
 (
-  node["currency:XBT"="yes"](area.berlin);
-  way["currency:XBT"="yes"](area.berlin);
-  node["payment:bitcoin"="yes"](area.berlin);
-  way["payment:bitcoin"="yes"](area.berlin);
+  node["currency:XBT"="yes"](area.duesseldorf);
+  way["currency:XBT"="yes"](area.duesseldorf);
+  node["payment:bitcoin"="yes"](area.duesseldorf);
+  way["payment:bitcoin"="yes"](area.duesseldorf);
 );
 out center tags;
 """
@@ -66,7 +66,7 @@ def fetch_from_overpass() -> list[dict]:
     req = urllib.request.Request(
         OVERPASS_URL,
         data=data,
-        headers={"User-Agent": "sats4berlin/1.0 (https://github.com/satoshiinberlin/sats4berlin)"},
+        headers={"User-Agent": "sats4duesseldorf/1.0 (https://github.com/arbadacarbaYK/sats4duesseldorf)"},
     )
 
     max_retries = 3
@@ -147,7 +147,7 @@ def extract_row(element: dict) -> dict:
         "addr:street": tags.get("addr:street", ""),
         "addr:housenumber": tags.get("addr:housenumber", ""),
         "addr:postcode": tags.get("addr:postcode", ""),
-        "addr:city": tags.get("addr:city", "Berlin"),
+        "addr:city": tags.get("addr:city", "Düsseldorf"),
         "addr:suburb": tags.get("addr:suburb", ""),
         "lat": lat,
         "lon": lon,

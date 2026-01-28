@@ -1,24 +1,24 @@
-# Satoshis für Berlin – die Millionenchallenge
+# Satoshis für Düsseldorf – die Millionenchallenge
 
 **Gesamtbounty: 1.000.000 sats (nur in Bitcoin auszahlbar)**
 
 Echte Bitcoin-Zahlungen vor Ort belegen, BTCMap aktuell halten, Sats verdienen.
 
-**[Zur Übersicht](https://satoshiinberlin.github.io/sats4berlin/)** | **[Check einreichen](https://satoshiinberlin.github.io/sats4berlin/submit.html)** | **[Regeln](RULES.md)**
+**[Zur Übersicht](https://arbadacarbaYK.github.io/sats4duesseldorf/)** | **[Check einreichen](https://arbadacarbaYK.github.io/sats4duesseldorf/submit.html)** | **[Regeln](RULES.md)**
 
 ---
 
 ## Worum geht es?
 
-BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll. Solche Informationen ändern sich schnell. Diese Challenge sorgt dafür, dass Berliner Einträge regelmäßig durch echte Käufe vor Ort überprüft und bei Bedarf aktualisiert werden.
+BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll. Solche Informationen ändern sich schnell. Diese Challenge sorgt dafür, dass Düsseldorfer Einträge regelmäßig durch echte Käufe vor Ort überprüft und bei Bedarf aktualisiert werden.
 
 ## Schnellstart
 
-1. **Übersicht öffnen:** [satoshiinberlin.github.io/sats4berlin](https://satoshiinberlin.github.io/sats4berlin/)
+1. **Übersicht öffnen:** [arbadacarbaYK.github.io/sats4duesseldorf](https://arbadacarbaYK.github.io/sats4duesseldorf/)
 2. **Ort wählen:** Suche einen Ort mit Status „auszahlbar" (grün)
 3. **Vor Ort kaufen:** Bezahle in Bitcoin (Lightning oder On-Chain)
 4. **Nachweise sammeln:** Bon, Zahlungsbestätigung, Foto vom Ort, öffentlicher Post
-5. **Check einreichen:** [Formular ausfüllen](https://satoshiinberlin.github.io/sats4berlin/submit.html)
+5. **Check einreichen:** [Formular ausfüllen](https://arbadacarbaYK.github.io/sats4duesseldorf/submit.html)
 6. **Sats kassieren:** Nach Prüfung wird der Bounty ausgezahlt
 
 ## Wer kann mitmachen?
@@ -31,7 +31,7 @@ Bedingung: Du machst vor Ort einen echten Kauf und bezahlst in Bitcoin.
 1. **Kaufbeleg** (Bon o.ä.; sensible Daten schwärzen)
 2. **Nachweis der Bitcoin-Zahlung** (Bestätigung „bezahlt", Betrag/Datum sichtbar; persönliche Daten schwärzen)
 3. **Ort erkennbar** (Foto/Video von Schild, Eingang, Kasse o.ä.; keine Personen filmen)
-4. **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Berlin"** und **„Bitcoin"** (Link wird eingereicht)
+4. **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Düsseldorf"** (oder **„Duesseldorf"**) und **„Bitcoin"** (Link wird eingereicht)
 
 ## Bounty-Staffelung
 
@@ -91,11 +91,11 @@ Ein Ort kann frühestens **90 Tage** nach dem letzten gültigen Check erneut gep
 
 ## Links
 
-- **Übersicht:** https://satoshiinberlin.github.io/sats4berlin/
-- **Check einreichen:** [Formular](https://satoshiinberlin.github.io/sats4berlin/submit.html)
+- **Übersicht:** https://arbadacarbaYK.github.io/sats4duesseldorf/
+- **Check einreichen:** [Formular](https://arbadacarbaYK.github.io/sats4duesseldorf/submit.html)
 - **Vollständige Regeln:** [RULES.md](RULES.md)
-- **Rohdaten:** [locations.csv](https://satoshiinberlin.github.io/sats4berlin/data/locations.csv)
+- **Rohdaten:** [locations.csv](https://arbadacarbaYK.github.io/sats4duesseldorf/data/locations.csv)
 
 ---
 
-**Fragen?** Erstelle ein [Issue](https://github.com/satoshiinberlin/sats4berlin/issues) oder kontaktiere die Maintainer.
+**Fragen?** Erstelle ein [Issue](https://github.com/arbadacarbaYK/sats4duesseldorf/issues) oder kontaktiere die Maintainer.

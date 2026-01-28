@@ -13,7 +13,7 @@ import csv
 import datetime
 from pathlib import Path
 
-RAW = Path("data/berlin_raw.csv")
+RAW = Path("data/duesseldorf_raw.csv")
 OUT = Path("data/locations.csv")
 
 TODAY = datetime.date.today().isoformat()
@@ -71,7 +71,7 @@ def validate_coordinates(lat_str, lon_str):
     """
     Validate and return coordinates.
     Returns (lat, lon) as strings if valid, ("", "") if invalid.
-    Berlin bounds: lat ~52.3-52.7, lon ~13.1-13.8
+    Düsseldorf bounds (approx.): lat ~51.1-51.4, lon ~6.6-7.0
     """
     try:
         if not lat_str or not lon_str:
@@ -82,9 +82,9 @@ def validate_coordinates(lat_str, lon_str):
         if not (-90 <= lat <= 90 and -180 <= lon <= 180):
             print(f"Warning: Coordinates out of global bounds: {lat}, {lon}")
             return "", ""
-        # Berlin-specific bounds check (warn but still accept)
-        if not (52.3 <= lat <= 52.7 and 13.0 <= lon <= 13.8):
-            print(f"Warning: Coordinates outside Berlin area: {lat}, {lon}")
+        # Düsseldorf-specific bounds check (warn but still accept)
+        if not (51.1 <= lat <= 51.4 and 6.6 <= lon <= 7.0):
+            print(f"Warning: Coordinates outside Düsseldorf area: {lat}, {lon}")
         return str(lat), str(lon)
     except (ValueError, TypeError):
         return "", ""
@@ -207,7 +207,7 @@ def create_new_location_from_btcmap(raw_row, location_id):
         "street": get(raw_row, "street", "addr:street", default="").strip(),
         "housenumber": get(raw_row, "housenumber", "addr:housenumber", default="").strip(),
         "postcode": get(raw_row, "postcode", "addr:postcode", default="").strip(),
-        "city": get(raw_row, "city", "addr:city", default="Berlin").strip() or "Berlin",
+        "city": get(raw_row, "city", "addr:city", default="Düsseldorf").strip() or "Düsseldorf",
         "lat": lat,
         "lon": lon,
         "website": get(raw_row, "website", "contact:website", default="").strip(),
@@ -256,7 +256,7 @@ def update_location_from_btcmap(existing_row, raw_row):
         "street": get(raw_row, "street", "addr:street", default="").strip(),
         "housenumber": get(raw_row, "housenumber", "addr:housenumber", default="").strip(),
         "postcode": get(raw_row, "postcode", "addr:postcode", default="").strip(),
-        "city": get(raw_row, "city", "addr:city", default="Berlin").strip() or "Berlin",
+        "city": get(raw_row, "city", "addr:city", default="Düsseldorf").strip() or "Düsseldorf",
         "lat": lat,
         "lon": lon,
         "website": get(raw_row, "website", "contact:website", default="").strip(),

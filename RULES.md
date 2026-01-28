@@ -1,9 +1,9 @@
-# Satoshis für Berlin – die Millionenchallenge
+# Satoshis für Düsseldorf – die Millionenchallenge
 **Gesamtbounty: 1.000.000 sats (nur in Bitcoin auszahlbar)**  
 Echte Bitcoin-Zahlungen vor Ort belegen, BTCMap aktuell halten, Sats verdienen.
 
 ## Worum geht es?
-BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll. Solche Informationen ändern sich schnell. Diese Challenge sorgt dafür, dass Berliner Einträge regelmäßig durch echte Käufe vor Ort überprüft und bei Bedarf aktualisiert werden.
+BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll. Solche Informationen ändern sich schnell. Diese Challenge sorgt dafür, dass Düsseldorfer Einträge regelmäßig durch echte Käufe vor Ort überprüft und bei Bedarf aktualisiert werden.
 
 ## Budget, Laufzeit, Pilot
 - Das Programm läuft, bis insgesamt **1.000.000 sats** ausgeschüttet sind.
@@ -11,7 +11,7 @@ BTCMap (btcmap.org) listet Orte, an denen man mit Bitcoin bezahlen können soll.
 - Das Programm ist ein Pilot: Regeln und Abläufe können laufend verbessert werden. Maßgeblich ist die aktuelle Version dieses Dokuments.
 
 ## Grundlage: BTCMap
-- Ausgangspunkt sind die BTCMap-Einträge für Berlin (auf OpenStreetMap-Daten basierend).
+- Ausgangspunkt sind die BTCMap-Einträge für Düsseldorf (auf OpenStreetMap-Daten basierend).
 - Nach gültigen Checks werden Einträge bei Bedarf aktualisiert (BTCMap/OSM).
 
 ## Wer kann mitmachen?
@@ -25,7 +25,7 @@ Ein Bounty wird nur ausgezahlt, wenn ein nachweisbarer Kauf vor Ort in Bitcoin s
 1) **Kaufbeleg** (Bon o.ä.; sensible Daten schwärzen)  
 2) **Nachweis der Bitcoin-Zahlung** (Bestätigung „bezahlt“, Betrag/Datum sichtbar; persönliche Daten schwärzen)  
 3) **Ort erkennbar** (Foto/Video von Schild, Eingang, Kasse o.ä.; keine Personen filmen)  
-4) **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Berlin“** und **„Bitcoin“** (Link wird eingereicht)
+4) **Öffentlicher Beweis-Post** mit Foto/Video und den Worten **„Düsseldorf“** (oder **„Duesseldorf“**) und **„Bitcoin“** (Link wird eingereicht)
 
 ## Cooldown
 Ein Ort kann frühestens 90 Tage nach dem letzten gültigen Check erneut mit einem Bounty geprüft werden. Der Cooldown berücksichtigt sowohl BTCMap-Verifikationen als auch lokale Checks aus dieser Challenge.

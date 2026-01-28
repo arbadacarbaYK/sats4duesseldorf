@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check einreichen – Satoshis für Berlin</title>
+  <title>Check einreichen – Satoshis für Düsseldorf</title>
 
   <!-- CSV parsing library -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -658,7 +658,7 @@
     <div>
       <h1>
         <span class="btc-icon">₿</span>
-        Satoshis für Berlin
+        Satoshis für Düsseldorf
       </h1>
       <p class="header-subtitle">Die Millionenchallenge</p>
     </div>
@@ -720,7 +720,7 @@
       <div id="normal-check-fields">
         <div class="field">
           <label>1. Öffentlicher Post <span class="required">*</span></label>
-          <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin" – gerne mit <strong>#Sats4Berlin</strong></div>
+          <div class="field-hint">Link zu deinem Post mit "Düsseldorf" (oder "Duesseldorf") und "Bitcoin" – gerne mit <strong>#Sats4Duesseldorf</strong></div>
           <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
         </div>
 
@@ -831,7 +831,7 @@
       <div class="field">
         <label>Adresse <span class="required">*</span></label>
         <div class="field-hint">Vollständige Adresse mit PLZ</div>
-        <input type="text" name="address" placeholder="Musterstraße 1, 10115 Berlin" required>
+        <input type="text" name="address" placeholder="Musterstraße 1, 40213 Düsseldorf" required>
       </div>
 
       <div class="field">
@@ -868,7 +868,7 @@
 
       <div class="field">
         <label>1. Öffentlicher Post <span class="required">*</span></label>
-        <div class="field-hint">Link zu deinem Post mit "Berlin" und "Bitcoin" – gerne mit <strong>#Sats4Berlin</strong></div>
+        <div class="field-hint">Link zu deinem Post mit "Düsseldorf" (oder "Duesseldorf") und "Bitcoin" – gerne mit <strong>#Sats4Duesseldorf</strong></div>
         <input type="url" name="public_post_url" placeholder="https://x.com/deinname/status/..." required>
       </div>
 
@@ -963,11 +963,11 @@
 <footer class="footer">
   <a href="./">← Zur Übersicht</a>
   <span class="footer-sep">·</span>
-  <a href="https://github.com/satoshiinberlin/sats4berlin" target="_blank" rel="noopener">GitHub</a>
+  <a href="https://github.com/arbadacarbaYK/sats4duesseldorf" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 <script>
-  const WORKER_URL = 'https://sats4berlin-form-handler.satoshiinberlin.workers.dev/api/submit';
+  const WORKER_URL = 'https://sats4berlin-form-handler.nostr.workers.dev/api/submit';
 
   // Tab switching
   document.querySelectorAll('.form-tab').forEach(tab => {
@@ -1381,7 +1381,7 @@
           // Update suggested updates for critical (moved location scenario)
           if (suggestedUpdatesLabel) suggestedUpdatesLabel.textContent = 'Neue Adresse (falls umgezogen)';
           if (suggestedUpdatesHint) suggestedUpdatesHint.textContent = 'Optional: Falls der Ort an eine neue Adresse umgezogen ist';
-          if (suggestedUpdatesInput) suggestedUpdatesInput.placeholder = 'Neue Adresse: Musterstraße 123, 10115 Berlin';
+          if (suggestedUpdatesInput) suggestedUpdatesInput.placeholder = 'Neue Adresse: Musterstraße 123, 40213 Düsseldorf';
         } else {
           // Show normal fields, hide critical fields
           normalFields.style.display = 'block';
