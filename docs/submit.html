@@ -798,9 +798,11 @@
         <select name="contact_method" id="check-contact-method" required>
           <option value="">– Bitte wählen –</option>
           <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+          <option value="bolt12">BOLT12 Offer (direkter Empfang)</option>
           <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
           <option value="email">E-Mail (Cashu-Token per Mail)</option>
           <option value="telegram">Telegram (Cashu-Token per DM)</option>
+          <option value="signal">Signal (Cashu-Token per DM)</option>
           <option value="simplex">SimpleX Chat (Cashu-Token)</option>
         </select>
       </div>
@@ -924,9 +926,11 @@
         <select name="contact_method" id="newloc-contact-method" required>
           <option value="">– Bitte wählen –</option>
           <option value="lightning">Lightning-Adresse (direkter Empfang)</option>
+          <option value="bolt12">BOLT12 Offer (direkter Empfang)</option>
           <option value="nostr">Nostr (verschlüsselte DM mit Cashu-Token)</option>
           <option value="email">E-Mail (Cashu-Token per Mail)</option>
           <option value="telegram">Telegram (Cashu-Token per DM)</option>
+          <option value="signal">Signal (Cashu-Token per DM)</option>
           <option value="simplex">SimpleX Chat (Cashu-Token)</option>
         </select>
       </div>
@@ -1188,23 +1192,31 @@
   // Contact method hints and placeholders
   const contactConfig = {
     lightning: {
-      hint: 'Deine Lightning-Adresse für direkten Empfang',
+      hint: 'Deine Lightning-Adresse – verwende immer dieselbe für den Aktivitätsfaktor',
       placeholder: 'satoshi@getalby.com'
     },
+    bolt12: {
+      hint: 'Dein BOLT12 Offer (lno1...) – verwende immer denselben für den Aktivitätsfaktor',
+      placeholder: 'lno1qgsq...'
+    },
     nostr: {
-      hint: 'Dein Nostr Public Key (npub) für verschlüsselte DM',
+      hint: 'Dein Nostr Public Key (npub) – wir senden einen verschlüsselten Cashu-Token per DM',
       placeholder: 'npub1...'
     },
     email: {
-      hint: 'Deine E-Mail-Adresse für Cashu-Token',
+      hint: 'Deine E-Mail-Adresse – wir senden einen Cashu-Token als Anhang',
       placeholder: 'satoshi@example.com'
     },
     telegram: {
-      hint: 'Dein Telegram-Username (mit @)',
+      hint: 'Dein Telegram-Username mit @ – wir senden einen Cashu-Token per DM',
       placeholder: '@satoshi'
     },
+    signal: {
+      hint: 'Dein Signal-Username (Einstellungen → Profil) – endet immer mit Ziffern',
+      placeholder: 'satoshi.42'
+    },
     simplex: {
-      hint: 'Dein SimpleX-Einladungslink oder Kontaktadresse',
+      hint: 'Dein SimpleX-Einladungslink – findest du unter "Adresse teilen" in der App',
       placeholder: 'https://simplex.chat/contact#...'
     }
   };

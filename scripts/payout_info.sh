@@ -138,6 +138,11 @@ else
             lightning)
                 echo -e "Send Lightning payment to: ${GREEN}${BOLD}${VALUE}${NC}"
                 ;;
+            bolt12)
+                echo -e "Pay BOLT12 offer: ${GREEN}${BOLD}${VALUE}${NC}"
+                echo "  lightning-cli fetchinvoice <offer> <amount_msat>"
+                echo "  lightning-cli pay <invoice>"
+                ;;
             nostr)
                 echo "Send encrypted Nostr DM with Cashu token to: ${VALUE}"
                 ;;
@@ -146,6 +151,9 @@ else
                 ;;
             telegram)
                 echo "Send Telegram DM with Cashu token to: ${VALUE}"
+                ;;
+            signal)
+                echo "Send Signal DM with Cashu token to username: ${VALUE}"
                 ;;
             simplex)
                 echo "Send SimpleX message with Cashu token to: ${VALUE}"
